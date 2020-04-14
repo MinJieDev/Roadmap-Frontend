@@ -28,12 +28,6 @@ export default {
       }
     },
     ok() {
-      this.$Message.error({
-        background: true,
-        content: 'Tips for manual closing',
-        duration: 10,
-        closable: true,
-      });
       this.$emit('cancelErrModal');
     },
     cancel() {
@@ -75,7 +69,6 @@ export default {
     -      this.$Message.error({
               background: true,
               content: 'Error Content',
-              duration: 5,
               duration: 5,
               closable: true,
             });
