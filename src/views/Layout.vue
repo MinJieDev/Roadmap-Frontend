@@ -64,6 +64,8 @@
 
             <Content :style="{padding: '24px', minHeight: '280px', background: '#fff'}">
               <div :style="{height: '500px', width: '500'}">
+                <p>{{$store.state.example}}</p>
+                <p>{{$store.getters.getFirstTxtArr}}</p>
                 <mindmap
                   :nodes="nodes"
                   :connections="connections"

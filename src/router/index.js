@@ -1,26 +1,3 @@
-// import Vue from 'vue';
-// import Router from 'vue-router';
-// import HelloWorld from '@/components/HelloWorld';
-//
-// Vue.use(Router);
-// const routes = [
-//   {
-//     path: '/',
-//     name: 'Home',
-//     component: () => import(/* webpackChunkName: "about" */ '../views/Index.vue')
-//   }
-// ]
-//
-// export default new Router({
-//   routes: [
-//     {
-//       path: '/',
-//       name: 'HelloWorld',
-//       component: HelloWorld,
-//     },
-//   ],
-//
-// });
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 
