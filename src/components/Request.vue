@@ -13,11 +13,22 @@
 import axios from 'axios'
 
 export default {}
-function req (url, method, params = {}) {
-  const options = {
-    method: method,
-    url: url,
-    params: params
+function req (url, method, params = {}, data = {}) {
+  method = method.toUpperCase()
+  let options
+  if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
+    options = {
+      method: method,
+      url: url,
+      params: params,
+      data: data
+    }
+  } else {
+    options = {
+      method: method,
+      url: url,
+      params: params
+    }
   }
   try {
     return axios(options)
