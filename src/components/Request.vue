@@ -16,8 +16,8 @@ export default {}
 function req (url, method, params = {}) {
   const options = {
     method: method,
-    url: url, 
-    data: params
+    url: url,
+    params: params
   }
   try {
     return axios(options)
@@ -34,7 +34,7 @@ function debugReq () {
   const method = document.getElementById('method').value.toString().toUpperCase()
   console.info(url)
   console.info(method)
-  console.info(req(url, method).then(res => console.info(res.data)))
+  console.info(req(url, method, { _limit: 5 }).then(res => console.info(res.data)))
 }
 window.onload = function () {
   document.getElementById('try_button').addEventListener('click', debugReq)
