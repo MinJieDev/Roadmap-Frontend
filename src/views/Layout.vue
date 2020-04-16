@@ -61,11 +61,11 @@
                 </Submenu>
               </Menu>
             </Sider>
-
             <Content :style="{padding: '24px', minHeight: '280px', background: '#fff'}">
               <div :style="{height: '500px', width: '500'}">
                 <p>{{$store.state.example}}</p>
                 <p>{{$store.getters.getFirstTxtArr}}</p>
+<!--  add content here  -->
                 <mindmap
                   :nodes="nodes"
                   :connections="connections"
@@ -94,14 +94,24 @@
             </Sider>
           </Layout>
         </Content>
+        <!-- add below the drawing board -->
+        <div>
+          <MindTable
+            :columns="columns"
+            :data="data"
+          />
+        </div>
       </Layout>
       <Footer class="layout-footer-center"> &copy; footer</Footer>
     </Layout>
   </div>
 </template>
 <script>
+import MindTable from './MindTable';
+
 export default {
   name: 'MyMindmap',
+  components: { MindTable },
   data() {
     return {
       title: 'learn anything - programming - programming languages - python',
