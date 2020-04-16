@@ -7,7 +7,12 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: () => import(/* webpackChunkName: "about" */ '../views/Layout.vue'),
+    component: () => import(/* webpackChunkName: "about" */ '../views/ArticleTableView.vue'),
+  },
+  {
+    path: '/editor',
+    name: 'Editor',
+    component: () => import(/* webpackChunkName: "about" */ '../views/RoadmapEditorView.vue'),
   },
 ];
 
