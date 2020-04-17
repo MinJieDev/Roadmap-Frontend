@@ -38,6 +38,7 @@
           :nodes="nodes"
           :connections="connections"
           :editable="true"
+          :key="repaint"
         />
       </div>
     </Content>
@@ -48,7 +49,7 @@
             <Icon type="ios-navigate"></Icon>
             工具栏
           </template>
-          <MenuItem name="1-1">Option 1</MenuItem>
+          <AddNodeForm @node-added="handleNodeAdded"></AddNodeForm>
           <MenuItem name="1-2">Option 2</MenuItem>
           <MenuItem name="1-3">Option 3</MenuItem>
 
@@ -64,11 +65,20 @@
 </template>
 
 <script>
+import _ from 'lodash';
+import Vue from 'vue';
+import AddNodeForm from '../components/AddNodeForm';
+
+Vue.prototype._ = _;
 
 export default {
   name: 'RoadmapEditor',
+  components: {
+    AddNodeForm,
+  },
   data() {
     return {
+      repaint: 1,
       nodes: [{
         text: 'python',
         url: 'http://www.wikiwand.com/en/Python_(programming_language)',
@@ -313,6 +323,48 @@ export default {
           },
           ],
     };
+  },
+  methods: {
+    getMidPos() {
+      let xMin = +99999;
+      let xMax = -99999;
+      let yMin = +99999;
+      let yMax = -99999;
+      if (this.nodes.length === 0) {
+        return {
+          fx: 0,
+          fy: 0,
+        };
+      }
+      _(this.nodes).forEach((node) => {
+        xMax = node.fx > xMax ? node.fx : xMax;
+        xMin = node.fx < xMin ? node.fx : xMin;
+        yMax = node.fy > xMax ? node.fy : yMax;
+        yMin = node.fy > xMin ? node.fy : yMin;
+      });
+      return {
+        fx: (xMin + xMax) / 2,
+        fy: (yMin + yMax) / 2,
+      };
+    },
+    handleNodeAdded(nodeInfo) {
+      const pos = this.getMidPos();
+      console.log(pos);
+      this.nodes.push(
+        {
+          text: nodeInfo.nodeName,
+          url: nodeInfo.nodeUrl,
+          fx: pos.fx,
+          fy: pos.fy,
+          nodes: [],
+          category: 'wiki',
+        },
+      );
+      this.repaintMindMap();
+    },
+    repaintMindMap() {
+      this.repaint += 1;
+    },
   },
 };
 </script>
