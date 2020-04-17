@@ -15,6 +15,7 @@
   "dependencies": {
     "axios": "^0.19.2",
     "global": "^4.4.0",
+    "lodash": "^4.17.15",
     "view-design": "^4.2.0",
     "vue": "^2.5.2",
     "vue-mindmap": "^0.0.4",
