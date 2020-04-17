@@ -30,17 +30,15 @@
       </Menu>
     </Sider>
     <Content :style="{padding: '24px', minHeight: '280px', background: '#fff'}">
-      <div :style="{height: '500px', width: '500'}">
         <!--        <p>{{$store.state.example}}</p>-->
         <!--        <p>{{$store.getters.getFirstTxtArr}}</p>-->
         <!--  add content here  -->
-        <mindmap
-          :nodes="nodes"
-          :connections="connections"
-          :editable="true"
-          :key="repaint"
-        />
-      </div>
+      <mindmap
+        :nodes="nodes"
+        :connections="connections"
+        :editable="true"
+        :key="repaint"
+      />
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}">
       <Menu active-name="1-2" theme="dark" width="auto" :open-names="['1']">
@@ -50,14 +48,9 @@
             工具栏
           </template>
           <AddNodeForm @node-added="handleNodeAdded"></AddNodeForm>
-          <MenuItem name="1-2">Option 2</MenuItem>
-          <MenuItem name="1-3">Option 3</MenuItem>
-
-          <MenuItem name="2-1">Option 1</MenuItem>
-          <MenuItem name="2-2">Option 2</MenuItem>
-
-          <MenuItem name="3-1">Option 1</MenuItem>
-          <MenuItem name="3-2">Option 2</MenuItem>
+          <AddConnectionForm @connection-added="handleConnectionAdded"></AddConnectionForm>
+          <DelNodeForm @node-deleted="handleNodeDeleted"></DelNodeForm>
+          <DelConnectionForm @connection-deleted="handleConnectionDeleted"></DelConnectionForm>
         </Submenu>
       </Menu>
     </Sider>
@@ -68,6 +61,9 @@
 import _ from 'lodash';
 import Vue from 'vue';
 import AddNodeForm from '../components/AddNodeForm';
+import AddConnectionForm from '../components/AddConnectionForm';
+import DelNodeForm from '../components/DelNodeForm';
+import DelConnectionForm from '../components/DelConnectionForm';
 
 Vue.prototype._ = _;
 
@@ -75,6 +71,9 @@ export default {
   name: 'RoadmapEditor',
   components: {
     AddNodeForm,
+    AddConnectionForm,
+    DelNodeForm,
+    DelConnectionForm,
   },
   data() {
     return {
@@ -95,7 +94,7 @@ export default {
       if (this.nodes.length === 0) {
         return {
           fx: -13.916222252976013,
-          fy: -659.1641376795345,
+          fy: -300.1641376795345,
         };
       }
       _(this.nodes).forEach((node) => {
@@ -121,6 +120,27 @@ export default {
           category: 'mindmap',
         },
       );
+      this.repaintMindMap();
+    },
+    handleNodeDeleted(nodeInfo) {
+      _.remove(this.nodes, node => node.text === nodeInfo.nodeName);
+      _.remove(this.connections, connection => (connection.source.text === nodeInfo.nodeName
+          || connection.target.text === nodeInfo.nodeName));
+      this.repaintMindMap();
+    },
+    handleConnectionAdded(connectionInfo) {
+      this.connections.push({
+        source: connectionInfo.sourceNode,
+        target: connectionInfo.targetNode,
+      });
+      this.repaintMindMap();
+    },
+    handleConnectionDeleted(connectionInfo) {
+      _.remove(this.connections, connection => (
+        (connection.source.text === connectionInfo.node1
+                  && connection.target.text === connectionInfo.node2)
+        || (connection.target.text === connectionInfo.node1
+                  && connection.source.text === connectionInfo.node2)));
       this.repaintMindMap();
     },
     repaintMindMap() {
