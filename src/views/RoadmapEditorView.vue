@@ -60,6 +60,10 @@
             @connection-deleted="handleConnectionDeleted"
             :node-name-list='nodeNameList'>
           </DelConnectionForm>
+          <AddCommentForm
+            @comment-added="handleCommentAdded"
+            :node-name-list='nodeNameList'>
+          </AddCommentForm>
         </Submenu>
       </Menu>
     </Sider>
@@ -73,6 +77,7 @@ import AddNodeForm from '../components/AddNodeForm';
 import AddConnectionForm from '../components/AddConnectionForm';
 import DelNodeForm from '../components/DelNodeForm';
 import DelConnectionForm from '../components/DelConnectionForm';
+import AddCommentForm from '../components/AddCommentForm';
 
 Vue.prototype._ = _;
 
@@ -83,6 +88,7 @@ export default {
     AddConnectionForm,
     DelNodeForm,
     DelConnectionForm,
+    AddCommentForm,
   },
   data() {
     return {
@@ -131,7 +137,7 @@ export default {
       this.nodes = [...this.nodes,
         {
           text: nodeInfo.nodeName,
-          url: nodeInfo.nodeUrl,
+          URI: nodeInfo.nodeUrl,
           fx: pos.fx,
           fy: pos.fy,
           nodes: [],
@@ -159,6 +165,19 @@ export default {
                   && connection.target.text === connectionInfo.node2)
         || (connection.target.text === connectionInfo.node1
                   && connection.source.text === connectionInfo.node2)));
+      this.repaintMindMap();
+    },
+    handleCommentAdded(commentInfo) {
+      _.forEach(this.nodes, (node) => {
+        if (node.text === commentInfo.node) {
+          // eslint-disable-next-line no-param-reassign
+          node.nodes = [...node.nodes, {
+            text: commentInfo.comment,
+            nodes: [],
+            color: 'rgba(36, 170, 255, 1.0)',
+          }];
+        }
+      });
       this.repaintMindMap();
     },
     repaintMindMap() {
