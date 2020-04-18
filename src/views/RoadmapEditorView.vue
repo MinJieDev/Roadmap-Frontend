@@ -1,15 +1,32 @@
 <template>
   <Layout>
     <Sider hide-trigger :style="{background: '#fff'}">
-      <Menu active-name="1-2" theme="light" width="auto" :open-names="['1']">
+      <Menu :active-name="SideMenuActiveItem"
+            @on-select="handleSideMenuSelect"
+            theme="light" width="auto"
+            :open-names="['1']"
+            ref="side_menu">
         <Submenu name="1">
           <template slot="title">
             <Icon type="ios-navigate"></Icon>
             文献栏
           </template>
-          <MenuItem name="1-1">Option 1</MenuItem>
-          <MenuItem name="1-2">Option 2</MenuItem>
-          <MenuItem name="1-3">Option 3</MenuItem>
+          <MenuItem name="1-1">
+            <FileItem
+              fileName="敏杰开发♂"
+              :display="isFileItemDisplay('1-1')"
+              @node-added="handleNodeAdded"
+              @node-deleted="handleNodeDeleted">
+            </FileItem>
+          </MenuItem>
+          <MenuItem name="1-2">
+            <FileItem
+              fileName="荷花花nb♀"
+              :display="isFileItemDisplay('1-2')"
+              @node-added="handleNodeAdded"
+              @node-deleted="handleNodeDeleted">
+            </FileItem>
+          </MenuItem>
         </Submenu>
         <Submenu name="2">
           <template slot="title">
@@ -85,6 +102,7 @@ import DelNodeForm from '../components/DelNodeForm';
 import DelConnectionForm from '../components/DelConnectionForm';
 import AddCommentForm from '../components/AddCommentForm';
 import DelCommentForm from '../components/DelCommentForm';
+import FileItem from '../components/FileItem';
 
 Vue.prototype._ = _;
 
@@ -97,9 +115,12 @@ export default {
     DelConnectionForm,
     AddCommentForm,
     DelCommentForm,
+    FileItem,
   },
   data() {
     return {
+      display: false,
+      SideMenuActiveItem: '1-1',
       repaint: 1,
       nodes: [
       ],
@@ -116,6 +137,9 @@ export default {
         ret = [...ret, node.text];
       });
       return ret;
+    },
+    isFileItemDisplay() {
+      return itemName => itemName === this.SideMenuActiveItem;
     },
   },
   methods: {
@@ -209,6 +233,9 @@ export default {
     },
     repaintMindMap() {
       this.repaint += 1;
+    },
+    handleSideMenuSelect(itemName) {
+      this.SideMenuActiveItem = itemName;
     },
   },
 };
