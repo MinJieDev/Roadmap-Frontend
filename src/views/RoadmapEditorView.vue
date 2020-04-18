@@ -110,7 +110,7 @@ export default {
     },
     handleNodeAdded(nodeInfo) {
       const pos = this.getMidPos();
-      this.nodes.push(
+      this.nodes = [...this.nodes,
         {
           text: nodeInfo.nodeName,
           url: nodeInfo.nodeUrl,
@@ -118,8 +118,7 @@ export default {
           fy: pos.fy,
           nodes: [],
           category: 'mindmap',
-        },
-      );
+        }];
       this.repaintMindMap();
     },
     handleNodeDeleted(nodeInfo) {
@@ -129,10 +128,10 @@ export default {
       this.repaintMindMap();
     },
     handleConnectionAdded(connectionInfo) {
-      this.connections.push({
+      this.connections = [...this.connections, {
         source: connectionInfo.sourceNode,
         target: connectionInfo.targetNode,
-      });
+      }];
       this.repaintMindMap();
     },
     handleConnectionDeleted(connectionInfo) {
