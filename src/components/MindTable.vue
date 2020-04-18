@@ -22,6 +22,38 @@ export default {
         {
           title: 'Note',
           key: 'note',
+        }, {
+          title: 'Action',
+          key: 'action',
+          width: 150,
+          align: 'center',
+          render: (h, params) => h('div', [
+            h('Button', {
+              props: {
+                type: 'primary',
+                size: 'small',
+              },
+              style: {
+                marginRight: '5px',
+              },
+              on: {
+                click: () => {
+                  this.onView(params.index);
+                },
+              },
+            }, 'View'),
+            h('Button', {
+              props: {
+                type: 'error',
+                size: 'small',
+              },
+              on: {
+                click: () => {
+                  this.onDelete(params.index);
+                },
+              },
+            }, 'Delete'),
+          ]),
         },
       ],
       data: [
@@ -47,6 +79,16 @@ export default {
         },
       ],
     };
+  },
+  methods: {
+    onView(index) {
+      window.console.log('onView', index);
+      this.$Message.info('Click View');
+    },
+    onDelete(index) {
+      window.console.log('onDelete', index);
+      this.$Message.info('Click Delete');
+    },
   },
 };
 </script>
