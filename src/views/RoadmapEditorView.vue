@@ -62,8 +62,14 @@
           </DelConnectionForm>
           <AddCommentForm
             @comment-added="handleCommentAdded"
-            :node-name-list='nodeNameList'>
+            :node-name-list="nodeNameList">
           </AddCommentForm>
+          <DelCommentForm
+            @comment-deleted="handleCommentDeleted"
+            @node-comment-list-changed="handleNodeCommentListChanged"
+            :node-name-list="nodeNameList"
+            :comment-list="commentList">
+          </DelCommentForm>
         </Submenu>
       </Menu>
     </Sider>
@@ -78,6 +84,7 @@ import AddConnectionForm from '../components/AddConnectionForm';
 import DelNodeForm from '../components/DelNodeForm';
 import DelConnectionForm from '../components/DelConnectionForm';
 import AddCommentForm from '../components/AddCommentForm';
+import DelCommentForm from '../components/DelCommentForm';
 
 Vue.prototype._ = _;
 
@@ -89,15 +96,17 @@ export default {
     DelNodeForm,
     DelConnectionForm,
     AddCommentForm,
+    DelCommentForm,
   },
   data() {
     return {
       repaint: 1,
       nodes: [
       ],
-      connections:
-          [
-          ],
+      connections: [
+      ],
+      commentList: [
+      ],
     };
   },
   computed: {
@@ -179,6 +188,24 @@ export default {
         }
       });
       this.repaintMindMap();
+    },
+    handleCommentDeleted(commentInfo) {
+      _.forEach(this.nodes, (node) => {
+        if (node.text === commentInfo.node) {
+          // eslint-disable-next-line no-param-reassign
+          node.nodes = _.filter(node.nodes, node2 => node2.text !== commentInfo.comment);
+        }
+      });
+      this.repaintMindMap();
+    },
+    handleNodeCommentListChanged(nodeName) {
+      this.commentList = [];
+      const tmplist = _(this.nodes).filter(node => node.text === nodeName);
+      _(tmplist).forEach((node) => {
+        _(node.nodes).forEach((node2) => {
+          this.commentList = [...this.commentList, node2.text];
+        });
+      });
     },
     repaintMindMap() {
       this.repaint += 1;
