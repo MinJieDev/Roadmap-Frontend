@@ -48,9 +48,18 @@
             工具栏
           </template>
           <AddNodeForm @node-added="handleNodeAdded"></AddNodeForm>
-          <AddConnectionForm @connection-added="handleConnectionAdded"></AddConnectionForm>
-          <DelNodeForm @node-deleted="handleNodeDeleted"></DelNodeForm>
-          <DelConnectionForm @connection-deleted="handleConnectionDeleted"></DelConnectionForm>
+          <AddConnectionForm
+            @connection-added="handleConnectionAdded"
+            :node-name-list='nodeNameList'>
+          </AddConnectionForm>
+          <DelNodeForm
+            @node-deleted="handleNodeDeleted"
+            :node-name-list='nodeNameList'>
+          </DelNodeForm>
+          <DelConnectionForm
+            @connection-deleted="handleConnectionDeleted"
+            :node-name-list='nodeNameList'>
+          </DelConnectionForm>
         </Submenu>
       </Menu>
     </Sider>
@@ -84,6 +93,15 @@ export default {
           [
           ],
     };
+  },
+  computed: {
+    nodeNameList() {
+      let ret = [];
+      _(this.nodes).forEach((node) => {
+        ret = [...ret, node.text];
+      });
+      return ret;
+    },
   },
   methods: {
     getMidPos() {
@@ -122,9 +140,10 @@ export default {
       this.repaintMindMap();
     },
     handleNodeDeleted(nodeInfo) {
-      _.remove(this.nodes, node => node.text === nodeInfo.nodeName);
-      _.remove(this.connections, connection => (connection.source.text === nodeInfo.nodeName
-          || connection.target.text === nodeInfo.nodeName));
+      this.nodes = _.filter(this.nodes, node => node.text !== nodeInfo.nodeName);
+      this.connections = _.filter(this.connections, connection =>
+        (connection.source.text !== nodeInfo.nodeName
+          && connection.target.text !== nodeInfo.nodeName));
       this.repaintMindMap();
     },
     handleConnectionAdded(connectionInfo) {
@@ -135,7 +154,7 @@ export default {
       this.repaintMindMap();
     },
     handleConnectionDeleted(connectionInfo) {
-      _.remove(this.connections, connection => (
+      this.connections = _.filter(this.connections, connection => !(
         (connection.source.text === connectionInfo.node1
                   && connection.target.text === connectionInfo.node2)
         || (connection.target.text === connectionInfo.node1
