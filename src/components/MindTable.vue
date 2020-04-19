@@ -1,14 +1,25 @@
 <template>
-  <Table row-key="id"
-         :columns="columns"
-         :data="data"
-         border></Table>
+  <div>
+    <Table row-key="id"
+           :columns="columns"
+           :data="data"
+           border>
+    </Table>
+    <ItemEditor
+      v-bind:drawer="drawer"
+      @cancelDrawer = "cancelDrawer">
+    </ItemEditor>
+  </div>
 </template>
 <script>
+import ItemEditor from './TableItemEditor';
+
 export default {
   name: 'MindTable',
+  components: { ItemEditor },
   data() {
     return {
+      drawer: false,
       columns: [
         {
           title: 'Title',
@@ -84,15 +95,19 @@ export default {
     onView(index) {
       window.console.log('onView', index);
       this.$Message.info('Click View');
+      this.drawer = true;
     },
     onDelete(index) {
       window.console.log('onDelete', index);
       this.$Message.info('Click Delete');
     },
+    cancelDrawer() {
+      this.$Message.info('cancel drawer');
+      this.drawer = false;
+    },
   },
 };
 </script>
-
 
 <style scoped>
 
