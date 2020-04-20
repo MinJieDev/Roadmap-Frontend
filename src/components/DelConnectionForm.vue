@@ -9,15 +9,20 @@
       @on-ok="ok"
       @on-cancel="cancel">
       <p>Node1 Name</p>
-      <Input v-model="connectionInfo.node1" placeholder="Enter something..." style="width: 300px" />
+      <Select v-model="connectionInfo.node1" filterable>
+        <Option v-for="item in nodeNameList" :value="item" :key="item">{{ item }}</Option>
+      </Select>
       <p>Node2 Name</p>
-      <Input v-model="connectionInfo.node2" placeholder="Enter something..." style="width: 300px" />
+      <Select v-model="connectionInfo.node2" filterable>
+        <Option v-for="item in nodeNameList" :value="item" :key="item">{{ item }}</Option>
+      </Select>
     </Modal>
   </div>
 </template>
 <script>
 export default {
   name: 'DelConnectionForm',
+  props: ['nodeNameList'],
   data() {
     return {
       connectionDelFormModal: false,

@@ -7,13 +7,16 @@
       @on-ok="ok"
       @on-cancel="cancel">
       <p>Node Name</p>
-      <Input v-model="nodeInfo.nodeName" placeholder="Enter something..." style="width: 300px" />
+      <Select v-model="nodeInfo.nodeName" filterable>
+        <Option v-for="item in nodeNameList" :value="item" :key="item">{{ item }}</Option>
+      </Select>
     </Modal>
   </div>
 </template>
 <script>
 export default {
   name: 'DelNodeForm',
+  props: ['nodeNameList'],
   data() {
     return {
       nodeDelFormModal: false,
