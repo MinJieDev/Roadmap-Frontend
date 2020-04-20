@@ -11,18 +11,10 @@
             <Icon type="ios-navigate"></Icon>
             文献栏
           </template>
-          <MenuItem name="1-1">
+          <MenuItem v-for="(article, index) in articles" :key="index" :name="'1-'+article.id" >
             <FileItem
-              fileName="敏杰开发♂"
-              :display="isFileItemDisplay('1-1')"
-              @node-added="handleNodeAdded"
-              @node-deleted="handleNodeDeleted">
-            </FileItem>
-          </MenuItem>
-          <MenuItem name="1-2">
-            <FileItem
-              fileName="荷花花nb♀"
-              :display="isFileItemDisplay('1-2')"
+              :fileName="article.title"
+              :display="isFileItemDisplay('1-'+article.id)"
               @node-added="handleNodeAdded"
               @node-deleted="handleNodeDeleted">
             </FileItem>
@@ -103,6 +95,8 @@ import DelConnectionForm from '../components/DelConnectionForm';
 import AddCommentForm from '../components/AddCommentForm';
 import DelCommentForm from '../components/DelCommentForm';
 import FileItem from '../components/FileItem';
+import { req } from '../apis/util';
+import errPush from '../components/ErrPush';
 
 Vue.prototype._ = _;
 
@@ -119,8 +113,9 @@ export default {
   },
   data() {
     return {
+      articles: [],
       display: false,
-      SideMenuActiveItem: '1-1',
+      SideMenuActiveItem: '',
       repaint: 1,
       nodes: [
       ],
@@ -141,6 +136,13 @@ export default {
     isFileItemDisplay() {
       return itemName => itemName === this.SideMenuActiveItem;
     },
+  },
+  mounted() {
+    req('/api/articles/', 'GET').then((res) => {
+      this.articles = res.data;
+    }).catch(() => {
+      errPush(this, '4000', true);
+    });
   },
   methods: {
     getMidPos() {
