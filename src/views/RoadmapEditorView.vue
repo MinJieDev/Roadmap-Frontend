@@ -79,6 +79,15 @@
             :node-name-list="nodeNameList"
             :comment-list="commentList">
           </DelCommentForm>
+          <MenuItem name="save-roadmap" @click.native="handleClkSaveRoadmap">
+            Save Roadmap
+          </MenuItem>
+          <MenuItem name="load-roadmap" @click.native="handleClkLoadRoadmap">
+            Load Roadmap
+          </MenuItem>
+          <MenuItem name="create-roadmap" @click.native="handleClkCreateRoadmap">
+            create Roadmap
+          </MenuItem>
         </Submenu>
       </Menu>
     </Sider>
@@ -97,6 +106,7 @@ import DelCommentForm from '../components/DelCommentForm';
 import FileItem from '../components/FileItem';
 import { req } from '../apis/util';
 import errPush from '../components/ErrPush';
+import { createRoadmap, updateRoadmap, getRoadmap } from '../apis/RoadmapEditorApis';
 
 Vue.prototype._ = _;
 
@@ -238,6 +248,29 @@ export default {
     },
     handleSideMenuSelect(itemName) {
       this.SideMenuActiveItem = itemName;
+    },
+    handleClkSaveRoadmap() {
+      updateRoadmap(2, this.nodes, this.connections).then(() => {
+        this.$Notice.success({ title: 'Roadmap saved' });
+      }).catch(() => {
+        errPush(this, '4000', true);
+      });
+    },
+    handleClkLoadRoadmap() {
+      getRoadmap(2).then((res) => {
+        this.nodes = JSON.parse(res.data.text).nodes;
+        this.connections = JSON.parse(res.data.text).connections;
+        this.repaintMindMap();
+      }).catch(() => {
+        errPush(this, '4000', true);
+      });
+    },
+    handleClkCreateRoadmap() {
+      createRoadmap(this.nodes, this.connections).then(() => {
+        this.$Notice.success({ title: 'Roadmap created' });
+      }).catch(() => {
+        errPush(this, '4000', true);
+      });
     },
   },
 };
