@@ -29,7 +29,7 @@ function debugReq() {
   // eslint-disable-next-line no-console
   req(url, method, { _limit: 5 })
     // eslint-disable-next-line no-console
-    .then(response => console.info(response.data)).catch(error => console.info(error.error));
+    .then(response => console.info(response.data)).catch(error => console.info(error.code));
 }
 
 // eslint-disable-next-line func-names

@@ -12,6 +12,7 @@ instance.interceptors.response.use(
   response => response,
   (error) => {
     if (error.response) {
+      // code: 错误状态码， response：错误响应信息，error：原始错误信息
       switch (error.response.status) {
         case 400:
           return Promise.reject({ code: 400, response: error.response, error }); // 客户端请求有语法错误
