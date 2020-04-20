@@ -14,20 +14,20 @@ instance.interceptors.response.use(
     if (error.response) {
       switch (error.response.status) {
         case 400:
-          return Promise.reject({ error: 400, response: error.response }); // 客户端请求有语法错误
+          return Promise.reject({ code: 400, response: error.response, error }); // 客户端请求有语法错误
         case 401:
-          return Promise.reject({ error: 401, response: error.response }); // 请求未经授权
+          return Promise.reject({ code: 401, response: error.response, error }); // 请求未经授权
         case 404:
-          return Promise.reject({ error: 404, response: error.response }); // 页面未找到
+          return Promise.reject({ code: 404, response: error.response, error }); // 页面未找到
         case 403:
-          return Promise.reject({ error: 403, response: error.response }); // Bad Gateway
+          return Promise.reject({ code: 403, response: error.response, error }); // Bad Gateway
         case 500:
-          return Promise.reject({ error: 500, response: error.response }); // Server Error
+          return Promise.reject({ code: 500, response: error.response, error }); // Server Error
         default:
-          return Promise.reject({ error: -1, response: error.response }); // 不常见错误
+          return Promise.reject({ code: -1, response: error.response, error }); // 不常见错误
       }
     } else {
-      return error;
+      return Promise.reject({ code: -1, response: {}, error });
     }
   },
 );
