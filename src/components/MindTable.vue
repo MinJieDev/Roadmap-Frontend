@@ -1,5 +1,11 @@
 <template>
   <div>
+    <Button
+      @click="opendrawer(0)"
+      type="primary"
+      style="margin-left: 10px; margin-bottom: 10px ">
+      Create
+    </Button>
     <Table row-key="id"
            :columns="columns"
            :data="data"
@@ -7,7 +13,7 @@
     </Table>
     <ItemEditor
       v-bind:drawer="drawer"
-      @cancelDrawer = "cancelDrawer">
+      @cancelDrawer="cancelDrawer">
     </ItemEditor>
   </div>
 </template>
@@ -95,6 +101,10 @@ export default {
     onView(index) {
       window.console.log('onView', index);
       this.$Message.info('Click View');
+      this.opendrawer(index);
+    },
+    opendrawer(index) {
+      window.console.log(index);
       this.drawer = true;
     },
     onDelete(index) {

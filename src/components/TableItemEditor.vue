@@ -1,6 +1,5 @@
 <template>
   <div>
-    <Button @click="drawer = true" type="primary">Create</Button>
     <Drawer
       title="Create"
       v-model="drawer"
