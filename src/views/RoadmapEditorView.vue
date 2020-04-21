@@ -82,9 +82,8 @@
           <MenuItem name="save-roadmap" @click.native="handleClkSaveRoadmap">
             Save Roadmap
           </MenuItem>
-          <MenuItem name="load-roadmap" @click.native="handleClkLoadRoadmap">
-            Load Roadmap
-          </MenuItem>
+          <LoadRoadmapForm @roadmap-form-loaded="handleClkLoadRoadmap">
+          </LoadRoadmapForm>
           <MenuItem name="create-roadmap" @click.native="handleClkCreateRoadmap">
             create Roadmap
           </MenuItem>
@@ -103,6 +102,7 @@ import DelNodeForm from '../components/DelNodeForm';
 import DelConnectionForm from '../components/DelConnectionForm';
 import AddCommentForm from '../components/AddCommentForm';
 import DelCommentForm from '../components/DelCommentForm';
+import LoadRoadmapForm from '../components/LoadRoadmapForm';
 import FileItem from '../components/FileItem';
 import { req } from '../apis/util';
 import errPush from '../components/ErrPush';
@@ -120,9 +120,11 @@ export default {
     AddCommentForm,
     DelCommentForm,
     FileItem,
+    LoadRoadmapForm,
   },
   data() {
     return {
+      roadMapId: -1,
       articles: [],
       display: false,
       SideMenuActiveItem: '',
@@ -145,6 +147,30 @@ export default {
     },
     isFileItemDisplay() {
       return itemName => itemName === this.SideMenuActiveItem;
+    },
+    simpleNodes() {
+      let ret = [];
+      _(this.nodes).forEach((node) => {
+        ret = [...ret, {
+          text: node.text,
+          URI: node.URI,
+          fx: node.fx,
+          fy: node.fy,
+          nodes: node.nodes,
+          category: node.category,
+        }];
+      });
+      return ret;
+    },
+    simpleConnections() {
+      let ret = [];
+      _(this.connections).forEach((connection) => {
+        ret = [...ret, {
+          source: connection.source.text,
+          target: connection.target.text,
+        }];
+      });
+      return ret;
     },
   },
   mounted() {
@@ -250,24 +276,37 @@ export default {
       this.SideMenuActiveItem = itemName;
     },
     handleClkSaveRoadmap() {
-      updateRoadmap(2, this.nodes, this.connections).then(() => {
-        this.$Notice.success({ title: 'Roadmap saved' });
-      }).catch(() => {
-        errPush(this, '4000', true);
-      });
+      // id ==
+      if (this.roadMapId === -1) {
+        createRoadmap(this.simpleNodes, this.simpleConnections).then((res) => {
+          this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
+          this.roadMapId = res.data.id;
+        }).catch(() => {
+          errPush(this, '4000', true);
+        });
+      } else {
+        updateRoadmap(this.roadMapId, this.simpleNodes, this.simpleConnections).then(() => {
+          this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
+        }).catch(() => {
+          errPush(this, '4000', true);
+        });
+      }
     },
-    handleClkLoadRoadmap() {
-      getRoadmap(2).then((res) => {
+    handleClkLoadRoadmap(roadmapInfo) {
+      getRoadmap(roadmapInfo.roadmapId).then((res) => {
         this.nodes = JSON.parse(res.data.text).nodes;
         this.connections = JSON.parse(res.data.text).connections;
         this.repaintMindMap();
+        this.roadMapId = roadmapInfo.roadmapId;
+        this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
       }).catch(() => {
         errPush(this, '4000', true);
       });
     },
     handleClkCreateRoadmap() {
-      createRoadmap(this.nodes, this.connections).then(() => {
-        this.$Notice.success({ title: 'Roadmap created' });
+      createRoadmap(this.simpleNodes, this.simpleConnections).then((res) => {
+        this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
+        this.roadMapId = res.data.id;
       }).catch(() => {
         errPush(this, '4000', true);
       });
