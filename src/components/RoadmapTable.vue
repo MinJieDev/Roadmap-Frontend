@@ -4,7 +4,7 @@
       @click="opendrawer(0)"
       type="primary"
       style="margin-left: 10px; margin-bottom: 10px ">
-      Create
+      新建路书
     </Button>
     <Table row-key="id"
            :columns="columns"
@@ -18,7 +18,7 @@
   </div>
 </template>
 <script>
-import ItemEditor from './TableItemEditor';
+import ItemEditor from './RoadItemEditor';
 
 export default {
   name: 'RoadmapTable',
@@ -28,21 +28,41 @@ export default {
       drawer: false,
       columns: [
         {
-          title: 'Title',
+          title: '序号',
+          key: 'id',
+          width: 100,
+          align: 'center',
+        },
+        {
+          title: '标题',
           key: 'title',
-          tree: true,
+          align: 'center',
         },
         {
-          title: 'Url',
-          key: 'url',
+          title: '标签',
+          key: 'tag',
+          width: 300,
+          align: 'center',
+          render: (h, params) => {
+            const tags = this.data[params.index].tags;
+            return h('div', (tags || []).map(item => h('Tag', {
+              props: {
+                // type: 'border',
+                key: item.name,
+                name: item.name,
+                color: item.color,
+                closable: true,
+                style: 'margin-left: 3px',
+              },
+            },
+            item.name,
+            )));
+          },
         },
         {
-          title: 'Note',
-          key: 'note',
-        }, {
-          title: 'Action',
+          title: '操作',
           key: 'action',
-          width: 150,
+          width: 300,
           align: 'center',
           render: (h, params) => h('div', [
             h('Button', {
@@ -51,14 +71,28 @@ export default {
                 size: 'small',
               },
               style: {
-                marginRight: '5px',
+                marginRight: '10px',
               },
               on: {
                 click: () => {
                   this.onView(params.index);
                 },
               },
-            }, 'View'),
+            }, '查看'),
+            h('Button', {
+              props: {
+                type: 'warning',
+                size: 'small',
+              },
+              style: {
+                marginRight: '10px',
+              },
+              on: {
+                click: () => {
+                  this.onEdit(params.index);
+                },
+              },
+            }, '修改'),
             h('Button', {
               props: {
                 type: 'error',
@@ -69,45 +103,49 @@ export default {
                   this.onDelete(params.index);
                 },
               },
-            }, 'Delete'),
+            }, '删除'),
           ]),
         },
       ],
-      data: [
-        {
-          id: '100',
-          title: 'python',
-          url: 'http://www.wikiwand.com/en/Python_(programming_language)',
-          note: 'Hello Python',
-          children: [
-            {
-              id: '10000',
-              title: 'source',
-              url: 'https://github.com/python/cpython',
-              note: 'original python implementation in c, compiles python code into byte code and interprets the byte code in a evaluation loop',
-            },
-          ],
-        },
-        {
-          id: '101',
-          title: 'help',
-          url: 'https://github.com/vinta/awesome-python',
-          note: 'awesome python',
-        },
-      ],
+      data: this.getData(),
     };
   },
   methods: {
+    getData() {
+      const data = [];
+      data.push({
+        id: '1',
+        title: 'Development of Learning-based Codec',
+        tags: [
+          { name: 'deep learning', color: 'primary' },
+          { name: 'Codec', color: 'success' },
+        ],
+      });
+      data.push({
+        id: '2',
+        title: 'New papers in GAN(Generative adversary network)',
+      });
+      return data;
+    },
     onView(index) {
       window.console.log('onView', index);
       this.$Message.info('Click View');
       this.opendrawer(index);
+    },
+    onEdit(index) {
+      window.console.log('onEdit', index);
+      this.$router.push({
+        path: '/editor',
+        query: { selected: index },
+      });
+      this.$Message.info('Click Edit');
     },
     opendrawer(index) {
       window.console.log(index);
       this.drawer = true;
     },
     onDelete(index) {
+      this.data.splice(index, 1);
       window.console.log('onDelete', index);
       this.$Message.info('Click Delete');
     },
