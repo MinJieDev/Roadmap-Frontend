@@ -13,9 +13,9 @@
               <Icon type="ios-keypad"></Icon>
               路书编辑器
             </MenuItem>
-            <MenuItem name="3">
+            <MenuItem name="3" :to="{name: 'RoadmapTable'}">
               <Icon type="ios-analytics"></Icon>
-              Item 3
+              路书管理
             </MenuItem>
             <MenuItem name="4">
               <Icon type="ios-paper"></Icon>
