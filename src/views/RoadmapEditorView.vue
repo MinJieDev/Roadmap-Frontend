@@ -38,10 +38,16 @@
         </Submenu>
       </Menu>
     </Sider>
-    <Content :style="{padding: '24px', minHeight: '280px', background: '#fff'}">
-        <!--        <p>{{$store.state.example}}</p>-->
-        <!--        <p>{{$store.getters.getFirstTxtArr}}</p>-->
-        <!--  add content here  -->
+    <Content :style="{minHeight: '280px', background: '#fff'}">
+      <div v-if="!titleEditable" id="roadmap-title" style="padding: 12px">
+        {{roadMapTitle}}
+        <Icon type="ios-create-outline" @click="handleClkEditTitle" />
+      </div>
+      <Input v-model="roadMapTitle"
+             v-if="titleEditable"
+             @on-blur="handleUpdateTitle"
+             size="large" style="padding: 12px">
+      </Input>
       <mindmap
         :nodes="nodes"
         :connections="connections"
@@ -125,10 +131,12 @@ export default {
   data() {
     return {
       roadMapId: -1,
+      roadMapTitle: 'roadMapTitleDefalt',
       articles: [],
       display: false,
       SideMenuActiveItem: '',
       repaint: 1,
+      titleEditable: false,
       nodes: [
       ],
       connections: [
@@ -311,10 +319,20 @@ export default {
         errPush(this, '4000', true);
       });
     },
+    handleClkEditTitle() {
+      this.titleEditable = true;
+    },
+    handleUpdateTitle() {
+      this.$Notice.success({ title: 'Roadmap title updated' });
+      this.titleEditable = false;
+    },
   },
 };
 </script>
 
 <style scoped>
-
+#roadmap-title{
+  text-align:left;
+  font-size: 24px;
+}
 </style>
