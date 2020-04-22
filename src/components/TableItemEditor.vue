@@ -6,7 +6,7 @@
       width="720"
       :mask-closable="false"
       :styles="styles"
-      @on-close="cancel"
+      @on-close="cancelDrawer"
     >
       <Row :gutter="32">
         <Col span="10">
@@ -60,8 +60,8 @@
       </Row>
 
       <div class="demo-drawer-footer">
-        <Button style="margin-right: 8px" @click="cancel">Cancel</Button>
-        <Button type="primary" @click="cancel">Submit</Button>
+        <Button style="margin-right: 8px" @click="cancelDrawer">取消</Button>
+        <Button type="primary" @click="submitDrawer">提交修改</Button>
       </div>
     </Drawer>
   </div>
@@ -92,22 +92,32 @@ export default {
       },
       data2: this.getMockData(),
       targetKeys2: this.getTargetKeys(),
+      formData: {
+        title: '',
+        url: '',
+        note: '',
+      },
     };
   },
   methods: {
-    cancel() {
+    cancelDrawer() {
+      this.$emit('cancelDrawer');
+    },
+    submitDrawer() {
+      // add api to submit data
       this.$emit('cancelDrawer');
     },
     getFormData() {
       if (this.data[this.index] === undefined) {
-        const formData = {
-          title: '',
-          url: '',
-          note: '',
-        };
-        return formData;
+        this.formData.title = '';
+        this.formData.url = '';
+        this.formData.note = '';
+        return this.formData;
       }
-      return this.data[this.index];
+      this.formData.title = this.data[this.index].title;
+      this.formData.url = this.data[this.index].url;
+      this.formData.note = this.data[this.index].note;
+      return this.formData;
     },
     getMockData() {
       const mockData = [];
