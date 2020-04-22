@@ -1,46 +1,67 @@
 <template>
   <div>
     <Drawer
-      title="Create"
+      title="查看"
       v-model="drawer"
       width="720"
       :mask-closable="false"
       :styles="styles"
+      @on-close="cancelDrawer"
     >
-      <Form :model="formData">
-        <Row :gutter="32">
-          <Col span="12">
-            <FormItem label="Title" label-position="top">
-              <Input v-model="formData.name" placeholder="please enter user name" >
+      <Row :gutter="32">
+        <Col span="10">
+          <h3>题目</h3> <br>
+          <Row :gutter="50" style="margin-left: 0px">
+            <Col>
+              <Input
+                v-model="drawerFormData.title"
+                clearable
+                placeholder="请输入文章标题">
               </Input>
-            </FormItem>
-          </Col>
-          <Col span="12">
-            <FormItem label="Url" label-position="top">
-              <Input v-model="formData.url" placeholder="please enter url">
-                <span slot="prepend">http://</span>
-              </Input>
-            </FormItem>
-          </Col>
-        </Row>
-        <FormItem label="Note" label-position="top">
-          <Input
-            type="textarea"
-            v-model="formData.desc"
-            :rows="4"
-            placeholder="please enter the description" >
-          </Input>
-        </FormItem>
+            </Col>
+          </Row>
+        </Col>
+
+        <Col span="12">
+          <h3>链接(URL)</h3>  <br>
+          <Row :gutter="50" style="margin-left: 20px">
+            <Input
+              v-model="drawerFormData.url"
+              clearable
+              placeholder="请输入网址(URL)">
+              <span slot="prepend">http://</span>
+            </Input>
+          </Row>
+        </Col>
+      </Row>
+      <br>
+      <h3>笔记</h3>
+      <br>
+      <Row :gutter="50" style="margin-left: 20px; margin-right: 20px">
+        <Input
+          type="textarea"
+          v-model="drawerFormData.note"
+          :rows="4"
+          clearable
+          placeholder="请输入描述或笔记">
+        </Input>
+      </Row>
+      <br>
+      <br>
+      <h3>引用文献</h3>
+      <br>
+      <Row :gutter="50" style="margin-left: 30px">
         <Transfer
           :data="data2"
           :target-keys="targetKeys2"
           filterable
           :filter-method="filterMethod"
           @on-change="handleChange2"></Transfer>
-      </Form>
+      </Row>
+
       <div class="demo-drawer-footer">
-        <Button style="margin-right: 8px" @click="cancel">Cancel</Button>
-        <Button type="primary" @click="cancel">Submit</Button>
+        <Button style="margin-right: 8px" @click="cancelDrawer">取消</Button>
+        <Button type="primary" @click="submitDrawer">提交修改</Button>
       </div>
     </Drawer>
   </div>
@@ -48,28 +69,36 @@
 <script>
 export default {
   name: 'ItemEditor',
-  props: ['drawer'],
+  props: {
+    drawer: {
+      type: Boolean,
+    },
+    index: {
+      type: Number,
+      default: -1,
+    },
+    drawerFormData: {
+      type: Object,
+    },
+  },
   data() {
     return {
-      // drawer: false,
       styles: {
         height: 'calc(100% - 55px)',
         overflow: 'auto',
         paddingBottom: '53px',
         position: 'static',
       },
-      formData: {
-        title: '',
-        url: '',
-        note: '',
-      },
       data2: this.getMockData(),
       targetKeys2: this.getTargetKeys(),
     };
   },
   methods: {
-    cancel() {
+    cancelDrawer() {
       this.$emit('cancelDrawer');
+    },
+    submitDrawer() {
+      this.$emit('submitDrawer');
     },
     getMockData() {
       const mockData = [];
@@ -98,7 +127,7 @@ export default {
 };
 </script>
 <style>
-  .demo-drawer-footer{
+  .demo-drawer-footer {
     width: 100%;
     position: absolute;
     bottom: 0;
