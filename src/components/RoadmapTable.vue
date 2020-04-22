@@ -1,7 +1,7 @@
 <template>
   <div>
     <Button
-      @click="opendrawer(0)"
+      @click="onClickNewRoadmap(0)"
       type="primary"
       style="margin-left: 10px; margin-bottom: 10px ">
       新建路书
@@ -18,7 +18,11 @@
   </div>
 </template>
 <script>
+import _ from 'lodash';
 import ItemEditor from './RoadItemEditor';
+import { req } from '../apis/util';
+import errPush from './ErrPush';
+import { delRoadmap } from '../apis/RoadmapEditorApis';
 
 export default {
   name: 'RoadmapTable',
@@ -75,7 +79,7 @@ export default {
               },
               on: {
                 click: () => {
-                  this.onView(params.index);
+                  this.onView(this.roadmaps[params.index].id);
                 },
               },
             }, '查看'),
@@ -89,7 +93,7 @@ export default {
               },
               on: {
                 click: () => {
-                  this.onEdit(params.index);
+                  this.onEdit(this.roadmaps[params.index].id);
                 },
               },
             }, '修改'),
@@ -100,37 +104,46 @@ export default {
               },
               on: {
                 click: () => {
-                  this.onDelete(params.index);
+                  this.onDelete(this.roadmaps[params.index].id, params.index);
                 },
               },
             }, '删除'),
           ]),
         },
       ],
-      data: this.getData(),
+      data: [],
+      roadmaps: [],
     };
+  },
+  mounted() {
+    req('/api/road_maps/', 'GET').then((res) => {
+      this.roadmaps = res.data;
+      this.data = this.getData();
+    }).catch(() => {
+      errPush(this, '4000', true);
+    });
   },
   methods: {
     getData() {
       const data = [];
-      data.push({
-        id: '1',
-        title: 'Development of Learning-based Codec',
-        tags: [
-          { name: 'deep learning', color: 'primary' },
-          { name: 'Codec', color: 'success' },
-        ],
-      });
-      data.push({
-        id: '2',
-        title: 'New papers in GAN(Generative adversary network)',
+      let index = 0;
+      _(this.roadmaps).forEach((roadmap) => {
+        index += 1;
+        data.push({
+          id: index,
+          title: roadmap.title,
+          tags: [],
+        });
       });
       return data;
     },
     onView(index) {
       window.console.log('onView', index);
-      this.$Message.info('Click View');
-      this.opendrawer(index);
+      this.$router.push({
+        path: '/reader',
+        query: { selected: index },
+      });
+      this.$Message.info('Click Read');
     },
     onEdit(index) {
       window.console.log('onEdit', index);
@@ -144,14 +157,26 @@ export default {
       window.console.log(index);
       this.drawer = true;
     },
-    onDelete(index) {
-      this.data.splice(index, 1);
-      window.console.log('onDelete', index);
-      this.$Message.info('Click Delete');
+    onDelete(index, posInTable) {
+      delRoadmap(index).then((res) => {
+        this.data.splice(posInTable, 1);
+        window.console.log('onDelete', index);
+        this.$Message.info(`${res.data.id} Deleted`);
+      }).catch(() => {
+        errPush(this, '4000', true);
+      });
     },
     cancelDrawer() {
       this.$Message.info('cancel drawer');
       this.drawer = false;
+    },
+    onClickNewRoadmap() {
+      window.console.log('onNew');
+      this.$router.push({
+        path: '/editor',
+        query: { selected: -1 },
+      });
+      this.$Message.info('onNew');
     },
   },
 };
