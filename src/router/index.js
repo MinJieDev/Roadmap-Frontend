@@ -14,6 +14,11 @@ const routes = [
     name: 'Editor',
     component: () => import(/* webpackChunkName: "about" */ '../views/RoadmapEditorView.vue'),
   },
+  {
+    path: '/reader',
+    name: 'Reader',
+    component: () => import(/* webpackChunkName: "about" */ '../views/RoadmapReaderView.vue'),
+  },
 ];
 
 const router = new VueRouter({
