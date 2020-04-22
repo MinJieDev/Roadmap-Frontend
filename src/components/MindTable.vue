@@ -1,7 +1,7 @@
 <template>
   <div>
     <Button
-      @click="opendrawer(0)"
+      @click="openDrawer(-1)"
       type="primary"
       style="margin-left: 10px; margin-bottom: 10px ">
       Create
@@ -13,6 +13,8 @@
     </Table>
     <ItemEditor
       v-bind:drawer="drawer"
+      v-bind:index="index"
+      v-bind:data="data"
       @cancelDrawer="cancelDrawer">
     </ItemEditor>
   </div>
@@ -32,6 +34,7 @@ export default {
   data() {
     return {
       drawer: false,
+      index: -1,
       columns: [
         {
           title: 'Title',
@@ -85,13 +88,14 @@ export default {
     onView(index) {
       window.console.log('onView', index);
       this.$Message.info('Click View');
-      this.opendrawer(index);
+      this.openDrawer(index);
     },
-    opendrawer(index) {
-      window.console.log(index);
+    openDrawer(index) {
+      this.index = index;
       this.drawer = true;
     },
     onDelete(index) {
+      this.data.splice(index, 1);
       window.console.log('onDelete', index);
       this.$Message.info('Click Delete');
     },
