@@ -15,6 +15,11 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/RoadmapEditorView.vue'),
   },
   {
+    path: '/RoadmapTable',
+    name: 'RoadmapTable',
+    component: () => import(/* webpackChunkName: "about" */ '../views/RoadmapTableView'),
+  },
+  {
     path: '/reader',
     name: 'Reader',
     component: () => import(/* webpackChunkName: "about" */ '../views/RoadmapReaderView.vue'),
