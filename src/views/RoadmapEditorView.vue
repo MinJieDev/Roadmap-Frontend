@@ -190,7 +190,8 @@ export default {
       errPush(this, '4000', true);
     });
     // load roadMap if has query
-    if (typeof (this.$route.query.selected) !== 'undefined') {
+    if ((typeof (this.$route.query.selected) !== 'undefined') &&
+                (String(this.$route.query.selected) !== '-1')) {
       this.roadMapId = this.$route.query.selected;
       getRoadmap(this.roadMapId)
         .then((res) => {
