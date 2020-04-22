@@ -1,5 +1,13 @@
 <template>
   <div>
+    <ItemEditor
+      v-bind:drawer="drawer"
+      v-bind:index="index"
+      v-bind:drawerFormData="drawerFormData"
+      @cancelDrawer="cancelDrawer"
+      @submitDrawer="submitDrawer"
+    >
+    </ItemEditor>
     <Button
       @click="openDrawer(-1)"
       type="primary"
@@ -11,12 +19,6 @@
            :data="data"
            border>
     </Table>
-    <ItemEditor
-      v-bind:drawer="drawer"
-      v-bind:index="index"
-      v-bind:data="data"
-      @cancelDrawer="cancelDrawer">
-    </ItemEditor>
   </div>
 </template>
 <script>
@@ -35,6 +37,11 @@ export default {
     return {
       drawer: false,
       index: -1,
+      drawerFormData: {
+        title: '',
+        url: '',
+        note: '',
+      },
       columns: [
         {
           title: 'Title',
@@ -90,17 +97,30 @@ export default {
       this.$Message.info('Click View');
       this.openDrawer(index);
     },
-    openDrawer(index) {
-      this.index = index;
-      this.drawer = true;
-    },
     onDelete(index) {
       this.data.splice(index, 1);
       window.console.log('onDelete', index);
       this.$Message.info('Click Delete');
     },
+    openDrawer(index) {
+      this.index = index;
+      if (this.data[this.index] === undefined) {
+        this.drawerFormData.title = '';
+        this.drawerFormData.url = '';
+        this.drawerFormData.note = '';
+      } else {
+        this.drawerFormData.title = this.data[this.index].title;
+        this.drawerFormData.url = this.data[this.index].url;
+        this.drawerFormData.note = this.data[this.index].note;
+      }
+      this.drawer = true;
+    },
     cancelDrawer() {
       this.$Message.info('cancel drawer');
+      this.drawer = false;
+    },
+    submitDrawer() {
+      this.$Message.info('submit drawer');
       this.drawer = false;
     },
   },

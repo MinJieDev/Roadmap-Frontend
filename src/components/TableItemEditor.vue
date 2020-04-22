@@ -1,7 +1,7 @@
 <template>
   <div>
     <Drawer
-      title="Create"
+      title="查看"
       v-model="drawer"
       width="720"
       :mask-closable="false"
@@ -14,9 +14,9 @@
           <Row :gutter="50" style="margin-left: 0px">
             <Col>
               <Input
-                v-model="getFormData().title"
+                v-model="drawerFormData.title"
                 clearable
-                placeholder="please enter user name">
+                placeholder="请输入文章标题">
               </Input>
             </Col>
           </Row>
@@ -26,9 +26,9 @@
           <h3>链接(URL)</h3>  <br>
           <Row :gutter="50" style="margin-left: 20px">
             <Input
-              v-model="getFormData().url"
+              v-model="drawerFormData.url"
               clearable
-              placeholder="please enter url">
+              placeholder="请输入网址(URL)">
               <span slot="prepend">http://</span>
             </Input>
           </Row>
@@ -40,10 +40,10 @@
       <Row :gutter="50" style="margin-left: 20px; margin-right: 20px">
         <Input
           type="textarea"
-          v-model="getFormData().note"
+          v-model="drawerFormData.note"
           :rows="4"
           clearable
-          placeholder="please enter the description">
+          placeholder="请输入描述或笔记">
         </Input>
       </Row>
       <br>
@@ -70,16 +70,15 @@
 export default {
   name: 'ItemEditor',
   props: {
-    data: {
-      type: Array,
-      required: true,
-    },
     drawer: {
       type: Boolean,
     },
     index: {
       type: Number,
       default: -1,
+    },
+    drawerFormData: {
+      type: Object,
     },
   },
   data() {
@@ -92,11 +91,6 @@ export default {
       },
       data2: this.getMockData(),
       targetKeys2: this.getTargetKeys(),
-      formData: {
-        title: '',
-        url: '',
-        note: '',
-      },
     };
   },
   methods: {
@@ -104,20 +98,7 @@ export default {
       this.$emit('cancelDrawer');
     },
     submitDrawer() {
-      // add api to submit data
-      this.$emit('cancelDrawer');
-    },
-    getFormData() {
-      if (this.data[this.index] === undefined) {
-        this.formData.title = '';
-        this.formData.url = '';
-        this.formData.note = '';
-        return this.formData;
-      }
-      this.formData.title = this.data[this.index].title;
-      this.formData.url = this.data[this.index].url;
-      this.formData.note = this.data[this.index].note;
-      return this.formData;
+      this.$emit('submitDrawer');
     },
     getMockData() {
       const mockData = [];
