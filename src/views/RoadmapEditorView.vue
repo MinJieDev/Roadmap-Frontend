@@ -38,10 +38,16 @@
         </Submenu>
       </Menu>
     </Sider>
-    <Content :style="{padding: '24px', minHeight: '280px', background: '#fff'}">
-        <!--        <p>{{$store.state.example}}</p>-->
-        <!--        <p>{{$store.getters.getFirstTxtArr}}</p>-->
-        <!--  add content here  -->
+    <Content :style="{minHeight: '280px', background: '#fff'}">
+      <div v-if="!titleEditable" id="roadmap-title" style="padding: 12px">
+        {{roadMapTitle}}
+        <Icon type="ios-create-outline" @click="handleClkEditTitle" />
+      </div>
+      <Input v-model="roadMapTitle"
+             v-if="titleEditable"
+             @on-blur="handleUpdateTitle"
+             size="large" style="padding: 12px">
+      </Input>
       <mindmap
         :nodes="nodes"
         :connections="connections"
@@ -50,6 +56,7 @@
       />
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}">
+      <Button type="info" @click="handleClkReadOnly" id="b-ro">Read Only</Button>
       <Menu active-name="1-2" theme="dark" width="auto" :open-names="['1']">
         <Submenu name="1">
           <template slot="title">
@@ -79,6 +86,14 @@
             :node-name-list="nodeNameList"
             :comment-list="commentList">
           </DelCommentForm>
+          <MenuItem name="save-roadmap" @click.native="handleClkSaveRoadmap">
+            Save Roadmap
+          </MenuItem>
+          <LoadRoadmapForm @roadmap-form-loaded="handleClkLoadRoadmap">
+          </LoadRoadmapForm>
+          <MenuItem name="create-roadmap" @click.native="handleClkCreateRoadmap">
+            create Roadmap
+          </MenuItem>
         </Submenu>
       </Menu>
     </Sider>
@@ -94,9 +109,11 @@ import DelNodeForm from '../components/DelNodeForm';
 import DelConnectionForm from '../components/DelConnectionForm';
 import AddCommentForm from '../components/AddCommentForm';
 import DelCommentForm from '../components/DelCommentForm';
+import LoadRoadmapForm from '../components/LoadRoadmapForm';
 import FileItem from '../components/FileItem';
 import { req } from '../apis/util';
 import errPush from '../components/ErrPush';
+import { createRoadmap, updateRoadmap, getRoadmap, updateRoadmapTitle } from '../apis/RoadmapEditorApis';
 
 Vue.prototype._ = _;
 
@@ -110,13 +127,17 @@ export default {
     AddCommentForm,
     DelCommentForm,
     FileItem,
+    LoadRoadmapForm,
   },
   data() {
     return {
+      roadMapId: -1,
+      roadMapTitle: 'New RoadMap',
       articles: [],
       display: false,
       SideMenuActiveItem: '',
       repaint: 1,
+      titleEditable: false,
       nodes: [
       ],
       connections: [
@@ -136,13 +157,53 @@ export default {
     isFileItemDisplay() {
       return itemName => itemName === this.SideMenuActiveItem;
     },
+    simpleNodes() {
+      let ret = [];
+      _(this.nodes).forEach((node) => {
+        ret = [...ret, {
+          text: node.text,
+          URI: node.URI,
+          fx: node.fx,
+          fy: node.fy,
+          nodes: node.nodes,
+          category: node.category,
+        }];
+      });
+      return ret;
+    },
+    simpleConnections() {
+      let ret = [];
+      _(this.connections).forEach((connection) => {
+        ret = [...ret, {
+          source: connection.source.text,
+          target: connection.target.text,
+        }];
+      });
+      return ret;
+    },
   },
   mounted() {
+    // GET articles for l-sider
     req('/api/articles/', 'GET').then((res) => {
       this.articles = res.data;
     }).catch(() => {
       errPush(this, '4000', true);
     });
+    // load roadMap if has query
+    if (typeof (this.$route.query.selected) !== 'undefined') {
+      this.roadMapId = this.$route.query.selected;
+      getRoadmap(this.roadMapId)
+        .then((res) => {
+          this.nodes = JSON.parse(res.data.text).nodes;
+          this.connections = JSON.parse(res.data.text).connections;
+          this.roadMapTitle = res.data.title;
+          this.repaintMindMap();
+          this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
+        })
+        .catch(() => {
+          errPush(this, '4000', true);
+        });
+    }
   },
   methods: {
     getMidPos() {
@@ -239,10 +300,76 @@ export default {
     handleSideMenuSelect(itemName) {
       this.SideMenuActiveItem = itemName;
     },
+    handleClkSaveRoadmap() {
+      // id ==
+      if (this.roadMapId === -1) {
+        createRoadmap(this.roadMapTitle, this.simpleNodes, this.simpleConnections).then((res) => {
+          this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
+          this.roadMapId = res.data.id;
+        }).catch(() => {
+          errPush(this, '4000', true);
+        });
+      } else {
+        updateRoadmap(this.roadMapId, this.roadMapTitle, this.simpleNodes, this.simpleConnections)
+          .then(() => {
+            this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
+          }).catch(() => {
+            errPush(this, '4000', true);
+          });
+      }
+    },
+    handleClkLoadRoadmap(roadmapInfo) {
+      getRoadmap(roadmapInfo.roadmapId).then((res) => {
+        this.nodes = JSON.parse(res.data.text).nodes;
+        this.connections = JSON.parse(res.data.text).connections;
+        this.roadMapTitle = res.data.title;
+        this.repaintMindMap();
+        this.roadMapId = roadmapInfo.roadmapId;
+        this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
+      }).catch(() => {
+        errPush(this, '4000', true);
+      });
+    },
+    handleClkCreateRoadmap() {
+      createRoadmap(this.roadMapTitle, this.simpleNodes, this.simpleConnections).then((res) => {
+        this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
+        this.roadMapId = res.data.id;
+      }).catch(() => {
+        errPush(this, '4000', true);
+      });
+    },
+    handleClkEditTitle() {
+      this.titleEditable = true;
+    },
+    handleUpdateTitle() {
+      if (this.roadMapId !== -1) {
+        updateRoadmapTitle(this.roadMapId, this.roadMapTitle).then(() => {
+          this.$Notice.success({ title: 'Roadmap Title Updated' });
+        }).catch(() => {
+          errPush(this, '4000', true);
+        });
+      }
+      this.titleEditable = false;
+    },
+    handleClkReadOnly() {
+      this.$router.push({
+        path: '/reader',
+        query: { selected: this.roadMapId },
+      });
+    },
   },
 };
 </script>
 
 <style scoped>
-
+  #roadmap-title{
+    text-align:left;
+    font-size: 24px;
+  }
+  #b-ro{
+    width: 120px;
+    margin-bottom: 20px;
+    margin-left: 40px;
+    margin-right: 40px;
+  }
 </style>
