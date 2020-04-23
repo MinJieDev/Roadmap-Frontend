@@ -8,9 +8,10 @@
       :styles="styles"
       @on-close="cancelDrawer"
     >
+      <h3>题目</h3>
+      <br>
       <Row :gutter="32">
-        <Col span="10">
-          <h3>题目</h3> <br>
+        <Col span="24">
           <Row :gutter="50" style="margin-left: 0px">
             <Col>
               <Input
@@ -21,9 +22,26 @@
             </Col>
           </Row>
         </Col>
+      </Row>
+
+      <Row :gutter="32">
+        <Col span="10">
+          <br>
+          <h3>作者</h3>
+          <br>
+          <Row :gutter="50" style="margin-left: 20px">
+            <Input
+              v-model="drawerFormData.author"
+              clearable
+              placeholder="请输入作者">
+            </Input>
+          </Row>
+        </Col>
 
         <Col span="12">
-          <h3>链接(URL)</h3>  <br>
+          <br>
+          <h3>链接(URL)</h3>
+          <br>
           <Row :gutter="50" style="margin-left: 20px">
             <Input
               v-model="drawerFormData.url"

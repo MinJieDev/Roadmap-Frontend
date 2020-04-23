@@ -12,7 +12,7 @@
       @click="openDrawer(-1)"
       type="primary"
       style="margin-left: 10px; margin-bottom: 10px ">
-      Create
+      创建文献
     </Button>
     <Table row-key="id"
            :columns="columns"
@@ -62,16 +62,38 @@ export default {
           title: 'Note',
           key: 'note',
         },
+        // {
+        //   title: 'Ref',
+        //   key: 'ref',
+        //   tree: true,
+        // },
         {
-          title: 'Ref',
-          key: 'ref',
-          tree: true,
-        }, {
           title: 'Action',
           key: 'action',
-          width: 150,
+          width: 250,
           align: 'center',
           render: (h, params) => h('div', [
+            h('Button', {
+              props: {
+                type: 'success',
+                size: 'small',
+              },
+              style: {
+                marginRight: '5px',
+              },
+              on: {
+                click: () => {
+                  const ref = this.data[params.index].article_references;
+                  const refNames = _.map(ref, id =>
+                    (_.find(this.data, item => (item.id === id)) || { title: 'notitle' })
+                      .title);
+                  this.$Modal.info({
+                    title: '引用列表',
+                    content: `${_.join(refNames, '<br>') || '空'}`,
+                  });
+                },
+              },
+            }, '查看引用'),
             h('Button', {
               props: {
                 type: 'primary',
@@ -85,7 +107,7 @@ export default {
                   this.onView(params.index);
                 },
               },
-            }, 'View'),
+            }, '编辑'),
             h('Button', {
               props: {
                 type: 'error',
@@ -96,7 +118,7 @@ export default {
                   this.onDelete(params.index);
                 },
               },
-            }, 'Delete'),
+            }, '删除'),
           ]),
         },
       ],
@@ -109,7 +131,6 @@ export default {
   },
   methods: {
     onView(index) {
-      window.console.log('onView', index);
       this.$Message.info('Click View');
       this.openDrawer(index);
     },
@@ -118,7 +139,6 @@ export default {
         .then((res) => {
           // this.data.splice(index, 1);
           this.data = _.slice(this.data, index, index + 1);
-          window.console.log('onDelete', index, this.data);
           this.$Message.info(`${res.title} Deleted`);
           this.$emit('reloadData');
         });
@@ -132,7 +152,7 @@ export default {
           article_references: [],
         };
       } else {
-        this.drawerFormData = this.data[this.index];
+        this.drawerFormData = _.clone(this.data[this.index]);
       }
       this.drawer = true;
     },
@@ -145,7 +165,7 @@ export default {
       if (this.index === -1) {
         createMTdata(
           drawerFormData.title,
-          '',
+          drawerFormData.author,
           drawerFormData.url,
           drawerFormData.note,
           drawerFormData.article_references)
@@ -157,14 +177,8 @@ export default {
             errPush(this, '4000', true);
           });
       } else {
-        // (id, title, author, url, ref)
-        changeMTdata(
-          drawerFormData.id,
-          drawerFormData.title,
-          drawerFormData.author,
-          drawerFormData.url,
-          drawerFormData.article_references,
-        )
+        // (id, title, author, url, note, ref)
+        changeMTdata(drawerFormData)
           .then(() => {
             this.$Notice.success('MT data change');
             this.$emit('reloadData');
