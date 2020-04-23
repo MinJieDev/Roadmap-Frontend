@@ -48,7 +48,7 @@
              @on-blur="handleUpdateTitle"
              size="large" style="padding: 12px">
       </Input>
-      <mindmap
+      <roadmap
         :nodes="nodes"
         :connections="connections"
         :editable="true"
@@ -114,12 +114,14 @@ import FileItem from '../components/FileItem';
 import { req } from '../apis/util';
 import errPush from '../components/ErrPush';
 import { createRoadmap, updateRoadmap, getRoadmap, updateRoadmapTitle } from '../apis/RoadmapEditorApis';
+import Roadmap from '../components/roadmap/Roadmap';
 
 Vue.prototype._ = _;
 
 export default {
   name: 'RoadmapEditor',
   components: {
+    Roadmap,
     AddNodeForm,
     AddConnectionForm,
     DelNodeForm,
