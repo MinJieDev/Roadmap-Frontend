@@ -126,7 +126,11 @@ export default {
     openDrawer(index) {
       this.index = index;
       if (this.data[this.index] === undefined) {
-        this.drawerFormData = {};
+        // TODO improve style here
+        this.drawerFormData = {
+          // this is required by iview transfer inside the editor
+          article_references: [],
+        };
       } else {
         this.drawerFormData = this.data[this.index];
       }
@@ -144,7 +148,7 @@ export default {
           '',
           drawerFormData.url,
           drawerFormData.note,
-          [])
+          drawerFormData.article_references)
           .then(() => {
             this.$Notice.success('MT data created');
             this.$emit('reloadData');
