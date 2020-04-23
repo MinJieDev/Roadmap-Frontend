@@ -8,6 +8,5 @@ export const createMTdata = (title, author, url, note, ref) => req(
 export const deleteMTdata = id => req(
   `api/articles/${id}/`, 'DELETE');
 
-export const changeMTdata = (id, title, author, url, ref) => req(
-  `api/articles/${id}/`, 'PATCH', {},
-  { title, author, url, article_references: ref });
+export const changeMTdata = data => req(
+  `api/articles/${data.id}/`, 'PATCH', {}, data);
