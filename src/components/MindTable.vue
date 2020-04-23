@@ -147,7 +147,7 @@ export default {
           this.drawerFormData.url,
           this.drawerFormData.note,
           []).then((res) => {
-          this.data = res.data;
+          this.drawreformData = res.data;
           this.$Notice.success('MT data created');
         }).catch(() => {
           errPush(this, '4000', true);
