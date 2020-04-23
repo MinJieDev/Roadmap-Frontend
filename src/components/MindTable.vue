@@ -25,7 +25,7 @@
 import _ from 'lodash';
 import errPush from '../components/ErrPush';
 import ItemEditor from './TableItemEditor';
-import { deleteMTdata, createMTdata } from '../apis/MindTableEditorApis';
+import { deleteMTdata, createMTdata, changeMTdata } from '../apis/MindTableEditorApis';
 
 export default {
   name: 'MindTable',
@@ -114,12 +114,14 @@ export default {
       this.openDrawer(index);
     },
     onDelete(index) {
-      deleteMTdata(this.data[index].id).then((res) => {
-        // this.data.splice(index, 1);
-        this.data = _.slice(this.data, index, index + 1);
-        window.console.log('onDelete', index, this.data);
-        this.$Message.info(`${res.title} Deleted`);
-      });
+      deleteMTdata(this.data[index].id)
+        .then((res) => {
+          // this.data.splice(index, 1);
+          this.data = _.slice(this.data, index, index + 1);
+          window.console.log('onDelete', index, this.data);
+          this.$Message.info(`${res.title} Deleted`);
+          this.$emit('reloadData');
+        });
     },
     openDrawer(index) {
       this.index = index;
@@ -146,12 +148,30 @@ export default {
           '',
           this.drawerFormData.url,
           this.drawerFormData.note,
-          []).then((res) => {
-          this.drawreformData = res.data;
-          this.$Notice.success('MT data created');
-        }).catch(() => {
-          errPush(this, '4000', true);
-        });
+          [])
+          .then(() => {
+            this.$Notice.success('MT data created');
+            this.$emit('reloadData');
+          })
+          .catch(() => {
+            errPush(this, '4000', true);
+          });
+      } else {
+        // (id, title, author, url, ref)
+        changeMTdata(
+          this.data[this.index].id,
+          this.drawerFormData.title,
+          '',
+          this.drawerFormData.url,
+          this.drawerFormData.ref,
+        )
+          .then(() => {
+            this.$Notice.success('MT data change');
+            this.$emit('reloadData');
+          })
+          .catch(() => {
+            errPush(this, '4000', true);
+          });
       }
       this.drawer = false;
     },
