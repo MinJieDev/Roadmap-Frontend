@@ -22,12 +22,14 @@
   </div>
 </template>
 <script>
+import _ from 'lodash';
 import ItemEditor from './TableItemEditor';
+import { deleteMTdata } from '../apis/MindTableEditorApis';
 
 export default {
   name: 'MindTable',
   props: {
-    data: {
+    tableData: {
       type: Array,
       required: true,
     },
@@ -99,6 +101,11 @@ export default {
       ],
     };
   },
+  computed: {
+    data() {
+      return _.slice(this.tableData, 0, this.tableData.length);
+    },
+  },
   methods: {
     onView(index) {
       window.console.log('onView', index);
@@ -106,9 +113,12 @@ export default {
       this.openDrawer(index);
     },
     onDelete(index) {
-      this.data.splice(index, 1);
-      window.console.log('onDelete', index);
-      this.$Message.info('Click Delete');
+      deleteMTdata(this.data[index].id).then((res) => {
+        // this.data.splice(index, 1);
+        this.data = _.slice(this.data, index, index + 1);
+        window.console.log('onDelete', index, this.data);
+        this.$Message.info(`${res.title} Deleted`);
+      });
     },
     openDrawer(index) {
       this.index = index;

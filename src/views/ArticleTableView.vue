@@ -1,6 +1,6 @@
 <template>
   <div>
-    <MindTable :data="tableData"/>
+    <MindTable :tableData="tableData"/>
   </div>
 </template>
 
