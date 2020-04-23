@@ -11,3 +11,5 @@ export const getRoadmap = id => req(`/api/road_maps/${id}/`, 'GET');
 
 export const updateRoadmapTitle = (id, roadmapTitle) => req(`/api/road_maps/${id}/`, 'PATCH', {},
   { title: roadmapTitle });
+
+export const delRoadmap = id => req(`/api/road_maps/${id}/`, 'DELETE');

@@ -46,7 +46,10 @@ export default {
         {
           title: 'Title',
           key: 'title',
-          tree: true,
+        },
+        {
+          title: 'Author',
+          key: 'author',
         },
         {
           title: 'Url',
@@ -55,6 +58,11 @@ export default {
         {
           title: 'Note',
           key: 'note',
+        },
+        {
+          title: 'Ref',
+          key: 'ref',
+          tree: true,
         }, {
           title: 'Action',
           key: 'action',
@@ -120,7 +128,6 @@ export default {
       this.drawer = false;
     },
     submitDrawer() {
-      // create if index = -1
       this.$Message.info('submit drawer');
       this.drawer = false;
     },
