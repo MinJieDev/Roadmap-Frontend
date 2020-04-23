@@ -1,6 +1,9 @@
 <template>
   <div>
-    <MindTable :data="tableData"/>
+    <MindTable
+      :tableData="tableData"
+      @reloadData="reloadData"
+    />
   </div>
 </template>
 
@@ -36,12 +39,17 @@ export default {
       return ret;
     },
   },
+  methods: {
+    reloadData() {
+      req('/api/articles/', 'GET').then((res) => {
+        this.articles = res.data;
+      }).catch(() => {
+        errPush(this, '4000', true);
+      });
+    },
+  },
   mounted() {
-    req('/api/articles/', 'GET').then((res) => {
-      this.articles = res.data;
-    }).catch(() => {
-      errPush(this, '4000', true);
-    });
+    this.reloadData();
   },
 };
 </script>

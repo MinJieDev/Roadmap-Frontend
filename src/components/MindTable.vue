@@ -22,12 +22,15 @@
   </div>
 </template>
 <script>
+import _ from 'lodash';
+import errPush from '../components/ErrPush';
 import ItemEditor from './TableItemEditor';
+import { deleteMTdata, createMTdata, changeMTdata } from '../apis/MindTableEditorApis';
 
 export default {
   name: 'MindTable',
   props: {
-    data: {
+    tableData: {
       type: Array,
       required: true,
     },
@@ -36,7 +39,7 @@ export default {
   data() {
     return {
       drawer: false,
-      index: -1,
+      index: 0,
       drawerFormData: {
         title: '',
         url: '',
@@ -99,6 +102,11 @@ export default {
       ],
     };
   },
+  computed: {
+    data() {
+      return _.slice(this.tableData, 0, this.tableData.length);
+    },
+  },
   methods: {
     onView(index) {
       window.console.log('onView', index);
@@ -106,9 +114,14 @@ export default {
       this.openDrawer(index);
     },
     onDelete(index) {
-      this.data.splice(index, 1);
-      window.console.log('onDelete', index);
-      this.$Message.info('Click Delete');
+      deleteMTdata(this.data[index].id)
+        .then((res) => {
+          // this.data.splice(index, 1);
+          this.data = _.slice(this.data, index, index + 1);
+          window.console.log('onDelete', index, this.data);
+          this.$Message.info(`${res.title} Deleted`);
+          this.$emit('reloadData');
+        });
     },
     openDrawer(index) {
       this.index = index;
@@ -129,6 +142,37 @@ export default {
     },
     submitDrawer() {
       this.$Message.info('submit drawer');
+      if (this.index === -1) {
+        createMTdata(
+          this.drawerFormData.title,
+          '',
+          this.drawerFormData.url,
+          this.drawerFormData.note,
+          [])
+          .then(() => {
+            this.$Notice.success('MT data created');
+            this.$emit('reloadData');
+          })
+          .catch(() => {
+            errPush(this, '4000', true);
+          });
+      } else {
+        // (id, title, author, url, ref)
+        changeMTdata(
+          this.data[this.index].id,
+          this.drawerFormData.title,
+          '',
+          this.drawerFormData.url,
+          this.drawerFormData.ref,
+        )
+          .then(() => {
+            this.$Notice.success('MT data change');
+            this.$emit('reloadData');
+          })
+          .catch(() => {
+            errPush(this, '4000', true);
+          });
+      }
       this.drawer = false;
     },
   },
