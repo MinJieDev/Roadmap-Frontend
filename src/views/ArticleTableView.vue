@@ -5,35 +5,43 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import MindTable from '../components/MindTable';
+import { req } from '../apis/util';
+import errPush from '../components/ErrPush';
 
 export default {
   name: 'ArticleTableView',
   components: { MindTable },
   data() {
     return {
-      tableData: [
-        {
-          id: '100',
-          title: 'python',
-          url: 'http://www.wikiwand.com/en/Python_(programming_language)',
-          note: 'Hello Python',
-          children: [
-            {
-              id: '10000',
-              title: 'source',
-              url: 'https://github.com/python/cpython',
-              note: 'original python implementation in c,compiles python code into byte code and interprets the byte code in a evaluation loop',
-            },
-          ],
-        },
-        {
-          id: '101',
-          title: 'help',
-          url: 'https://github.com/vinta/awesome-python',
-          note: 'awesome python',
-        }],
+      articles: [],
     };
+  },
+  computed: {
+    // eslint-disable-next-line vue/return-in-computed-property
+    tableData() {
+      let ret = [];
+      _(this.articles).forEach((article) => {
+        ret = _.concat(ret, {
+          id: article.id,
+          title: article.title,
+          author: article.author,
+          url: article.url,
+          note: article.note,
+          ref: article.ref,
+        });
+      });
+      // console.log(ret.last());
+      return ret;
+    },
+  },
+  mounted() {
+    req('/api/articles/', 'GET').then((res) => {
+      this.articles = res.data;
+    }).catch(() => {
+      errPush(this, '4000', true);
+    });
   },
 };
 </script>
