@@ -29,7 +29,7 @@ export default {
           author: article.author,
           url: article.url,
           note: article.note,
-          ref: article.ref,
+          ref: article.ref, // array
         });
       });
       // console.log(ret.last());
