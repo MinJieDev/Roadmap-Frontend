@@ -52,11 +52,10 @@
       <br>
       <Row :gutter="50" style="margin-left: 30px">
         <Transfer
-          :data="data2"
-          :target-keys="targetKeys2"
+          :data="transferData"
+          :target-keys="targetKeys"
           filterable
-          :filter-method="filterMethod"
-          @on-change="handleChange2"></Transfer>
+          @on-change="handleTransferChange"></Transfer>
       </Row>
 
       <div class="demo-drawer-footer">
@@ -67,6 +66,9 @@
   </div>
 </template>
 <script>
+import _ from 'lodash';
+import { req } from '../apis/util';
+
 export default {
   name: 'ItemEditor',
   props: {
@@ -89,39 +91,31 @@ export default {
         paddingBottom: '53px',
         position: 'static',
       },
-      data2: this.getMockData(),
-      targetKeys2: this.getTargetKeys(),
+      transferData: [],
     };
+  },
+  async mounted() {
+    const data = (await req('/api/articles', 'GET')).data;
+
+    // 'key' is required by iview transfer
+    this.transferData = _.map(data, atc => ({ key: atc.id, label: atc.title }));
+
+    // lazy loading this, just after all article data loaded
+  },
+  computed: {
+    targetKeys() {
+      return this.drawerFormData.article_references;
+    },
   },
   methods: {
     cancelDrawer() {
       this.$emit('cancelDrawer');
     },
     submitDrawer() {
-      this.$emit('submitDrawer');
+      this.$emit('submitDrawer', this.drawerFormData);
     },
-    getMockData() {
-      const mockData = [];
-      for (let i = 1; i <= 20; i += 1) {
-        mockData.push({
-          key: i.toString(),
-          label: `Content ${i}`,
-          description: `The desc of content  ${i}`,
-          disabled: Math.random() * 3 < 1,
-        });
-      }
-      return mockData;
-    },
-    getTargetKeys() {
-      return this.getMockData()
-        .filter(() => Math.random() * 2 > 1)
-        .map(item => item.key);
-    },
-    handleChange2(newTargetKeys) {
-      this.targetKeys2 = newTargetKeys;
-    },
-    filterMethod(data, query) {
-      return data.label.indexOf(query) > -1;
+    handleTransferChange(newTargetKeys) {
+      this.drawerFormData.article_references = newTargetKeys;
     },
   },
 };

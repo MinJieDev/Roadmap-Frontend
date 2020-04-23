@@ -126,13 +126,9 @@ export default {
     openDrawer(index) {
       this.index = index;
       if (this.data[this.index] === undefined) {
-        this.drawerFormData.title = '';
-        this.drawerFormData.url = '';
-        this.drawerFormData.note = '';
+        this.drawerFormData = {};
       } else {
-        this.drawerFormData.title = this.data[this.index].title;
-        this.drawerFormData.url = this.data[this.index].url;
-        this.drawerFormData.note = this.data[this.index].note;
+        this.drawerFormData = this.data[this.index];
       }
       this.drawer = true;
     },
@@ -140,14 +136,14 @@ export default {
       this.$Message.info('cancel drawer');
       this.drawer = false;
     },
-    submitDrawer() {
+    submitDrawer(drawerFormData) {
       this.$Message.info('submit drawer');
       if (this.index === -1) {
         createMTdata(
-          this.drawerFormData.title,
+          drawerFormData.title,
           '',
-          this.drawerFormData.url,
-          this.drawerFormData.note,
+          drawerFormData.url,
+          drawerFormData.note,
           [])
           .then(() => {
             this.$Notice.success('MT data created');
@@ -159,11 +155,11 @@ export default {
       } else {
         // (id, title, author, url, ref)
         changeMTdata(
-          this.data[this.index].id,
-          this.drawerFormData.title,
-          '',
-          this.drawerFormData.url,
-          this.drawerFormData.ref,
+          drawerFormData.id,
+          drawerFormData.title,
+          drawerFormData.author,
+          drawerFormData.url,
+          drawerFormData.article_references,
         )
           .then(() => {
             this.$Notice.success('MT data change');
