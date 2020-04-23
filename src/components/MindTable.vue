@@ -23,8 +23,9 @@
 </template>
 <script>
 import _ from 'lodash';
+import errPush from '../components/ErrPush';
 import ItemEditor from './TableItemEditor';
-import { deleteMTdata } from '../apis/MindTableEditorApis';
+import { deleteMTdata, createMTdata } from '../apis/MindTableEditorApis';
 
 export default {
   name: 'MindTable',
@@ -38,7 +39,7 @@ export default {
   data() {
     return {
       drawer: false,
-      index: -1,
+      index: 0,
       drawerFormData: {
         title: '',
         url: '',
@@ -139,6 +140,19 @@ export default {
     },
     submitDrawer() {
       this.$Message.info('submit drawer');
+      if (this.index === -1) {
+        createMTdata(
+          this.drawerFormData.title,
+          '',
+          this.drawerFormData.url,
+          this.drawerFormData.note,
+          []).then((res) => {
+          this.data = res.data;
+          this.$Notice.success('MT data created');
+        }).catch(() => {
+          errPush(this, '4000', true);
+        });
+      }
       this.drawer = false;
     },
   },
