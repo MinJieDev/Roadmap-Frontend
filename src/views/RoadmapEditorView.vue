@@ -15,7 +15,7 @@
             <FileItem
               :fileName="article.title"
               :display="isFileItemDisplay('1-'+article.id)"
-              @node-added="handleNodeAdded"
+              @node-added="handleArticleNodeAdded"
               @node-deleted="handleNodeDeleted">
             </FileItem>
           </MenuItem>
@@ -50,7 +50,7 @@
       </Input>
       <roadmap
         :nodes="nodes"
-        :connections="connections"
+        :connections="mergedConnections"
         :editable="true"
         :key="repaint"
       />
@@ -183,6 +183,39 @@ export default {
       });
       return ret;
     },
+
+    /**
+     * auto generated reference connections
+     * @type {Array}
+     */
+    refConnections() {
+      let conn = [];
+      let articleNodes = _.filter(this.nodes, node => (node.category === 'article'));
+      articleNodes = _.map(articleNodes, (node) => {
+        const article = _.find(this.articles, atc => (atc.title === node.text));
+        return { ...node, article };
+      });
+      _.forEach(articleNodes, (ni) => {
+        _.forEach(articleNodes, (nj) => {
+          if (_.includes(ni.article.article_references, nj.article.id)) {
+            conn = _.concat(conn, {
+              source: nj.text,
+              target: ni.text,
+              type: 'ref',
+            });
+          }
+        });
+      });
+      return conn;
+    },
+
+    /**
+     * simple connections and reference connections
+     * @returns {*[]}
+     */
+    mergedConnections() {
+      return [...this.connections, ...this.refConnections];
+    },
   },
   mounted() {
     // GET articles for l-sider
@@ -231,7 +264,7 @@ export default {
         fy: (yMin + yMax) / 2,
       };
     },
-    handleNodeAdded(nodeInfo) {
+    handleNodeAdded(nodeInfo, category) {
       const pos = this.getMidPos();
       this.nodes = [...this.nodes,
         {
@@ -240,9 +273,12 @@ export default {
           fx: pos.fx,
           fy: pos.fy,
           nodes: [],
-          category: 'mindmap',
+          category: category || 'mindmap',
         }];
       this.repaintMindMap();
+    },
+    handleArticleNodeAdded(nodeInfo) {
+      this.handleNodeAdded(nodeInfo, 'article');
     },
     handleNodeDeleted(nodeInfo) {
       this.nodes = _.filter(this.nodes, node => node.text !== nodeInfo.nodeName);
