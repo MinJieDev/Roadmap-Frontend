@@ -1,6 +1,8 @@
+/* eslint-disable no-underscore-dangle */
+
+import _ from 'lodash';
 import { drag, event, zoom } from 'd3';
 import { getViewBox } from './dimensions';
-
 /**
  * Bind data to a <TAG>, inside a G element, inside the given root element.
  * Root is a D3 selection, data is an object or array, tag is a string.
@@ -16,10 +18,25 @@ const bindData = (root, data, tag) => (
 /**
  * Bind connections to PATH tags on the given SVG
  */
-export const d3Connections = (svg, connections) => (
-  bindData(svg, connections, 'path')
-    .attr('class', 'mindmap-connection')
-);
+export const d3Connections = (svg, connections) => {
+  window.console.warn('d3Connections is Deprecated. Use d3CustomConnections instead.');
+  return bindData(svg, connections, 'path')
+    .attr('class', 'mindmap-connection');
+};
+
+export const d3CustomConnections = (svg, connections) => {
+  const refConn = _.filter(connections, conn => conn.type === 'ref');
+  const simpleConn = _.filter(connections, conn => conn.type !== 'ref');
+
+  const refSelections = bindData(svg, refConn, 'path')
+    .attr('class', 'mindmap-connection-reference');
+  const simpleSelections = bindData(svg, simpleConn, 'path')
+    .attr('class', 'mindmap-connection');
+
+  const selections = simpleSelections;
+  selections._groups = [_.flattenDeep(_.map([refSelections, simpleSelections], '_groups'))];
+  return selections;
+};
 
 /* eslint-disable no-param-reassign */
 /**

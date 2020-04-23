@@ -17,11 +17,10 @@ import {
 } from 'd3';
 
 import {
-  d3Connections,
   d3Nodes,
   d3Drag,
   d3PanZoom,
-  onTick,
+  onTick, d3CustomConnections,
 } from './utils/d3';
 
 import { getDimensions, getViewBox } from './utils/dimensions';
@@ -108,7 +107,7 @@ export default {
       this.prepareNodes();
 
       // Bind data to SVG elements and set all the properties to render them
-      const connections = d3Connections(svg, this.connections);
+      const connections = d3CustomConnections(svg, this.connections);
       const { nodes, subnodes } = d3Nodes(svg, this.nodes);
 
       nodes.append('title').text(node => node.note);
