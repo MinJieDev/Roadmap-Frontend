@@ -48,7 +48,7 @@
              @on-blur="handleUpdateTitle"
              size="large" style="padding: 12px">
       </Input>
-      <Collapse>
+      <Collapse value="1">
         <Panel name="1">
           Description
           <Icon type="ios-create-outline" @click="handleClkEditDescription" />
