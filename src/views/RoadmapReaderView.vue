@@ -4,6 +4,13 @@
       <div  id="roadmap-title">
         {{roadMapTitle}}
       </div>
+      <Collapse value="1">
+        <Panel name="1">
+          Description
+          <Icon type="ios-create-outline" @click="handleClkEditDescription" />
+          <p slot="content">{{description}}</p>
+        </Panel>
+      </Collapse>
       <roadmap
         :nodes="nodes"
         :connections="mergedConnections"
@@ -37,6 +44,7 @@ export default {
       roadMapId: -1,
       roadMapTitle: 'roadMapTitleDefalt',
       repaint: 1,
+      description: '',
       nodes: [
       ],
       connections: [
@@ -52,6 +60,7 @@ export default {
       this.nodes = JSON.parse(roadmapData.text).nodes;
       this.connections = JSON.parse(roadmapData.text).connections;
       this.roadMapTitle = roadmapData.title;
+      this.description = roadmapData.description;
       this.repaintMindMap();
       this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
     } catch (e) {
