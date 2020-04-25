@@ -15,6 +15,7 @@
             <FileItem
               :fileName="article.title"
               :display="isFileItemDisplay('1-'+article.id)"
+              :articleId="article.id"
               @node-added="handleArticleNodeAdded"
               @node-deleted="handleNodeDeleted">
             </FileItem>
@@ -175,11 +176,16 @@ export default {
     isFileItemDisplay() {
       return itemName => itemName === this.SideMenuActiveItem;
     },
-    simpleNodes() {
+    // if category is article, use "$id" in text
+    savedNodes() {
       let ret = [];
       _(this.nodes).forEach((node) => {
+        let saveTxt = node.text;
+        if (node.category === 'article') {
+          saveTxt = `$${this.getArticleIdByTitle(node.text)}`;
+        }
         ret = [...ret, {
-          text: node.text,
+          text: saveTxt,
           URI: node.URI,
           fx: node.fx,
           fy: node.fy,
@@ -189,12 +195,20 @@ export default {
       });
       return ret;
     },
-    simpleConnections() {
+    savedConnections() {
       let ret = [];
       _(this.connections).forEach((connection) => {
+        let sourceTxt = connection.source.text;
+        let targetTxt = connection.target.text;
+        if (connection.source.category === 'article') {
+          sourceTxt = `$${this.getArticleIdByTitle(sourceTxt)}`;
+        }
+        if (connection.target.category === 'article') {
+          targetTxt = `$${this.getArticleIdByTitle(targetTxt)}`;
+        }
         ret = [...ret, {
-          source: connection.source.text,
-          target: connection.target.text,
+          source: sourceTxt,
+          target: targetTxt,
         }];
       });
       return ret;
@@ -246,8 +260,8 @@ export default {
       this.roadMapId = this.$route.query.selected;
       getRoadmap(this.roadMapId)
         .then((res) => {
-          this.nodes = JSON.parse(res.data.text).nodes;
-          this.connections = JSON.parse(res.data.text).connections;
+          this.nodes = this.toDisplayNodes(JSON.parse(res.data.text).nodes);
+          this.connections = this.toDisplayConnections(JSON.parse(res.data.text).connections);
           this.roadMapTitle = res.data.title;
           this.description = res.data.description;
           this.repaintMindMap();
@@ -359,14 +373,14 @@ export default {
     handleClkSaveRoadmap() {
       // id ==
       if (this.roadMapId === -1) {
-        createRoadmap(this.roadMapTitle, this.simpleNodes, this.simpleConnections).then((res) => {
+        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections).then((res) => {
           this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
           this.roadMapId = res.data.id;
         }).catch(() => {
           errPush(this, '4000', true);
         });
       } else {
-        updateRoadmap(this.roadMapId, this.roadMapTitle, this.simpleNodes, this.simpleConnections)
+        updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
           }).catch(() => {
@@ -387,7 +401,7 @@ export default {
       });
     },
     handleClkCreateRoadmap() {
-      createRoadmap(this.roadMapTitle, this.simpleNodes, this.simpleConnections).then((res) => {
+      createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections).then((res) => {
         this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
         this.roadMapId = res.data.id;
       }).catch(() => {
@@ -423,6 +437,38 @@ export default {
         path: '/reader',
         query: { selected: this.roadMapId },
       });
+    },
+    getArticleIdByTitle(title) {
+      return _(this.articles).find(art => art.title === title).roadMapId;
+    },
+    getArticleById(id) {
+      return _(this.articles).find(art => String(art.id) === String(id));
+    },
+    toDisplayNodes(savedNodes) {
+      let ret = [];
+      _(savedNodes).forEach((node) => {
+        if ((node.text)[0] === '$') {
+          // eslint-disable-next-line no-param-reassign
+          node.text = this.getArticleById(_.split(node.text, '$', 1)[0]).title;
+        }
+        ret = [...ret, node];
+      });
+      return ret;
+    },
+    toDisplayConnections(savedConnections) {
+      let ret = [];
+      _(savedConnections).forEach((conn) => {
+        if ((conn.source)[0] === '$') {
+          // eslint-disable-next-line no-param-reassign
+          conn.source = this.getArticleById(_.split(conn.source, '$', 1)[0]).title;
+        }
+        if ((conn.target)[0] === '$') {
+          // eslint-disable-next-line no-param-reassign
+          conn.target = this.getArticleById(_.split(conn.target, '$', 1)[0]).title;
+        }
+        ret = [...ret, conn];
+      });
+      return ret;
     },
   },
 };
