@@ -209,6 +209,8 @@ export default {
         ret = [...ret, {
           source: sourceTxt,
           target: targetTxt,
+          source_category: connection.source.category,
+          target_category: connection.target.category,
         }];
       });
       return ret;
@@ -380,6 +382,8 @@ export default {
           errPush(this, '4000', true);
         });
       } else {
+        window.console.log(this.connections);
+        window.console.log(this.savedConnections);
         updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
@@ -447,9 +451,17 @@ export default {
     toDisplayNodes(savedNodes) {
       let ret = [];
       _(savedNodes).forEach((node) => {
-        if ((node.text)[0] === '$') {
-          // eslint-disable-next-line no-param-reassign
-          node.text = this.getArticleById(_.split(node.text, '$', 2)[1]).title;
+        if (node.category === 'article') {
+          const art = this.getArticleById(_.split(node.text, '$', 2)[1]);
+          if (typeof art !== 'undefined') {
+            // eslint-disable-next-line no-param-reassign
+            node.text = art.title;
+          } else {
+            // eslint-disable-next-line no-param-reassign
+            node.category = 'mindmap';
+            // eslint-disable-next-line no-param-reassign
+            node.text += ': article not found';
+          }
         }
         ret = [...ret, node];
       });
@@ -458,13 +470,29 @@ export default {
     toDisplayConnections(savedConnections) {
       let ret = [];
       _(savedConnections).forEach((conn) => {
-        if ((conn.source)[0] === '$') {
-          // eslint-disable-next-line no-param-reassign
-          conn.source = this.getArticleById(_.split(conn.source, '$', 2)[1]).title;
+        if (conn.source_category === 'article') {
+          const art = this.getArticleById(_.split(conn.source, '$', 2)[1]);
+          if (typeof art !== 'undefined') {
+            // eslint-disable-next-line no-param-reassign
+            conn.source = art.title;
+          } else {
+            // eslint-disable-next-line no-param-reassign
+            conn.source_category = 'mindmap';
+            // eslint-disable-next-line no-param-reassign
+            conn.source += ': article not found';
+          }
         }
-        if ((conn.target)[0] === '$') {
-          // eslint-disable-next-line no-param-reassign
-          conn.target = this.getArticleById(_.split(conn.target, '$', 2)[1]).title;
+        if (conn.target_category === 'article') {
+          const art = this.getArticleById(_.split(conn.target, '$', 2)[1]);
+          if (typeof art !== 'undefined') {
+            // eslint-disable-next-line no-param-reassign
+            conn.target = art.title;
+          } else {
+            // eslint-disable-next-line no-param-reassign
+            conn.target_category = 'mindmap';
+            // eslint-disable-next-line no-param-reassign
+            conn.target += ': article not found';
+          }
         }
         ret = [...ret, conn];
       });
