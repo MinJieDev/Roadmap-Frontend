@@ -249,28 +249,28 @@ export default {
   },
   mounted() {
     // GET articles for l-sider
-    req('/api/articles/', 'GET').then((res) => {
-      this.articles = res.data;
+    req('/api/articles/', 'GET').then((res1) => {
+      this.articles = res1.data;
+      // load roadMap if has query
+      if ((typeof (this.$route.query.selected) !== 'undefined') &&
+        (String(this.$route.query.selected) !== '-1')) {
+        this.roadMapId = this.$route.query.selected;
+        getRoadmap(this.roadMapId)
+          .then((res) => {
+            this.nodes = this.toDisplayNodes(JSON.parse(res.data.text).nodes);
+            this.connections = this.toDisplayConnections(JSON.parse(res.data.text).connections);
+            this.roadMapTitle = res.data.title;
+            this.description = res.data.description;
+            this.repaintMindMap();
+            this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
+          })
+          .catch(() => {
+            errPush(this, '4000', true);
+          });
+      }
     }).catch(() => {
       errPush(this, '4000', true);
     });
-    // load roadMap if has query
-    if ((typeof (this.$route.query.selected) !== 'undefined') &&
-                (String(this.$route.query.selected) !== '-1')) {
-      this.roadMapId = this.$route.query.selected;
-      getRoadmap(this.roadMapId)
-        .then((res) => {
-          this.nodes = this.toDisplayNodes(JSON.parse(res.data.text).nodes);
-          this.connections = this.toDisplayConnections(JSON.parse(res.data.text).connections);
-          this.roadMapTitle = res.data.title;
-          this.description = res.data.description;
-          this.repaintMindMap();
-          this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
-        })
-        .catch(() => {
-          errPush(this, '4000', true);
-        });
-    }
   },
   methods: {
     getMidPos() {
@@ -439,7 +439,7 @@ export default {
       });
     },
     getArticleIdByTitle(title) {
-      return _(this.articles).find(art => art.title === title).roadMapId;
+      return _(this.articles).find(art => art.title === title).id;
     },
     getArticleById(id) {
       return _(this.articles).find(art => String(art.id) === String(id));
@@ -449,7 +449,7 @@ export default {
       _(savedNodes).forEach((node) => {
         if ((node.text)[0] === '$') {
           // eslint-disable-next-line no-param-reassign
-          node.text = this.getArticleById(_.split(node.text, '$', 1)[0]).title;
+          node.text = this.getArticleById(_.split(node.text, '$', 2)[1]).title;
         }
         ret = [...ret, node];
       });
@@ -460,11 +460,11 @@ export default {
       _(savedConnections).forEach((conn) => {
         if ((conn.source)[0] === '$') {
           // eslint-disable-next-line no-param-reassign
-          conn.source = this.getArticleById(_.split(conn.source, '$', 1)[0]).title;
+          conn.source = this.getArticleById(_.split(conn.source, '$', 2)[1]).title;
         }
         if ((conn.target)[0] === '$') {
           // eslint-disable-next-line no-param-reassign
-          conn.target = this.getArticleById(_.split(conn.target, '$', 1)[0]).title;
+          conn.target = this.getArticleById(_.split(conn.target, '$', 2)[1]).title;
         }
         ret = [...ret, conn];
       });
