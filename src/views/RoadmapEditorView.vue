@@ -382,8 +382,6 @@ export default {
           errPush(this, '4000', true);
         });
       } else {
-        window.console.log(this.connections);
-        window.console.log(this.savedConnections);
         updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
