@@ -3,16 +3,11 @@
     <div class="outer_label">
       <img class="inner_label login_logo" src="../assets/logo.png" alt="No Image">
     </div>
-    <div class="login_form">
-      <i-input :value.sync="userName" placeholder="用户名"
+    <div>
+      <i-input v-model="userName" placeholder="用户名"
                style="margin-left: 10px; margin-bottom: 10px; width: 300px " />
-      <i-input type="password" :value.sync="password" placeholder="密码"
+      <i-input type="password" v-model="password" placeholder="密码"
                style="margin-left: 10px; margin-bottom: 10px; width: 300px "/>
-      <!--button
-        class="login_btn el-button el-button&#45;&#45;primary is-round"
-        type="primary" round>
-        登录
-      </--button> -->
       <i-button
         type="primary"
         @click.native="login">
@@ -25,7 +20,7 @@
 
 <script>
 
-// import { req } from '../apis/util';
+import { reqNoAuth } from '../apis/util';
 import errPush from '../components/ErrPush';
 
 export default {
@@ -33,25 +28,32 @@ export default {
     return {
       userName: '',
       password: '',
-      isBtnLoading: false,
     };
   },
-  created() {
-    if (JSON.parse(localStorage.getItem('user')) && JSON.parse(localStorage.getItem('user')).userName) {
-      this.userName = JSON.parse(localStorage.getItem('user')).userName;
-      this.password = JSON.parse(localStorage.getItem('user')).password;
-    }
-  },
-  computed: {
-    btnText() {
-      if (this.isBtnLoading) return '登录中...';
-      return '登录';
-    },
-  },
+  computed: {},
   methods: {
     login() {
       if (!this.userName || !this.password) {
         errPush(this, '5010');
+      } else {
+        const tempData = {
+          username: this.userName,
+          password: this.password,
+        };
+        reqNoAuth('/login', 'post', tempData)
+          .then(res => this.check_token(res))
+          .catch(res => this.check_token(res))
+        ;
+      }
+    },
+    check_token(response) {
+      if (response.token) {
+        // eslint-disable-next-line no-console
+        console.info(response.token);
+      } else if (response.non_field_errors) {
+        errPush(this, '5020');
+      } else {
+        errPush(this, '4000');
       }
     },
   },

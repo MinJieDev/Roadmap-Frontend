@@ -2,6 +2,7 @@ import axios from 'axios';
 
 // axios with interceptor
 // eslint-disable-next-line no-unused-vars
+// todo : 增加带有auth功能的拦截器.
 const instance = axios.create({
   headers: {
     'Access-Control-Allow-Origin': '*',
@@ -55,7 +56,28 @@ export const req = (url, _method, params = {}, data = {}) => {
 };
 
 // eslint-disable-next-line camelcase,no-undef
-export const req_single = (url, _method, params_or_data = {}) => {
+export const reqSingle = (url, _method, params_or_data = {}) => {
+  const method = _method.toUpperCase();
+  let options;
+  if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
+    options = {
+      method,
+      url,
+      data: params_or_data,
+    };
+  } else {
+    options = {
+      method,
+      url,
+      params: params_or_data,
+    };
+  }
+  return instance(options);
+};
+
+
+// eslint-disable-next-line camelcase
+export const reqNoAuth = (url, _method, params_or_data = {}) => {
   const method = _method.toUpperCase();
   let options;
   if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
