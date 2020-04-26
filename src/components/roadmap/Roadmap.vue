@@ -17,7 +17,8 @@ import {
 } from 'd3';
 
 import {
-  d3Nodes,
+  // d3Nodes,
+  d3CustomNodes,
   d3Drag,
   d3PanZoom,
   onTick, d3CustomConnections,
@@ -108,7 +109,7 @@ export default {
 
       // Bind data to SVG elements and set all the properties to render them
       const connections = d3CustomConnections(svg, this.connections);
-      const { nodes, subnodes } = d3Nodes(svg, this.nodes);
+      const { nodes, subnodes } = d3CustomNodes(svg, this.nodes);
 
       nodes.append('title').text(node => node.note);
 

@@ -44,10 +44,13 @@ export const d3CustomConnections = (svg, connections) => {
  * and set dimensions and html.
  */
 export const d3Nodes = (svg, nodes) => {
+  window.console.warn('d3Nodes is Deprecated. Use d3CustomNodes instead.');
   const selection = svg.append('g')
     .selectAll('foreignObject')
     .data(nodes)
     .enter();
+
+  window.console.log('selection', selection);
 
   const d3nodes = selection
     .append('foreignObject')
@@ -55,6 +58,89 @@ export const d3Nodes = (svg, nodes) => {
     .attr('width', node => node.width + 4)
     .attr('height', node => node.height)
     .html(node => node.html);
+
+  window.console.log(d3nodes);
+
+  const d3subnodes = selection
+    .append('foreignObject')
+    .attr('class', 'mindmap-subnodes')
+    .attr('width', node => node.nodesWidth + 4)
+    .attr('height', node => node.nodesHeight)
+    .html(node => node.nodesHTML);
+
+  return {
+    nodes: d3nodes,
+    subnodes: d3subnodes,
+  };
+};
+
+export const d3CustomNodes = (svg, nodes) => {
+  const articleNode = _.filter(nodes, node => node.category === 'article');
+  const mindmapNode = _.filter(nodes, node => node.category !== 'article');
+
+  window.console.log('articleNode', articleNode);
+  window.console.log('mindmapNode', mindmapNode);
+
+  const articleSelection = svg.append('g')
+    .selectAll('foreignObject')
+    .data(articleNode)
+    .enter();
+
+  const mindmapSelection = svg.append('g')
+    .selectAll('foreignObject')
+    .data(mindmapNode)
+    .enter();
+
+  window.console.log('articleSelection', articleSelection);
+  window.console.log('mindmapSelection', mindmapSelection);
+
+  const d3articleNodes = articleSelection
+    .append('foreignObject')
+    .attr('class', 'article-node')
+    .attr('width', node => node.width + 4)
+    .attr('height', node => node.height)
+    .html(node => node.html);
+
+  const d3mindmapNodes = mindmapSelection
+    .append('foreignObject')
+    .attr('class', 'mindmap-node')
+    .attr('width', node => node.width + 4)
+    .attr('height', node => node.height)
+    .html(node => node.html);
+
+  window.console.log('d3articleNodes', d3articleNodes);
+  window.console.log('d3mindmapNodes', d3mindmapNodes);
+
+  const selection = svg.append('g')
+    .selectAll('foreignObject')
+    .data(nodes)
+    .enter();
+
+  // window.console.log('selection', selection);
+  //
+  // const d3nodes = selection
+  //   .append('foreignObject')
+  //   .attr('class', 'mindmap-node')
+  //   .attr('width', node => node.width + 4)
+  //   .attr('height', node => node.height)
+  //   .html(node => node.html);
+  const d3nodes = d3mindmapNodes;
+  // const tmp = JSON.stringify(d3mindmapNodes);
+  // // const d3nodes = JSON.parse(tmp);
+  // _(d3articleNodes._groups[0]).forEach((node) => {
+  //   window.console.log(node.classList.value);
+  //   node.classList.value = 'article-node';
+  //   node.className.baseVal = 'article-node';
+  //   node.className.animVal = 'article-node';
+  // });
+  window.console.log(_.map([d3mindmapNodes, d3articleNodes], '_groups'));
+  window.console.log(_.flattenDeep(_.map([d3mindmapNodes, d3articleNodes], '_groups')));
+  d3nodes._groups = [_.flattenDeep(_.map([d3mindmapNodes, d3articleNodes], '_groups'))];
+  // d3nodes._groups[0] = [...(d3mindmapNodes._groups[0]), ...(d3articleNodes._groups[0])];
+
+  window.console.log('d3nodes', d3nodes);
+
+  window.console.log('selection', selection);
 
   const d3subnodes = selection
     .append('foreignObject')
