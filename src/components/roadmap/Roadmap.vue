@@ -72,7 +72,12 @@ export default {
      */
     prepareEditor(svg, conns, nodes, subnodes) {
       nodes
-        .attr('class', 'mindmap-node mindmap-node--editable')
+        .attr('class', (node) => {
+          if (node.category === 'article') {
+            return 'article-node article-node--editable';
+          }
+          return 'mindmap-node mindmap-node--editable';
+        })
         .on('dbclick', (node) => {
           node.fx = null;
           node.fy = null;
