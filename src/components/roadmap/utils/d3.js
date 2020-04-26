@@ -102,6 +102,7 @@ export const onTick = (conns, nodes, subnodes) => {
 /*
  * Return drag behavior to use on d3.selection.call().
  */
+// eslint-disable-next-line no-unused-vars
 export const d3Drag = (simulation, svg, nodes) => {
   const dragStart = (node) => {
     if (!event.active) {
