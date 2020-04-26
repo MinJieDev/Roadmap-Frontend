@@ -2,7 +2,7 @@
 
 import _ from 'lodash';
 import { drag, event, zoom } from 'd3';
-import { getViewBox } from './dimensions';
+// import { getViewBox } from './dimensions';
 /**
  * Bind data to a <TAG>, inside a G element, inside the given root element.
  * Root is a D3 selection, data is an object or array, tag is a string.
@@ -121,8 +121,7 @@ export const d3Drag = (simulation, svg, nodes) => {
     if (!event.active) {
       simulation.alphaTarget(0);
     }
-
-    svg.attr('viewBox', getViewBox(nodes.data()));
+    // svg.attr('viewBox', getViewBox(nodes.data()));
   };
 
   return drag()
