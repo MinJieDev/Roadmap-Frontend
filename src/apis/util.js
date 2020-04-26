@@ -53,3 +53,23 @@ export const req = (url, _method, params = {}, data = {}) => {
   }
   return instance(options);
 };
+
+// eslint-disable-next-line camelcase,no-undef
+export const req_single = (url, _method, params_or_data = {}) => {
+  const method = _method.toUpperCase();
+  let options;
+  if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
+    options = {
+      method,
+      url,
+      data: params_or_data,
+    };
+  } else {
+    options = {
+      method,
+      url,
+      params: params_or_data,
+    };
+  }
+  return instance(options);
+};
