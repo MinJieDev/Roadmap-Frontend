@@ -12,7 +12,7 @@
       @click="openDrawer(-1)"
       type="primary"
       style="margin-left: 10px; margin-bottom: 10px ">
-      Create
+      创建文献
     </Button>
     <Table row-key="id"
            :columns="columns"
@@ -22,12 +22,15 @@
   </div>
 </template>
 <script>
+import _ from 'lodash';
+import errPush from '../components/ErrPush';
 import ItemEditor from './TableItemEditor';
+import { deleteMTdata, createMTdata, changeMTdata } from '../apis/MindTableEditorApis';
 
 export default {
   name: 'MindTable',
   props: {
-    data: {
+    tableData: {
       type: Array,
       required: true,
     },
@@ -36,7 +39,7 @@ export default {
   data() {
     return {
       drawer: false,
-      index: -1,
+      index: 0,
       drawerFormData: {
         title: '',
         url: '',
@@ -59,16 +62,38 @@ export default {
           title: 'Note',
           key: 'note',
         },
+        // {
+        //   title: 'Ref',
+        //   key: 'ref',
+        //   tree: true,
+        // },
         {
-          title: 'Ref',
-          key: 'ref',
-          tree: true,
-        }, {
           title: 'Action',
           key: 'action',
-          width: 150,
+          width: 250,
           align: 'center',
           render: (h, params) => h('div', [
+            h('Button', {
+              props: {
+                type: 'success',
+                size: 'small',
+              },
+              style: {
+                marginRight: '5px',
+              },
+              on: {
+                click: () => {
+                  const ref = this.data[params.index].article_references;
+                  const refNames = _.map(ref, id =>
+                    (_.find(this.data, item => (item.id === id)) || { title: 'notitle' })
+                      .title);
+                  this.$Modal.info({
+                    title: '引用列表',
+                    content: `${_.join(refNames, '<br>') || '空'}`,
+                  });
+                },
+              },
+            }, '查看引用'),
             h('Button', {
               props: {
                 type: 'primary',
@@ -82,7 +107,7 @@ export default {
                   this.onView(params.index);
                 },
               },
-            }, 'View'),
+            }, '编辑'),
             h('Button', {
               props: {
                 type: 'error',
@@ -93,33 +118,41 @@ export default {
                   this.onDelete(params.index);
                 },
               },
-            }, 'Delete'),
+            }, '删除'),
           ]),
         },
       ],
     };
   },
+  computed: {
+    data() {
+      return _.slice(this.tableData, 0, this.tableData.length);
+    },
+  },
   methods: {
     onView(index) {
-      window.console.log('onView', index);
       this.$Message.info('Click View');
       this.openDrawer(index);
     },
     onDelete(index) {
-      this.data.splice(index, 1);
-      window.console.log('onDelete', index);
-      this.$Message.info('Click Delete');
+      deleteMTdata(this.data[index].id)
+        .then((res) => {
+          // this.data.splice(index, 1);
+          this.data = _.slice(this.data, index, index + 1);
+          this.$Message.info(`${res.title} Deleted`);
+          this.$emit('reloadData');
+        });
     },
     openDrawer(index) {
       this.index = index;
       if (this.data[this.index] === undefined) {
-        this.drawerFormData.title = '';
-        this.drawerFormData.url = '';
-        this.drawerFormData.note = '';
+        // TODO improve style here
+        this.drawerFormData = {
+          // this is required by iview transfer inside the editor
+          article_references: [],
+        };
       } else {
-        this.drawerFormData.title = this.data[this.index].title;
-        this.drawerFormData.url = this.data[this.index].url;
-        this.drawerFormData.note = this.data[this.index].note;
+        this.drawerFormData = _.clone(this.data[this.index]);
       }
       this.drawer = true;
     },
@@ -127,8 +160,33 @@ export default {
       this.$Message.info('cancel drawer');
       this.drawer = false;
     },
-    submitDrawer() {
+    submitDrawer(drawerFormData) {
       this.$Message.info('submit drawer');
+      if (this.index === -1) {
+        createMTdata(
+          drawerFormData.title,
+          drawerFormData.author,
+          drawerFormData.url,
+          drawerFormData.note,
+          drawerFormData.article_references)
+          .then(() => {
+            this.$Notice.success('MT data created');
+            this.$emit('reloadData');
+          })
+          .catch(() => {
+            errPush(this, '4000', true);
+          });
+      } else {
+        // (id, title, author, url, note, ref)
+        changeMTdata(drawerFormData)
+          .then(() => {
+            this.$Notice.success('MT data change');
+            this.$emit('reloadData');
+          })
+          .catch(() => {
+            errPush(this, '4000', true);
+          });
+      }
       this.drawer = false;
     },
   },

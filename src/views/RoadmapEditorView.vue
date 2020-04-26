@@ -15,7 +15,7 @@
             <FileItem
               :fileName="article.title"
               :display="isFileItemDisplay('1-'+article.id)"
-              @node-added="handleNodeAdded"
+              @node-added="handleArticleNodeAdded"
               @node-deleted="handleNodeDeleted">
             </FileItem>
           </MenuItem>
@@ -48,9 +48,22 @@
              @on-blur="handleUpdateTitle"
              size="large" style="padding: 12px">
       </Input>
-      <mindmap
+      <Collapse value="1">
+        <Panel name="1">
+          Description
+          <Icon type="ios-create-outline" @click="handleClkEditDescription" />
+          <p slot="content">{{description}}</p>
+          <EditRoadmapDescriptionForm
+            :description="description"
+            ref="edit_desc"
+            @description-edited="handleDescEdited"
+            >
+          </EditRoadmapDescriptionForm>
+        </Panel>
+      </Collapse>
+      <roadmap
         :nodes="nodes"
-        :connections="connections"
+        :connections="mergedConnections"
         :editable="true"
         :key="repaint"
       />
@@ -110,16 +123,19 @@ import DelConnectionForm from '../components/DelConnectionForm';
 import AddCommentForm from '../components/AddCommentForm';
 import DelCommentForm from '../components/DelCommentForm';
 import LoadRoadmapForm from '../components/LoadRoadmapForm';
+import EditRoadmapDescriptionForm from '../components/EditRoadmapDescriptionForm';
 import FileItem from '../components/FileItem';
 import { req } from '../apis/util';
 import errPush from '../components/ErrPush';
-import { createRoadmap, updateRoadmap, getRoadmap, updateRoadmapTitle } from '../apis/RoadmapEditorApis';
+import { createRoadmap, updateRoadmap, getRoadmap, updateRoadmapTitle, updateRoadmapDescription } from '../apis/RoadmapEditorApis';
+import Roadmap from '../components/roadmap/Roadmap';
 
 Vue.prototype._ = _;
 
 export default {
   name: 'RoadmapEditor',
   components: {
+    Roadmap,
     AddNodeForm,
     AddConnectionForm,
     DelNodeForm,
@@ -128,6 +144,7 @@ export default {
     DelCommentForm,
     FileItem,
     LoadRoadmapForm,
+    EditRoadmapDescriptionForm,
   },
   data() {
     return {
@@ -138,6 +155,7 @@ export default {
       SideMenuActiveItem: '',
       repaint: 1,
       titleEditable: false,
+      description: '',
       nodes: [
       ],
       connections: [
@@ -181,6 +199,39 @@ export default {
       });
       return ret;
     },
+
+    /**
+     * auto generated reference connections
+     * @type {Array}
+     */
+    refConnections() {
+      let conn = [];
+      let articleNodes = _.filter(this.nodes, node => (node.category === 'article'));
+      articleNodes = _.map(articleNodes, (node) => {
+        const article = _.find(this.articles, atc => (atc.title === node.text));
+        return { ...node, article };
+      });
+      _.forEach(articleNodes, (ni) => {
+        _.forEach(articleNodes, (nj) => {
+          if (_.includes(ni.article.article_references, nj.article.id)) {
+            conn = _.concat(conn, {
+              source: nj.text,
+              target: ni.text,
+              type: 'ref',
+            });
+          }
+        });
+      });
+      return conn;
+    },
+
+    /**
+     * simple connections and reference connections
+     * @returns {*[]}
+     */
+    mergedConnections() {
+      return [...this.connections, ...this.refConnections];
+    },
   },
   mounted() {
     // GET articles for l-sider
@@ -198,6 +249,7 @@ export default {
           this.nodes = JSON.parse(res.data.text).nodes;
           this.connections = JSON.parse(res.data.text).connections;
           this.roadMapTitle = res.data.title;
+          this.description = res.data.description;
           this.repaintMindMap();
           this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
         })
@@ -229,7 +281,7 @@ export default {
         fy: (yMin + yMax) / 2,
       };
     },
-    handleNodeAdded(nodeInfo) {
+    handleNodeAdded(nodeInfo, category) {
       const pos = this.getMidPos();
       this.nodes = [...this.nodes,
         {
@@ -238,9 +290,12 @@ export default {
           fx: pos.fx,
           fy: pos.fy,
           nodes: [],
-          category: 'mindmap',
+          category: category || 'mindmap',
         }];
       this.repaintMindMap();
+    },
+    handleArticleNodeAdded(nodeInfo) {
+      this.handleNodeAdded(nodeInfo, 'article');
     },
     handleNodeDeleted(nodeInfo) {
       this.nodes = _.filter(this.nodes, node => node.text !== nodeInfo.nodeName);
@@ -341,6 +396,17 @@ export default {
     },
     handleClkEditTitle() {
       this.titleEditable = true;
+    },
+    handleClkEditDescription() {
+      this.$refs.edit_desc.handleTrig();
+    },
+    handleDescEdited(newDesc) {
+      this.description = newDesc;
+      updateRoadmapDescription(this.roadMapId, newDesc).then(() => {
+        this.$Notice.success({ title: 'description sent' });
+      }).catch(() => {
+        errPush(this, '4000', true);
+      });
     },
     handleUpdateTitle() {
       if (this.roadMapId !== -1) {
