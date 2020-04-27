@@ -1,6 +1,19 @@
 <template>
   <div>
-    <svg class='mindmap-svg' ref='mountPoint'/>
+    <svg class='mindmap-svg' ref='mountPoint' >
+      <defs>
+        <marker id="arrow"
+                markerUnits="strokeWidth"
+                markerWidth="10"
+                markerHeight="10"
+                viewBox="0 0 12 12"
+                refX="28"
+                refY="6"
+                orient="auto">
+          <path d="M2,2 L10,6 L2,10 L6,6 L2,2" style="fill: #000000;" />
+        </marker>
+      </defs>
+    </svg>
   </div>
 </template>
 <script>
@@ -12,8 +25,8 @@ import {
   forceManyBody,
   forceSimulation,
   select,
-  zoom,
-  zoomIdentity,
+  // zoom,
+  // zoomIdentity,
 } from 'd3';
 
 import {
@@ -72,7 +85,12 @@ export default {
      */
     prepareEditor(svg, conns, nodes, subnodes) {
       nodes
-        .attr('class', 'mindmap-node mindmap-node--editable')
+        .attr('class', (node) => {
+          if (node.category === 'article') {
+            return 'article-node article-node--editable';
+          }
+          return 'mindmap-node mindmap-node--editable';
+        })
         .on('dbclick', (node) => {
           node.fx = null;
           node.fy = null;
@@ -97,9 +115,8 @@ export default {
      */
     renderMap() {
       const svg = select(this.$refs.mountPoint);
-
       // Clear the SVG in case there's stuff already there.
-      svg.selectAll('*').remove();
+      svg.selectAll('g').remove();
 
       // Add subnode group
       svg.append('g').attr('id', 'mindmap-subnodes');
@@ -111,7 +128,6 @@ export default {
       const { nodes, subnodes } = d3Nodes(svg, this.nodes);
 
       nodes.append('title').text(node => node.note);
-
       // Bind nodes and connections to the simulation
       this.simulation
         .nodes(this.nodes)
@@ -137,7 +153,7 @@ export default {
     this.renderMap();
   },
   updated() {
-    zoom().transform(select(this.$refs.mountPoint), zoomIdentity);
+    // zoom().transform(select(this.$refs.mountPoint), zoomIdentity);
 
     this.renderMap();
   },
