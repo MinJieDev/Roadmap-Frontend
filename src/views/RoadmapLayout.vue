@@ -17,25 +17,23 @@
               <Icon type="ios-analytics"></Icon>
               路书管理
             </MenuItem>
-            <MenuItem name="4">
-              <Icon type="ios-paper"></Icon>
-              Item 4
-            </MenuItem>
           </div>
         </Menu>
       </Header>
       <Layout :style="{padding: '0 50px'}">
         <Breadcrumb :style="{margin: '16px 0px'}">
-          <BreadcrumbItem>Home</BreadcrumbItem>
-          <BreadcrumbItem>Components</BreadcrumbItem>
-          <BreadcrumbItem>Layout</BreadcrumbItem>
+          <BreadcrumbItem to="/">Home</BreadcrumbItem>
+          <BreadcrumbItem to="/RoadmapTable">Components</BreadcrumbItem>
+          <BreadcrumbItem to="/editor">Layout</BreadcrumbItem>
         </Breadcrumb>
         <Content :style="{padding: '24px 0', minHeight: '500px', background: '#fff'}">
           <!-- add below the drawing board -->
           <slot></slot>
         </Content>
       </Layout>
-      <Footer class="layout-footer-center"> &copy; footer</Footer>
+      <Footer class="layout-footer-center"> &copy; MinJieDev · 知识路书 <br>
+        <Icon type="logo-github" />
+        <a  href="https://github.com/MinJieDev/Roadmap-Frontend"> Star Us</a> </Footer>
     </Layout>
   </div>
 </template>
