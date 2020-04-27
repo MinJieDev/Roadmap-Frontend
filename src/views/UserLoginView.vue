@@ -1,13 +1,13 @@
 <template>
   <div>
-    <div class="outer_label">
+    <div id="logo-view">
       <img class="inner_label login_logo" src="../assets/logo.png" alt="No Image">
     </div>
-    <div>
+    <div id="login-view">
       <i-input v-model="userName" placeholder="用户名"
-               style="margin-left: 10px; margin-bottom: 10px; width: 300px " />
+               style="width: 300px " />
       <i-input type="password" v-model="password" placeholder="密码"
-               style="margin-left: 10px; margin-bottom: 10px; width: 300px "/>
+               style="width: 300px "/>
       <i-button
         type="primary"
         @click.native="login">
@@ -40,20 +40,21 @@ export default {
           username: this.userName,
           password: this.password,
         };
-        reqNoAuth('/login', 'post', tempData)
-          .then(res => this.check_token(res))
-          .catch(res => this.check_token(res))
+        reqNoAuth('/login/', 'post', tempData)
+          .then(res => this.save_token(res))
+          .catch(res => this.handle_error(res))
         ;
       }
     },
-    check_token(response) {
-      if (response.token) {
-        // eslint-disable-next-line no-console
-        console.info(response.token);
-      } else if (response.non_field_errors) {
+    save_token(response) {
+      // eslint-disable-next-line no-console
+      console.info(response.data.token);
+    },
+    handle_error(response) {
+      if (response.code === 400) {
         errPush(this, '5020');
       } else {
-        errPush(this, '4000');
+        errPush(this, '0000', false, '网络错误', `${response.code}`);
       }
     },
   },
@@ -61,4 +62,14 @@ export default {
 </script>
 
 <style scoped>
+  #logo-view{
+    text-align:center;
+    font-size: 24px;
+    padding: 12px;
+  }
+  #login-view{
+    text-align:center;
+    font-size: 24px;
+    padding: 12px;
+  }
 </style>
