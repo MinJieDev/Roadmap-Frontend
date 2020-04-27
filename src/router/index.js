@@ -10,7 +10,7 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/ArticleTableView.vue'),
   },
   {
-    path: '/login',
+    path: '/user_login',
     name: 'Login',
     component: () => import('../views/UserLoginView.vue'),
   },
