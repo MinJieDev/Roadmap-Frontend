@@ -2,7 +2,7 @@
 
 import _ from 'lodash';
 import { drag, event, zoom } from 'd3';
-import { getViewBox } from './dimensions';
+// import { getViewBox } from './dimensions';
 /**
  * Bind data to a <TAG>, inside a G element, inside the given root element.
  * Root is a D3 selection, data is an object or array, tag is a string.
@@ -102,6 +102,7 @@ export const onTick = (conns, nodes, subnodes) => {
 /*
  * Return drag behavior to use on d3.selection.call().
  */
+// eslint-disable-next-line no-unused-vars
 export const d3Drag = (simulation, svg, nodes) => {
   const dragStart = (node) => {
     if (!event.active) {
@@ -121,8 +122,7 @@ export const d3Drag = (simulation, svg, nodes) => {
     if (!event.active) {
       simulation.alphaTarget(0);
     }
-
-    svg.attr('viewBox', getViewBox(nodes.data()));
+    // svg.attr('viewBox', getViewBox(nodes.data()));
   };
 
   return drag()
