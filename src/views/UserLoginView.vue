@@ -22,6 +22,7 @@
 
 import { reqNoAuth } from '../apis/util';
 import errPush from '../components/ErrPush';
+import store from '../vuex/index';
 
 export default {
   data() {
@@ -49,6 +50,7 @@ export default {
     save_token(response) {
       // eslint-disable-next-line no-console
       console.info(response.data.token);
+      store.commit('pushAuthToken', response.data.token);
     },
     handle_error(response) {
       if (response.code === 400) {
