@@ -23,6 +23,7 @@
 import { reqNoAuth } from '../apis/util';
 import errPush from '../components/ErrPush';
 import store from '../vuex/index';
+import router from '../router';
 
 export default {
   data() {
@@ -51,6 +52,7 @@ export default {
       // eslint-disable-next-line no-console
       console.info(response.data.token);
       store.commit('pushAuthToken', response.data.token);
+      router.push('/');
     },
     handle_error(response) {
       if (response.code === 400) {

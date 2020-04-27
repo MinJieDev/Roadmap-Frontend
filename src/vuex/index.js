@@ -8,7 +8,7 @@ Vue.use(Vuex);
 const state = {
   example: 'vuex is backing up',
   txtArr: ['hdlnb', 'hdlswlp'],
-  authToken: cookie.VueCookies.get('authToken'),
+  authToken: cookie.get('authToken'),
 };
 
 const getters = {
