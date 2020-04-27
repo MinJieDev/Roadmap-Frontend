@@ -1,5 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+// eslint-disable-next-line no-unused-vars
+import cookie from 'vue-cookies';
 
 Vue.use(Vuex);
 
