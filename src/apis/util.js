@@ -55,7 +55,7 @@ export const req = (url, _method, params = {}, data = {}) => {
 };
 
 // eslint-disable-next-line camelcase,no-undef
-export const req_single = (url, _method, params_or_data = {}) => {
+export const reqSingle = (url, _method, params_or_data = {}) => {
   const method = _method.toUpperCase();
   let options;
   if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
