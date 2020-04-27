@@ -15,6 +15,7 @@
             <FileItem
               :fileName="article.title"
               :display="isFileItemDisplay('1-'+article.id)"
+              :articleId="article.id"
               @node-added="handleArticleNodeAdded"
               @node-deleted="handleNodeDeleted">
             </FileItem>
@@ -175,11 +176,16 @@ export default {
     isFileItemDisplay() {
       return itemName => itemName === this.SideMenuActiveItem;
     },
-    simpleNodes() {
+    // if category is article, use "$id" in text
+    savedNodes() {
       let ret = [];
       _(this.nodes).forEach((node) => {
+        let saveTxt = node.text;
+        if (node.category === 'article') {
+          saveTxt = `$${this.getArticleIdByTitle(node.text)}`;
+        }
         ret = [...ret, {
-          text: node.text,
+          text: saveTxt,
           URI: node.URI,
           fx: node.fx,
           fy: node.fy,
@@ -189,12 +195,22 @@ export default {
       });
       return ret;
     },
-    simpleConnections() {
+    savedConnections() {
       let ret = [];
       _(this.connections).forEach((connection) => {
+        let sourceTxt = connection.source.text;
+        let targetTxt = connection.target.text;
+        if (connection.source.category === 'article') {
+          sourceTxt = `$${this.getArticleIdByTitle(sourceTxt)}`;
+        }
+        if (connection.target.category === 'article') {
+          targetTxt = `$${this.getArticleIdByTitle(targetTxt)}`;
+        }
         ret = [...ret, {
-          source: connection.source.text,
-          target: connection.target.text,
+          source: sourceTxt,
+          target: targetTxt,
+          source_category: connection.source.category,
+          target_category: connection.target.category,
         }];
       });
       return ret;
@@ -235,28 +251,28 @@ export default {
   },
   mounted() {
     // GET articles for l-sider
-    req('/api/articles/', 'GET').then((res) => {
-      this.articles = res.data;
+    req('/api/articles/', 'GET').then((res1) => {
+      this.articles = res1.data;
+      // load roadMap if has query
+      if ((typeof (this.$route.query.selected) !== 'undefined') &&
+        (String(this.$route.query.selected) !== '-1')) {
+        this.roadMapId = this.$route.query.selected;
+        getRoadmap(this.roadMapId)
+          .then((res) => {
+            this.nodes = this.toDisplayNodes(JSON.parse(res.data.text).nodes);
+            this.connections = this.toDisplayConnections(JSON.parse(res.data.text).connections);
+            this.roadMapTitle = res.data.title;
+            this.description = res.data.description;
+            this.repaintMindMap();
+            this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
+          })
+          .catch(() => {
+            errPush(this, '4000', true);
+          });
+      }
     }).catch(() => {
       errPush(this, '4000', true);
     });
-    // load roadMap if has query
-    if ((typeof (this.$route.query.selected) !== 'undefined') &&
-                (String(this.$route.query.selected) !== '-1')) {
-      this.roadMapId = this.$route.query.selected;
-      getRoadmap(this.roadMapId)
-        .then((res) => {
-          this.nodes = JSON.parse(res.data.text).nodes;
-          this.connections = JSON.parse(res.data.text).connections;
-          this.roadMapTitle = res.data.title;
-          this.description = res.data.description;
-          this.repaintMindMap();
-          this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
-        })
-        .catch(() => {
-          errPush(this, '4000', true);
-        });
-    }
   },
   methods: {
     getMidPos() {
@@ -359,14 +375,14 @@ export default {
     handleClkSaveRoadmap() {
       // id ==
       if (this.roadMapId === -1) {
-        createRoadmap(this.roadMapTitle, this.simpleNodes, this.simpleConnections).then((res) => {
+        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections).then((res) => {
           this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
           this.roadMapId = res.data.id;
         }).catch(() => {
           errPush(this, '4000', true);
         });
       } else {
-        updateRoadmap(this.roadMapId, this.roadMapTitle, this.simpleNodes, this.simpleConnections)
+        updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
           }).catch(() => {
@@ -387,7 +403,7 @@ export default {
       });
     },
     handleClkCreateRoadmap() {
-      createRoadmap(this.roadMapTitle, this.simpleNodes, this.simpleConnections).then((res) => {
+      createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections).then((res) => {
         this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
         this.roadMapId = res.data.id;
       }).catch(() => {
@@ -423,6 +439,62 @@ export default {
         path: '/reader',
         query: { selected: this.roadMapId },
       });
+    },
+    getArticleIdByTitle(title) {
+      return _(this.articles).find(art => art.title === title).id;
+    },
+    getArticleById(id) {
+      return _(this.articles).find(art => String(art.id) === String(id));
+    },
+    toDisplayNodes(savedNodes) {
+      let ret = [];
+      _(savedNodes).forEach((node) => {
+        if (node.category === 'article') {
+          const art = this.getArticleById(_.split(node.text, '$', 2)[1]);
+          if (typeof art !== 'undefined') {
+            // eslint-disable-next-line no-param-reassign
+            node.text = art.title;
+          } else {
+            // eslint-disable-next-line no-param-reassign
+            node.category = 'mindmap';
+            // eslint-disable-next-line no-param-reassign
+            node.text += ': article not found';
+          }
+        }
+        ret = [...ret, node];
+      });
+      return ret;
+    },
+    toDisplayConnections(savedConnections) {
+      let ret = [];
+      _(savedConnections).forEach((conn) => {
+        if (conn.source_category === 'article') {
+          const art = this.getArticleById(_.split(conn.source, '$', 2)[1]);
+          if (typeof art !== 'undefined') {
+            // eslint-disable-next-line no-param-reassign
+            conn.source = art.title;
+          } else {
+            // eslint-disable-next-line no-param-reassign
+            conn.source_category = 'mindmap';
+            // eslint-disable-next-line no-param-reassign
+            conn.source += ': article not found';
+          }
+        }
+        if (conn.target_category === 'article') {
+          const art = this.getArticleById(_.split(conn.target, '$', 2)[1]);
+          if (typeof art !== 'undefined') {
+            // eslint-disable-next-line no-param-reassign
+            conn.target = art.title;
+          } else {
+            // eslint-disable-next-line no-param-reassign
+            conn.target_category = 'mindmap';
+            // eslint-disable-next-line no-param-reassign
+            conn.target += ': article not found';
+          }
+        }
+        ret = [...ret, conn];
+      });
+      return ret;
     },
   },
 };

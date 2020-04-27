@@ -23,7 +23,7 @@
 <script>
 export default {
   name: 'FileItem',
-  props: ['fileName', 'display'],
+  props: ['fileName', 'display', 'articleId'],
   data() {
     return {
     };
@@ -42,6 +42,7 @@ export default {
       this.$Message.info('Node added');
       this.$emit('node-added', {
         nodeName: this.fileName,
+        articleId: this.articleId,
         nodeUrl: '',
       });
     },
