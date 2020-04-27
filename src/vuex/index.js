@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import cookie from 'vue-cookies';
 
 Vue.use(Vuex);
 
@@ -7,6 +8,7 @@ Vue.use(Vuex);
 const state = {
   example: 'vuex is backing up',
   txtArr: ['hdlnb', 'hdlswlp'],
+  authToken: cookie.get('authToken'),
 };
 
 const getters = {
@@ -24,6 +26,10 @@ const mutations = {
   },
   popTxtArr() {
     state.txtArr.pop();
+  },
+  // eslint-disable-next-line no-shadow
+  pushAuthToken(state, authToken) {
+    state.authToken = authToken;
   },
 };
 

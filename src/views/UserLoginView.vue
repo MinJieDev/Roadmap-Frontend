@@ -1,0 +1,79 @@
+<template>
+  <div>
+    <div id="logo-view">
+      <img class="inner_label login_logo" src="../assets/logo.png" alt="No Image">
+    </div>
+    <div id="login-view">
+      <i-input v-model="userName" placeholder="用户名"
+               style="width: 300px " />
+      <i-input type="password" v-model="password" placeholder="密码"
+               style="width: 300px "/>
+      <i-button
+        type="primary"
+        @click.native="login">
+        登陆
+      </i-button>
+    </div>
+  </div>
+</template>
+
+
+<script>
+
+import { reqNoAuth } from '../apis/util';
+import errPush from '../components/ErrPush';
+import store from '../vuex/index';
+import router from '../router';
+
+export default {
+  data() {
+    return {
+      userName: '',
+      password: '',
+    };
+  },
+  computed: {},
+  methods: {
+    login() {
+      if (!this.userName || !this.password) {
+        errPush(this, '5010');
+      } else {
+        const tempData = {
+          username: this.userName,
+          password: this.password,
+        };
+        reqNoAuth('/login/', 'post', tempData)
+          .then(res => this.save_token(res))
+          .catch(res => this.handle_error(res))
+        ;
+      }
+    },
+    save_token(response) {
+      // eslint-disable-next-line no-console
+      console.info(response.data.token);
+      store.commit('pushAuthToken', response.data.token);
+      router.push('/');
+    },
+    handle_error(response) {
+      if (response.code === 400) {
+        errPush(this, '5020');
+      } else {
+        errPush(this, '0000', false, '网络错误', `${response.code}`);
+      }
+    },
+  },
+};
+</script>
+
+<style scoped>
+  #logo-view{
+    text-align:center;
+    font-size: 24px;
+    padding: 12px;
+  }
+  #login-view{
+    text-align:center;
+    font-size: 24px;
+    padding: 12px;
+  }
+</style>
