@@ -142,3 +142,23 @@ export const reqNoAuth = (url, _method, params_or_data = {}) => {
   }
   return instanceNoAuth(options);
 };
+
+// eslint-disable-next-line camelcase,no-undef
+export const reqSingle = (url, _method, params_or_data = {}) => {
+  const method = _method.toUpperCase();
+  let options;
+  if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
+    options = {
+      method,
+      url,
+      data: params_or_data,
+    };
+  } else {
+    options = {
+      method,
+      url,
+      params: params_or_data,
+    };
+  }
+  return instance(options);
+};
