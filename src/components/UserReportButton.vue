@@ -13,20 +13,22 @@
       @on-close="cancelModal"
       @on-cancel="cancelModal">
       <h3>您的联系方式(E-Mail)</h3>
-      <Input v-model="UserEmail" placeholder="可以不填哦" clearable style="width: 200px" />
+      <Input v-model="UserEmail" placeholder="可以不填哦" clearable style="width: 200px"/>
       <br>
       <br>
       <h3>您对我们网站打多少分？</h3>
-      <Rate allow-half v-model="UserRating" />
+      <Rate allow-half v-model="UserRating"/>
       <br>
       <br>
       <h3>您对我们网站的建议？</h3>
-      <Input v-model="UserSuggest" type="textarea" placeholder="您的建议是我们前进的动力" />
+      <Input v-model="UserSuggest" type="textarea" placeholder="您的建议是我们前进的动力"/>
     </Modal>
   </div>
 </template>
 
 <script>
+import { createFeedBack } from '../apis/FeedBackApis';
+
 export default {
   name: 'UserReportButton',
   data() {
@@ -39,8 +41,12 @@ export default {
   },
   methods: {
     okModal() {
-      // TODO: send to backend
-      this.$Message.info('感谢您的反馈，我们会努力改进 ~');
+      createFeedBack(this.UserEmail, this.UserRating, this.UserSuggest).then(() => {
+        this.$Message.info('感谢您的反馈，我们会努力改进 ~');
+      }).catch(() => {
+        this.$Message.error('网络错误');
+      });
+
       this.cancelModal();
     },
     cancelModal() {
