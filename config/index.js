@@ -18,13 +18,6 @@ module.exports = {
           '^/api': '/api'
         }
       },
-      '/login': {
-        target: 'http://47.94.141.56:8000/',
-        changeOrigin: true,
-        pathRewrite: {
-          '^/login': '/login'
-        }
-      }
     },
 
     // Various Dev Server settings
