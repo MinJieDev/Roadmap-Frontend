@@ -8,7 +8,7 @@
     </Button>
     <Modal
       v-model="UserReportModal"
-      title="用户反馈收集"
+      title="期待您的宝贵建议"
       @on-ok="okModal"
       @on-close="cancelModal"
       @on-cancel="cancelModal">
@@ -40,7 +40,7 @@ export default {
   methods: {
     okModal() {
       // TODO: send to backend
-      this.$Message.info('感谢您的反馈 ~');
+      this.$Message.info('感谢您的反馈，我们会努力改进 ~');
       this.cancelModal();
     },
     cancelModal() {
