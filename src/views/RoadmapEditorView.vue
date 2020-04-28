@@ -21,22 +21,22 @@
             </FileItem>
           </MenuItem>
         </Submenu>
-        <Submenu name="2">
-          <template slot="title">
-            <Icon type="ios-keypad"></Icon>
-            随笔栏
-          </template>
-          <MenuItem name="2-1">Option 1</MenuItem>
-          <MenuItem name="2-2">Option 2</MenuItem>
-        </Submenu>
-        <Submenu name="3">
-          <template slot="title">
-            <Icon type="ios-analytics"></Icon>
-            其它
-          </template>
-          <MenuItem name="3-1">Option 1</MenuItem>
-          <MenuItem name="3-2">Option 2</MenuItem>
-        </Submenu>
+<!--        <Submenu name="2">-->
+<!--          <template slot="title">-->
+<!--            <Icon type="ios-keypad"></Icon>-->
+<!--            随笔栏-->
+<!--          </template>-->
+<!--          <MenuItem name="2-1">Option 1</MenuItem>-->
+<!--          <MenuItem name="2-2">Option 2</MenuItem>-->
+<!--        </Submenu>-->
+<!--        <Submenu name="3">-->
+<!--          <template slot="title">-->
+<!--            <Icon type="ios-analytics"></Icon>-->
+<!--            其它-->
+<!--          </template>-->
+<!--          <MenuItem name="3-1">Option 1</MenuItem>-->
+<!--          <MenuItem name="3-2">Option 2</MenuItem>-->
+<!--        </Submenu>-->
       </Menu>
     </Sider>
     <Content :style="{minHeight: '280px', background: '#fff'}">
@@ -77,6 +77,9 @@
             <Icon type="ios-navigate"></Icon>
             工具栏
           </template>
+          <MenuItem name="save-roadmap" @click.native="handleClkSaveRoadmap">
+            Save Roadmap
+          </MenuItem>
           <AddNodeForm @node-added="handleNodeAdded"></AddNodeForm>
           <AddConnectionForm
             @connection-added="handleConnectionAdded"
@@ -100,14 +103,11 @@
             :node-name-list="nodeNameList"
             :comment-list="commentList">
           </DelCommentForm>
-          <MenuItem name="save-roadmap" @click.native="handleClkSaveRoadmap">
-            Save Roadmap
-          </MenuItem>
-          <LoadRoadmapForm @roadmap-form-loaded="handleClkLoadRoadmap">
-          </LoadRoadmapForm>
-          <MenuItem name="create-roadmap" @click.native="handleClkCreateRoadmap">
-            create Roadmap
-          </MenuItem>
+<!--          <LoadRoadmapForm @roadmap-form-loaded="handleClkLoadRoadmap">-->
+<!--          </LoadRoadmapForm>-->
+<!--          <MenuItem name="create-roadmap" @click.native="handleClkCreateRoadmap">-->
+<!--            create Roadmap-->
+<!--          </MenuItem>-->
         </Submenu>
       </Menu>
     </Sider>
@@ -375,14 +375,16 @@ export default {
     handleClkSaveRoadmap() {
       // id ==
       if (this.roadMapId === -1) {
-        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections).then((res) => {
-          this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
-          this.roadMapId = res.data.id;
-        }).catch(() => {
-          errPush(this, '4000', true);
-        });
+        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections, this.description)
+          .then((res) => {
+            this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
+            this.roadMapId = res.data.id;
+          }).catch(() => {
+            errPush(this, '4000', true);
+          });
       } else {
-        updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections)
+        updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
+          this.description)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
           }).catch(() => {
@@ -418,11 +420,13 @@ export default {
     },
     handleDescEdited(newDesc) {
       this.description = newDesc;
-      updateRoadmapDescription(this.roadMapId, newDesc).then(() => {
-        this.$Notice.success({ title: 'description sent' });
-      }).catch(() => {
-        errPush(this, '4000', true);
-      });
+      if (this.roadMapId !== -1) {
+        updateRoadmapDescription(this.roadMapId, newDesc).then(() => {
+          this.$Notice.success({ title: 'description sent' });
+        }).catch(() => {
+          errPush(this, '4000', true);
+        });
+      }
     },
     handleUpdateTitle() {
       if (this.roadMapId !== -1) {
