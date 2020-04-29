@@ -8,6 +8,10 @@ const routes = [
     path: '/',
     name: 'Home',
     component: () => import(/* webpackChunkName: "about" */ '../views/ArticleTableView.vue'),
+    meta: {
+      name: ['文献目录'],
+      path: ['/'],
+    },
   },
   {
     path: '/user_login',
@@ -18,16 +22,28 @@ const routes = [
     path: '/editor',
     name: 'Editor',
     component: () => import(/* webpackChunkName: "about" */ '../views/RoadmapEditorView.vue'),
+    meta: {
+      name: ['路书目录', '路书编辑页'],
+      path: ['/RoadmapTable', '/editor'],
+    },
   },
   {
     path: '/RoadmapTable',
     name: 'RoadmapTable',
     component: () => import(/* webpackChunkName: "about" */ '../views/RoadmapTableView'),
+    meta: {
+      name: ['路书目录'],
+      path: ['/RoadmapTable'],
+    },
   },
   {
     path: '/reader',
     name: 'Reader',
     component: () => import(/* webpackChunkName: "about" */ '../views/RoadmapReaderView.vue'),
+    meta: {
+      name: ['路书目录', '路书阅览'],
+      path: ['/RoadmapTable', '/reader'],
+    },
   },
 ];
 

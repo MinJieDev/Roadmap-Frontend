@@ -22,9 +22,13 @@
       </Header>
       <Layout :style="{padding: '0 50px'}">
         <Breadcrumb :style="{margin: '16px 0px'}">
-          <BreadcrumbItem to="/">Home</BreadcrumbItem>
-          <BreadcrumbItem to="/RoadmapTable">Components</BreadcrumbItem>
-          <BreadcrumbItem to="/editor">Layout</BreadcrumbItem>
+          <BreadcrumbItem>HomePage</BreadcrumbItem>
+          <BreadcrumbItem
+            :to="path(index)"
+            v-for="(item, index) in $route.meta.name"
+            :key="index">
+            {{ item }}
+          </BreadcrumbItem>
         </Breadcrumb>
         <Content :style="{padding: '24px 0', minHeight: '500px', background: '#fff'}">
           <!-- add below the drawing board -->
@@ -46,7 +50,13 @@ export default {
       title: 'learn anything - programming - programming languages - python',
     };
   },
-  computed: {},
+  computed: {
+    path() {
+      return function f(index) {
+        return this.$route.meta.path[index];
+      };
+    },
+  },
   methods: {},
   created() {
 
