@@ -22,7 +22,7 @@ import _ from 'lodash';
 import ItemEditor from './RoadItemEditor';
 import { req } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
-import { delRoadmap } from '../apis/RoadmapEditorApis';
+import { delRoadmap, getRoadmapShareLink } from '../apis/RoadmapEditorApis';
 
 export default {
   name: 'RoadmapTable',
@@ -42,26 +42,32 @@ export default {
           key: 'title',
           align: 'center',
         },
+        // {
+        //   title: '标签',
+        //   key: 'tag',
+        //   width: 300,
+        //   align: 'center',
+        //   render: (h, params) => {
+        //     const tags = this.data[params.index].tags;
+        //     return h('div', (tags || []).map(item => h('Tag', {
+        //       props: {
+        //         // type: 'border',
+        //         key: item.name,
+        //         name: item.name,
+        //         color: item.color,
+        //         closable: true,
+        //         style: 'margin-left: 3px',
+        //       },
+        //     },
+        //     item.name,
+        //     )));
+        //   },
+        // },
         {
-          title: '标签',
-          key: 'tag',
+          title: '描述',
+          key: 'description',
           width: 300,
           align: 'center',
-          render: (h, params) => {
-            const tags = this.data[params.index].tags;
-            return h('div', (tags || []).map(item => h('Tag', {
-              props: {
-                // type: 'border',
-                key: item.name,
-                name: item.name,
-                color: item.color,
-                closable: true,
-                style: 'margin-left: 3px',
-              },
-            },
-            item.name,
-            )));
-          },
         },
         {
           title: '操作',
@@ -99,6 +105,20 @@ export default {
             }, '修改'),
             h('Button', {
               props: {
+                type: 'success',
+                size: 'small',
+              },
+              style: {
+                marginRight: '10px',
+              },
+              on: {
+                click: () => {
+                  this.onShare(this.roadmaps[params.index].id);
+                },
+              },
+            }, '分享'),
+            h('Button', {
+              props: {
                 type: 'error',
                 size: 'small',
               },
@@ -132,8 +152,10 @@ export default {
         data.push({
           id: index,
           title: roadmap.title,
-          tags: [],
+          // tags: [],
+          description: roadmap.description,
         });
+        window.console.log(roadmap);
       });
       return data;
     },
@@ -144,6 +166,18 @@ export default {
         query: { selected: index },
       });
       this.$Message.info('Click Read');
+    },
+    onShare(index) {
+      window.console.log('onShare', index);
+      getRoadmapShareLink(index).then((res) => {
+        this.$Modal.success({
+          title: '路书分享链接',
+          content: res.data,
+        });
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+      this.$Message.info('Click Share');
     },
     onEdit(index) {
       window.console.log('onEdit', index);

@@ -16,3 +16,5 @@ export const updateRoadmapDescription = (id, roadmapDescription) => req(`/api/ro
   { description: roadmapDescription });
 
 export const delRoadmap = id => req(`/api/road_maps/${id}/`, 'DELETE');
+
+export const getRoadmapShareLink = id => req(`/api/share/roadmap/${id}/`, 'GET');

@@ -234,8 +234,8 @@ export default {
         _.forEach(articleNodes, (nj) => {
           if (_.includes(ni.article.article_references, nj.article.id)) {
             conn = _.concat(conn, {
-              source: nj.text,
-              target: ni.text,
+              source: ni.text,
+              target: nj.text,
               type: 'ref',
             });
           }
