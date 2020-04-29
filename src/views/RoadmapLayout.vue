@@ -3,7 +3,9 @@
     <Layout>
       <Header>
         <Menu mode="horizontal" theme="dark" active-name="1">
-          <div class="layout-logo"></div>
+          <div class="layout-logo">
+            <img src="../assets/HomePageLogo.png" alt="MinJieDev · 知识路书" width=120px>
+          </div>
           <div class="layout-nav">
             <MenuItem name="1" :to="{name: 'Home'}">
               <Icon type="ios-navigate"></Icon>
@@ -74,14 +76,14 @@ export default {
   }
 
   .layout-logo {
-    width: 100px;
+    width: 50px;
     height: 30px;
-    background: #5b6270;
+    background: #515a6e;
     border-radius: 3px;
     float: left;
     position: relative;
-    top: 15px;
-    left: 20px;
+    top: 10px;
+    left: 0px;
   }
 
   .layout-nav {
