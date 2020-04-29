@@ -30,7 +30,7 @@
 <script>
 
 import { reqNoAuth } from '../apis/util';
-import errPush from '../components/ErrPush';
+import { pushErr } from '../components/ErrPush';
 import router from '../router';
 
 export default {
@@ -53,9 +53,9 @@ export default {
   methods: {
     register() {
       if (!this.userName.trim() || !this.password.trim() || !this.email.trim()) {
-        errPush(this, '5010');
+        pushErr(this, '5010');
       } else if (this.check_code.trim() !== `${this.add_a + this.add_b}`) {
-        errPush(this, '0000', 'false', '无效验证码');
+        pushErr(this, '0000', 'false', '无效验证码');
       } else {
         const tempData = {
           username: this.userName.trim(),
@@ -67,12 +67,14 @@ export default {
             this.$Message.success('注册成功');
             router.push('/');
           })
-          .catch(res => this.handle_error(res))
+          .catch((err) => {
+            pushErr(this, err, true);
+          })
         ;
       }
     },
     handle_error(response) {
-      errPush(this, '0000', false, '网络错误', `${response.code}`);
+      pushErr(this, '0000', false, '网络错误', `${response.code}`);
     },
   },
 };
