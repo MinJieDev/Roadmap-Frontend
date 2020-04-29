@@ -62,6 +62,7 @@ instanceAuth.interceptors.response.use(
           return Promise.reject({ code: 400, response: error.response, error }); // 客户端请求有语法错误
         case 401: // 请求未经授权
         {
+          store.commit('pushAuthToken', '');
           router.push({ name: 'Login' });
           return Promise.reject({ code: 401, response: error.response, error });
         }
