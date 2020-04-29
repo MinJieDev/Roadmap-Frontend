@@ -4,6 +4,7 @@
       v-bind:drawer="drawer"
       v-bind:index="index"
       v-bind:drawerFormData="drawerFormData"
+      v-bind:articles="tableData"
       @cancelDrawer="cancelDrawer"
       @submitDrawer="submitDrawer"
     >
@@ -23,7 +24,7 @@
 </template>
 <script>
 import _ from 'lodash';
-import errPush from '../components/ErrPush';
+import { pushErr } from '../components/ErrPush';
 import ItemEditor from './TableItemEditor';
 import { deleteMTdata, createMTdata, changeMTdata } from '../apis/MindTableEditorApis';
 
@@ -173,8 +174,8 @@ export default {
             this.$Notice.success('MT data created');
             this.$emit('reloadData');
           })
-          .catch(() => {
-            errPush(this, '4000', true);
+          .catch((err) => {
+            pushErr(this, err, true);
           });
       } else {
         // (id, title, author, url, note, ref)
@@ -183,8 +184,8 @@ export default {
             this.$Notice.success('MT data change');
             this.$emit('reloadData');
           })
-          .catch(() => {
-            errPush(this, '4000', true);
+          .catch((err) => {
+            pushErr(this, err, true);
           });
       }
       this.drawer = false;

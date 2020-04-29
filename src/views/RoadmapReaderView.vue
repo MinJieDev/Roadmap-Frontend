@@ -26,7 +26,7 @@
 <script>
 import _ from 'lodash';
 import Vue from 'vue';
-import errPush from '../components/ErrPush';
+import { pushErr } from '../components/ErrPush';
 import { getRoadmap } from '../apis/RoadmapEditorApis';
 import { req } from '../apis/util';
 import Roadmap from '../components/roadmap/Roadmap';
@@ -62,8 +62,8 @@ export default {
       this.description = roadmapData.description;
       this.repaintMindMap();
       this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
-    } catch (e) {
-      errPush(this, '4000', true);
+    } catch (err) {
+      pushErr(this, err, true);
     }
   },
   computed: {

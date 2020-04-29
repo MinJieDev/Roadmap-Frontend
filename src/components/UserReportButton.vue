@@ -28,6 +28,7 @@
 
 <script>
 import { createFeedBack } from '../apis/FeedBackApis';
+import { pushErr } from '../components/ErrPush';
 
 export default {
   name: 'UserReportButton',
@@ -43,8 +44,9 @@ export default {
     okModal() {
       createFeedBack(this.UserEmail, this.UserRating, this.UserSuggest).then(() => {
         this.$Message.info('感谢您的反馈，我们会努力改进 ~');
-      }).catch(() => {
-        this.$Message.error('网络错误');
+      }).catch((err) => {
+        pushErr(this, err, true);
+        // this.$Message.error('网络错误');
       });
 
       this.cancelModal();

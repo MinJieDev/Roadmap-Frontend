@@ -130,7 +130,7 @@ import LoadRoadmapForm from '../components/LoadRoadmapForm';
 import EditRoadmapDescriptionForm from '../components/EditRoadmapDescriptionForm';
 import FileItem from '../components/FileItem';
 import { req } from '../apis/util';
-import errPush from '../components/ErrPush';
+import { pushErr } from '../components/ErrPush';
 import { createRoadmap, updateRoadmap, getRoadmap, updateRoadmapTitle, updateRoadmapDescription } from '../apis/RoadmapEditorApis';
 import Roadmap from '../components/roadmap/Roadmap';
 
@@ -269,12 +269,12 @@ export default {
             this.repaintMindMap();
             this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
           })
-          .catch(() => {
-            errPush(this, '4000', true);
+          .catch((err) => {
+            pushErr(this, err, true);
           });
       }
-    }).catch(() => {
-      errPush(this, '4000', true);
+    }).catch((err) => {
+      pushErr(this, err, true);
     });
   },
   methods: {
@@ -382,16 +382,16 @@ export default {
           .then((res) => {
             this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
             this.roadMapId = res.data.id;
-          }).catch(() => {
-            errPush(this, '4000', true);
+          }).catch((err) => {
+            pushErr(this, err, true);
           });
       } else {
         updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
           this.description)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
-          }).catch(() => {
-            errPush(this, '4000', true);
+          }).catch((err) => {
+            pushErr(this, err, true);
           });
       }
     },
@@ -403,16 +403,16 @@ export default {
         this.repaintMindMap();
         this.roadMapId = roadmapInfo.roadmapId;
         this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
-      }).catch(() => {
-        errPush(this, '4000', true);
+      }).catch((err) => {
+        pushErr(this, err, true);
       });
     },
     handleClkCreateRoadmap() {
       createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections).then((res) => {
         this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
         this.roadMapId = res.data.id;
-      }).catch(() => {
-        errPush(this, '4000', true);
+      }).catch((err) => {
+        pushErr(this, err, true);
       });
     },
     handleClkEditTitle() {
@@ -426,8 +426,8 @@ export default {
       if (this.roadMapId !== -1) {
         updateRoadmapDescription(this.roadMapId, newDesc).then(() => {
           this.$Notice.success({ title: 'description sent' });
-        }).catch(() => {
-          errPush(this, '4000', true);
+        }).catch((err) => {
+          pushErr(this, err, true);
         });
       }
     },
@@ -435,8 +435,8 @@ export default {
       if (this.roadMapId !== -1) {
         updateRoadmapTitle(this.roadMapId, this.roadMapTitle).then(() => {
           this.$Notice.success({ title: 'Roadmap Title Updated' });
-        }).catch(() => {
-          errPush(this, '4000', true);
+        }).catch((err) => {
+          pushErr(this, err, true);
         });
       }
       this.titleEditable = false;
