@@ -4,21 +4,38 @@
       <Header>
         <Menu mode="horizontal" theme="dark" active-name="1">
           <div class="layout-logo">
-            <img src="../assets/HomePageLogo.png" alt="MinJieDev · 知识路书" width=120px>
+            <img
+              src="../assets/HomePageLogo.png"
+              alt="MinJieDev · 知识路书"
+              width=120px
+              style="cursor:pointer"
+              @click="goToLogin">
           </div>
           <div class="layout-nav">
-            <MenuItem name="1" :to="{name: 'Home'}">
-              <Icon type="ios-navigate"></Icon>
+            <MenuItem name="1" :to="{name: 'ArticleTable'}">
+              <Icon type="ios-book-outline"></Icon>
               文献管理
             </MenuItem>
-            <MenuItem name="2" :to="{name: 'Editor'}">
-              <Icon type="ios-keypad"></Icon>
-              路书编辑器
-            </MenuItem>
-            <MenuItem name="3" :to="{name: 'RoadmapTable'}">
-              <Icon type="ios-analytics"></Icon>
+            <MenuItem name="2" :to="{name: 'RoadmapTable'}">
+              <Icon type="md-map"></Icon>
               路书管理
             </MenuItem>
+                <div v-if="isLoginStatus() !== true">
+                  <MenuItem
+                    name="3">
+                    <Icon type="md-person"></Icon>
+                    登录
+                  </MenuItem>
+                </div>
+                <div v-if="isLoginStatus() === true">
+                  <MenuItem
+                    name="3"
+                    @click.native="logOut()">
+                    <Icon type="md-person"></Icon>
+                    退出账号
+                  </MenuItem>
+                </div>
+
           </div>
         </Menu>
       </Header>
@@ -50,6 +67,8 @@
 <script>
 
 import UserReportButton from '../components/UserReportButton';
+import router from '../router';
+import { isLogin, logout } from '../apis/User';
 
 export default {
   name: 'RoadmapLayout',
@@ -66,7 +85,22 @@ export default {
       };
     },
   },
-  methods: {},
+  methods: {
+    goToLogin() {
+      if (this.$route.path !== '/') {
+        router.push('/');
+      }
+    },
+    isLoginStatus() {
+      return isLogin();
+    },
+    logOut() {
+      logout();
+      if (this.$route.path !== '/') {
+        router.push('/');
+      }
+    },
+  },
   created() {
 
   },
