@@ -8,10 +8,17 @@
                style="width: 300px " />
       <i-input type="password" v-model="password" placeholder="密码"
                style="width: 300px "/>
+      <br>
+      <br>
       <i-button
         type="primary"
         @click.native="login">
         登录
+      </i-button>
+      <i-button
+        type="success"
+        @click.native="handle_register">
+        注册
       </i-button>
     </div>
   </div>
@@ -52,6 +59,9 @@ export default {
       window.console.info(response.data.token);
       store.commit('pushAuthToken', response.data.token);
       router.push('/ArticleTable');
+    },
+    handle_register() {
+      router.push('/user_register');
     },
     handle_error(response) {
       if (response.code === 400) {
