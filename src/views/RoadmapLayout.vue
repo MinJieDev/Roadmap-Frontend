@@ -3,7 +3,9 @@
     <Layout>
       <Header>
         <Menu mode="horizontal" theme="dark" active-name="1">
-          <div class="layout-logo"></div>
+          <div class="layout-logo">
+            <img src="../assets/HomePageLogo.png" alt="MinJieDev · 知识路书" width=120px>
+          </div>
           <div class="layout-nav">
             <MenuItem name="1" :to="{name: 'Home'}">
               <Icon type="ios-navigate"></Icon>
@@ -17,25 +19,27 @@
               <Icon type="ios-analytics"></Icon>
               路书管理
             </MenuItem>
-            <MenuItem name="4">
-              <Icon type="ios-paper"></Icon>
-              Item 4
-            </MenuItem>
           </div>
         </Menu>
       </Header>
       <Layout :style="{padding: '0 50px'}">
         <Breadcrumb :style="{margin: '16px 0px'}">
-          <BreadcrumbItem>Home</BreadcrumbItem>
-          <BreadcrumbItem>Components</BreadcrumbItem>
-          <BreadcrumbItem>Layout</BreadcrumbItem>
+          <BreadcrumbItem>HomePage</BreadcrumbItem>
+          <BreadcrumbItem
+            :to="path(index)"
+            v-for="(item, index) in $route.meta.name"
+            :key="index">
+            {{ item }}
+          </BreadcrumbItem>
         </Breadcrumb>
         <Content :style="{padding: '24px 0', minHeight: '500px', background: '#fff'}">
           <!-- add below the drawing board -->
           <slot></slot>
         </Content>
       </Layout>
-      <Footer class="layout-footer-center"> &copy; footer</Footer>
+      <Footer class="layout-footer-center"> &copy; MinJieDev · 知识路书 <br>
+        <Icon type="logo-github" />
+        <a  href="https://github.com/MinJieDev/Roadmap-Frontend"> Star Us</a> </Footer>
       <div class="report">
         <UserReportButton>
         </UserReportButton>
@@ -55,7 +59,13 @@ export default {
       title: 'learn anything - programming - programming languages - python',
     };
   },
-  computed: {},
+  computed: {
+    path() {
+      return function f(index) {
+        return this.$route.meta.path[index];
+      };
+    },
+  },
   methods: {},
   created() {
 
@@ -73,14 +83,14 @@ export default {
   }
 
   .layout-logo {
-    width: 100px;
+    width: 50px;
     height: 30px;
-    background: #5b6270;
+    background: #515a6e;
     border-radius: 3px;
     float: left;
     position: relative;
-    top: 15px;
-    left: 20px;
+    top: 10px;
+    left: 0px;
   }
 
   .layout-nav {
