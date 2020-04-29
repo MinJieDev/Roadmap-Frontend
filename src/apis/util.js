@@ -45,7 +45,9 @@ const instanceAuth = axios.create({
 instanceAuth.interceptors.request.use(
   (config) => {
     const configTemp = config;
-    configTemp.headers.Authorization = `JWT ${store.state.authToken}`;
+    if (store.state.authToken) {
+      configTemp.headers.Authorization = `JWT ${store.state.authToken}`;
+    }
     // configTemp.headers.Authorization = store.state.authToken.toString();
     return configTemp;
   },
