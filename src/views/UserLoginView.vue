@@ -42,7 +42,7 @@ export default {
           username: this.userName,
           password: this.password,
         };
-        reqNoAuth('/login/', 'post', tempData)
+        reqNoAuth('/api/login/', 'post', tempData)
           .then(res => this.save_token(res))
           .catch(res => this.handle_error(res))
         ;
