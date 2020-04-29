@@ -171,7 +171,7 @@ export default {
           drawerFormData.note,
           drawerFormData.article_references)
           .then(() => {
-            this.$Notice.success('MT data created');
+            // this.$Message.info('MT data created');
             this.$emit('reloadData');
           })
           .catch((err) => {
@@ -181,7 +181,7 @@ export default {
         // (id, title, author, url, note, ref)
         changeMTdata(drawerFormData)
           .then(() => {
-            this.$Notice.success('MT data change');
+            // this.$Message.info('MT data change');
             this.$emit('reloadData');
           })
           .catch((err) => {
