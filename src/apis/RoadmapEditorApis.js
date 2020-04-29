@@ -2,7 +2,7 @@ import { req } from '../apis/util';
 
 
 export const createRoadmap = (roadmapTitle, nodes, connections, description) => req('/api/road_maps/', 'POST', {},
-  { text: JSON.stringify({ nodes, connections }), title: roadmapTitle, user: 1, description });
+  { text: JSON.stringify({ nodes, connections }), title: roadmapTitle, description });
 
 export const updateRoadmap = (id, roadmapTitle, nodes, connections, description) => req(`/api/road_maps/${id}/`, 'PUT', {},
   { text: JSON.stringify({ nodes, connections }), title: roadmapTitle, description });

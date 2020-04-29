@@ -8,10 +8,17 @@
                style="width: 300px " />
       <i-input type="password" v-model="password" placeholder="密码"
                style="width: 300px "/>
+      <br>
+      <br>
       <i-button
         type="primary"
         @click.native="login">
-        登陆
+        登录
+      </i-button>
+      <i-button
+        type="success"
+        @click.native="handle_register">
+        注册
       </i-button>
     </div>
   </div>
@@ -21,7 +28,7 @@
 <script>
 
 import { reqNoAuth } from '../apis/util';
-import errPush from '../components/ErrPush';
+import { pushErr } from '../components/ErrPush';
 import store from '../vuex/index';
 import router from '../router';
 
@@ -36,7 +43,7 @@ export default {
   methods: {
     login() {
       if (!this.userName || !this.password) {
-        errPush(this, '5010');
+        pushErr(this, '5010');
       } else {
         const tempData = {
           username: this.userName,
@@ -49,16 +56,18 @@ export default {
       }
     },
     save_token(response) {
-      // eslint-disable-next-line no-console
-      console.info(response.data.token);
+      window.console.info(response.data.token);
       store.commit('pushAuthToken', response.data.token);
-      router.push('/');
+      router.push('/ArticleTable');
+    },
+    handle_register() {
+      router.push('/user_register');
     },
     handle_error(response) {
       if (response.code === 400) {
-        errPush(this, '5020');
+        pushErr(this, '5020');
       } else {
-        errPush(this, '0000', false, '网络错误', `${response.code}`);
+        pushErr(this, '0000', false, '网络错误', `${response.code}`);
       }
     },
   },

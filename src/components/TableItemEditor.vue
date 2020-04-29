@@ -85,11 +85,14 @@
 </template>
 <script>
 import _ from 'lodash';
-import { req } from '../apis/util';
 
 export default {
   name: 'ItemEditor',
   props: {
+    articles: {
+      type: Array,
+      required: true,
+    },
     drawer: {
       type: Boolean,
     },
@@ -109,20 +112,14 @@ export default {
         paddingBottom: '53px',
         position: 'static',
       },
-      transferData: [],
     };
-  },
-  async mounted() {
-    const data = (await req('/api/articles', 'GET')).data;
-
-    // 'key' is required by iview transfer
-    this.transferData = _.map(data, atc => ({ key: atc.id, label: atc.title }));
-
-    // lazy loading this, just after all article data loaded
   },
   computed: {
     targetKeys() {
       return this.drawerFormData.article_references;
+    },
+    transferData() {
+      return _.map(this.articles, atc => ({ key: atc.id, label: atc.title }));
     },
   },
   methods: {

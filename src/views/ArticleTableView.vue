@@ -10,7 +10,7 @@
 <script>
 import MindTable from '../components/MindTable';
 import { req } from '../apis/util';
-import errPush from '../components/ErrPush';
+import { pushErr } from '../components/ErrPush';
 
 export default {
   name: 'ArticleTableView',
@@ -24,8 +24,8 @@ export default {
     reloadData() {
       req('/api/articles/', 'GET').then((res) => {
         this.articles = res.data;
-      }).catch(() => {
-        errPush(this, '4000', true);
+      }).catch((err) => {
+        pushErr(this, err, true);
       });
     },
   },
