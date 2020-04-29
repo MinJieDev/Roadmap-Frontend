@@ -64,7 +64,7 @@ export default {
         };
         reqNoAuth('/api/users/', 'post', tempData)
           .then(() => {
-            router.push('/user_login');
+            router.push('/');
           })
           .catch(res => this.handle_error(res))
         ;
