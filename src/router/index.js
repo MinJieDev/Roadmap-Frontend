@@ -6,17 +6,17 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: '/',
-    name: 'Home',
+    name: 'Login',
+    component: () => import('../views/UserLoginView.vue'),
+  },
+  {
+    path: '/articleTable',
+    name: 'ArticleTable',
     component: () => import(/* webpackChunkName: "about" */ '../views/ArticleTableView.vue'),
     meta: {
       name: ['文献目录'],
-      path: ['/'],
+      path: ['/ArticleTable'],
     },
-  },
-  {
-    path: '/user_login',
-    name: 'Login',
-    component: () => import('../views/UserLoginView.vue'),
   },
   {
     path: '/user_register',
@@ -33,7 +33,7 @@ const routes = [
     },
   },
   {
-    path: '/RoadmapTable',
+    path: '/RoadMapTable',
     name: 'RoadmapTable',
     component: () => import(/* webpackChunkName: "about" */ '../views/RoadmapTableView'),
     meta: {

@@ -56,10 +56,9 @@ export default {
       }
     },
     save_token(response) {
-      // eslint-disable-next-line no-console
-      console.info(response.data.token);
+      window.console.info(response.data.token);
       store.commit('pushAuthToken', response.data.token);
-      router.push('/');
+      router.push('/ArticleTable');
     },
     handle_register() {
       router.push('/user_register');
