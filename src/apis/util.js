@@ -45,7 +45,8 @@ const instanceAuth = axios.create({
 instanceAuth.interceptors.request.use(
   (config) => {
     const configTemp = config;
-    configTemp.headers.Authorization = store.state.authToken;
+    configTemp.headers.Authorization = `JWT ${store.state.authToken}`;
+    // configTemp.headers.Authorization = store.state.authToken.toString();
     return configTemp;
   },
   error => Promise.reject(error),
@@ -61,6 +62,7 @@ instanceAuth.interceptors.response.use(
           return Promise.reject({ code: 400, response: error.response, error }); // 客户端请求有语法错误
         case 401: // 请求未经授权
         {
+          store.commit('pushAuthToken', '');
           router.push({ name: 'Login' });
           return Promise.reject({ code: 401, response: error.response, error });
         }
