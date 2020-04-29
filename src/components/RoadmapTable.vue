@@ -22,7 +22,7 @@ import _ from 'lodash';
 import ItemEditor from './RoadItemEditor';
 import { req } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
-import { delRoadmap, getRoadmapShareLink } from '../apis/RoadmapEditorApis';
+import { delRoadmap, postRoadmapShareLink } from '../apis/RoadmapEditorApis';
 
 export default {
   name: 'RoadmapTable',
@@ -169,10 +169,10 @@ export default {
     },
     onShare(index) {
       window.console.log('onShare', index);
-      getRoadmapShareLink(index).then((res) => {
+      postRoadmapShareLink(index).then((res) => {
         this.$Modal.success({
           title: '路书分享链接',
-          content: res.data,
+          content: `http://47.94.141.56/reader?sharedId=${res.data.share_id}/`,
         });
       }).catch((err) => {
         pushErr(this, err, true);

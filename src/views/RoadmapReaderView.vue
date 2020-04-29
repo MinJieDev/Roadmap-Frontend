@@ -17,7 +17,7 @@
         :key="repaint"
       />
     </Content>
-    <Sider hide-trigger :style="{background: '#fff'}">
+    <Sider hide-trigger :style="{background: '#fff'}" v-if="sharedId===-1">
       <Button type="success" @click="handleClkEdit" id="b-ed">Edit</Button>
     </Sider>
   </Layout>
@@ -27,7 +27,7 @@
 import _ from 'lodash';
 import Vue from 'vue';
 import { pushErr } from '../components/ErrPush';
-import { getRoadmap } from '../apis/RoadmapEditorApis';
+import { getRoadmap, getRoadmapShareLink } from '../apis/RoadmapEditorApis';
 import { req } from '../apis/util';
 import Roadmap from '../components/roadmap/Roadmap';
 
@@ -41,6 +41,7 @@ export default {
   data() {
     return {
       roadMapId: -1,
+      sharedId: -1,
       roadMapTitle: 'roadMapTitleDefalt',
       repaint: 1,
       description: '',
@@ -52,18 +53,35 @@ export default {
     };
   },
   async mounted() {
-    this.roadMapId = this.$route.query.selected;
-    try {
-      this.articles = (await req('/api/articles/', 'GET')).data;
-      const roadmapData = (await getRoadmap(this.roadMapId)).data;
-      this.nodes = this.toDisplayNodes(JSON.parse(roadmapData.text).nodes);
-      this.connections = this.toDisplayConnections(JSON.parse(roadmapData.text).connections);
-      this.roadMapTitle = roadmapData.title;
-      this.description = roadmapData.description;
-      this.repaintMindMap();
-      this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
-    } catch (err) {
-      pushErr(this, err, true);
+    // share
+    if (!this.$route.query.selected) {
+      this.sharedId = this.$route.query.sharedId;
+      try {
+        this.articles = (await req('/api/articles/', 'GET')).data;
+        const roadmapData = (await getRoadmapShareLink(this.sharedId)).data;
+        this.nodes = this.toDisplayNodes(JSON.parse(roadmapData.text).nodes);
+        this.connections = this.toDisplayConnections(JSON.parse(roadmapData.text).connections);
+        this.roadMapTitle = roadmapData.title;
+        this.description = roadmapData.description;
+        this.repaintMindMap();
+        this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
+      } catch (err) {
+        pushErr(this, err, true);
+      }
+    } else {
+      this.roadMapId = this.$route.query.selected;
+      try {
+        this.articles = (await req('/api/articles/', 'GET')).data;
+        const roadmapData = (await getRoadmap(this.roadMapId)).data;
+        this.nodes = this.toDisplayNodes(JSON.parse(roadmapData.text).nodes);
+        this.connections = this.toDisplayConnections(JSON.parse(roadmapData.text).connections);
+        this.roadMapTitle = roadmapData.title;
+        this.description = roadmapData.description;
+        this.repaintMindMap();
+        this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
+      } catch (err) {
+        pushErr(this, err, true);
+      }
     }
   },
   computed: {
