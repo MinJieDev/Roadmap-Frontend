@@ -21,7 +21,7 @@
 import _ from 'lodash';
 import ItemEditor from './RoadItemEditor';
 import { req } from '../apis/util';
-import errPush from './ErrPush';
+import { pushErr } from '../components/ErrPush';
 import { delRoadmap } from '../apis/RoadmapEditorApis';
 
 export default {
@@ -119,8 +119,8 @@ export default {
     req('/api/road_maps/', 'GET').then((res) => {
       this.roadmaps = res.data;
       this.data = this.getData();
-    }).catch(() => {
-      errPush(this, '4000', true);
+    }).catch((err) => {
+      pushErr(this, err, true);
     });
   },
   methods: {
@@ -162,8 +162,8 @@ export default {
         this.data.splice(posInTable, 1);
         window.console.log('onDelete', index);
         this.$Message.info(`${res.data.id} Deleted`);
-      }).catch(() => {
-        errPush(this, '4000', true);
+      }).catch((err) => {
+        pushErr(this, err, true);
       });
     },
     cancelDrawer() {

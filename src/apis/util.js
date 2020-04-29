@@ -17,15 +17,15 @@ instanceNoAuth.interceptors.response.use(
       // code: 错误状态码， response：错误响应信息，error：原始错误信息
       switch (error.response.status) {
         case 400:
-          return Promise.reject({ code: 400, response: error.response, error }); // 客户端请求有语法错误
+          return Promise.reject({ code: 4000, response: error.response, error }); // 客户端请求有语法错误
         case 401:
-          return Promise.reject({ code: 401, response: error.response, error }); // 请求未经授权
+          return Promise.reject({ code: 4010, response: error.response, error }); // 请求未经授权
         case 404:
-          return Promise.reject({ code: 404, response: error.response, error }); // 页面未找到
+          return Promise.reject({ code: 4040, response: error.response, error }); // 页面未找到
         case 403:
-          return Promise.reject({ code: 403, response: error.response, error }); // Bad Gateway
+          return Promise.reject({ code: 4030, response: error.response, error }); // Bad Gateway
         case 500:
-          return Promise.reject({ code: 500, response: error.response, error }); // Server Error
+          return Promise.reject({ code: 5000, response: error.response, error }); // Server Error
         default:
           return Promise.reject({ code: -1, response: error.response, error }); // 不常见错误
       }
@@ -59,19 +59,19 @@ instanceAuth.interceptors.response.use(
       // code: 错误状态码， response：错误响应信息，error：原始错误信息
       switch (error.response.status) {
         case 400:
-          return Promise.reject({ code: 400, response: error.response, error }); // 客户端请求有语法错误
+          return Promise.reject({ code: 4000, response: error.response, error }); // 客户端请求有语法错误
         case 401: // 请求未经授权
         {
           store.commit('pushAuthToken', '');
           router.push({ name: 'Login' });
-          return Promise.reject({ code: 401, response: error.response, error });
+          return Promise.reject({ code: 4010, response: error.response, error });
         }
         case 404:
-          return Promise.reject({ code: 404, response: error.response, error }); // 页面未找到
+          return Promise.reject({ code: 4040, response: error.response, error }); // 页面未找到
         case 403:
-          return Promise.reject({ code: 403, response: error.response, error }); // Bad Gateway
+          return Promise.reject({ code: 4030, response: error.response, error }); // Bad Gateway
         case 500:
-          return Promise.reject({ code: 500, response: error.response, error }); // Server Error
+          return Promise.reject({ code: 5000, response: error.response, error }); // Server Error
         default:
           return Promise.reject({ code: -1, response: error.response, error }); // 不常见错误
       }

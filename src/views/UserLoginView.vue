@@ -28,7 +28,7 @@
 <script>
 
 import { reqNoAuth } from '../apis/util';
-import errPush from '../components/ErrPush';
+import { pushErr } from '../components/ErrPush';
 import store from '../vuex/index';
 import router from '../router';
 
@@ -43,7 +43,7 @@ export default {
   methods: {
     login() {
       if (!this.userName || !this.password) {
-        errPush(this, '5010');
+        pushErr(this, '5010');
       } else {
         const tempData = {
           username: this.userName,
@@ -65,9 +65,9 @@ export default {
     },
     handle_error(response) {
       if (response.code === 400) {
-        errPush(this, '5020');
+        pushErr(this, '5020');
       } else {
-        errPush(this, '0000', false, '网络错误', `${response.code}`);
+        pushErr(this, '0000', false, '网络错误', `${response.code}`);
       }
     },
   },
