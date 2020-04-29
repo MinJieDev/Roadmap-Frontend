@@ -30,6 +30,7 @@ const mutations = {
   // eslint-disable-next-line no-shadow
   pushAuthToken(state, authToken) {
     state.authToken = authToken;
+    cookie.set('authToken', authToken);
   },
 };
 
