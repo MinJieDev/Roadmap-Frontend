@@ -1,7 +1,7 @@
 <template>
   <div>
     <div id="logo-view">
-      <img class="inner_label login_logo" src="../assets/logo.png" alt="No Image">
+      <img class="inner_label login_logo" src="../assets/LoginLogo.png" alt="No Image">
     </div>
     <div id="login-view">
       <i-input v-model="userName" placeholder="用户名"
