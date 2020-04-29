@@ -70,7 +70,10 @@
       />
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}">
-      <Button type="info" @click="handleClkReadOnly" id="b-ro">Read Only</Button>
+      <Button type="info" @click="handleClkReadOnly"
+              :disabled="roadMapId===-1" id="b-ro">
+        Read Only
+      </Button>
       <Menu active-name="1-2" theme="dark" width="auto" :open-names="['1']">
         <Submenu name="1">
           <template slot="title">
