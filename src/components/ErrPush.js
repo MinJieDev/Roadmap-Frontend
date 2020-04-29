@@ -72,10 +72,15 @@ export const pushErr = (obj, err, useModal = false, errTitle = '', errContent = 
   let title = '';
   let content = '';
   let errCode = '';
+  let response = '';
   if (typeof err === 'string') {
     errCode = err;
   } else {
     errCode = String(err.code);
+    response = err.response.data.detail;
+    if (!response) {
+      response = err.response.data.username;
+    }
   }
   if (errTitle === '' && errContent === '') {
     if (errCode === '0001') {
@@ -123,13 +128,13 @@ export const pushErr = (obj, err, useModal = false, errTitle = '', errContent = 
     if (modalType === 'info') {
       obj.$Modal.info({
         title,
-        content,
+        content: `${content}</br>${response}`,
         okText: '知道了~',
       });
     } else {
       obj.$Modal.error({
         title,
-        content,
+        content: `${content}</br>${response}`,
         okText: '知道了~',
       });
     }

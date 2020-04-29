@@ -38,7 +38,7 @@
 <script>
 
 import { reqNoAuth } from '../apis/util';
-import errPush from '../components/ErrPush';
+import { pushErr } from '../components/ErrPush';
 import router from '../router';
 
 export default {
@@ -63,13 +63,13 @@ export default {
     register() {
       // eslint-disable-next-line max-len
       if (!this.userName.trim() || !this.password.trim() || !this.email.trim() || !this.password_twice.trim()) {
-        errPush(this, '5010');
+        pushErr(this, '5010');
       } else if (this.check_code.trim() !== `${this.add_a + this.add_b}`) {
-        errPush(this, '0000', true, '无效验证码');
+        pushErr(this, '0000', true, '无效验证码');
       } else {
         // 双重密码输入验证
         if (this.password !== this.password_twice) {
-          errPush(this, '0000', true, '密码输入不一致');
+          pushErr(this, '0000', true, '密码输入不一致');
           return;
         }
         const tempData = {
@@ -84,12 +84,14 @@ export default {
             });
             router.push('/');
           })
-          .catch(res => this.handle_error(res))
+          .catch((err) => {
+            pushErr(this, err, true);
+          })
         ;
       }
     },
     handle_error(response) {
-      errPush(this, '0000', false, '网络错误', `${response.code}`);
+      pushErr(this, '0000', false, '网络错误', `${response.code}`);
     },
     forget_password() {
       this.$Modal.info({
