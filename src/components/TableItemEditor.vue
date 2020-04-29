@@ -53,6 +53,16 @@
         </Col>
       </Row>
       <br>
+      <h3>期刊/会议</h3>
+      <br>
+      <Row :gutter="50" style="margin-left: 20px; margin-right: 20px">
+        <Input
+          v-model="drawerFormData.journal"
+          clearable
+          placeholder="请输入文章所属的期刊/会议">
+        </Input>
+      </Row>
+      <br>
       <h3>笔记</h3>
       <br>
       <Row :gutter="50" style="margin-left: 20px; margin-right: 20px">
