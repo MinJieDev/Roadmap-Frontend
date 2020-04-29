@@ -7,4 +7,4 @@ export const logout = () => {
   router.push('/user_login');
 };
 
-export const isLogin = () => store.state.authToken === '' || store.state.authToken === undefined;
+export const isLogin = () => !(store.state.authToken === '' || store.state.authToken === undefined);
