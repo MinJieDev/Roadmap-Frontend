@@ -173,6 +173,7 @@ export default {
         this.$Modal.success({
           title: '路书分享链接',
           content: `http://47.94.141.56/reader?sharedId=${res.data.share_id}/`,
+          width: '700',
         });
       }).catch((err) => {
         pushErr(this, err, true);
