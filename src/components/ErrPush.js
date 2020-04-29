@@ -32,7 +32,7 @@ export default function pushError(obj, errCode, useModal = false, errTitle = '',
       content = '未登陆或没有访问权限';
     } else if (errCode === '5010') {
       title = 'Incomplete Input';
-      content = '用户名/密码输入不完整';
+      content = '输入不完整';
     } else if (errCode === '5020') {
       title = 'Login Fail';
       content = '登陆失败';
