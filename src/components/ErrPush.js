@@ -31,6 +31,9 @@ export default function pushError(obj, errCode, useModal = false, errTitle = '',
     } else if (errCode === '4010') {
       title = 'Unauthorized Exception';
       content = '未登陆或没有访问权限';
+    } else if (errCode === '5000') {
+      title = 'Server Error';
+      content = '服务器内部错误';
     } else if (errCode === '5010') {
       title = 'Incomplete Input';
       content = '输入不完整';

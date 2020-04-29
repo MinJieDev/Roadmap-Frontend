@@ -64,6 +64,7 @@ export default {
         };
         reqNoAuth('/api/users/', 'post', tempData)
           .then(() => {
+            this.$Message.success('注册成功');
             router.push('/');
           })
           .catch(res => this.handle_error(res))
