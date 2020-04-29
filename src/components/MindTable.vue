@@ -50,18 +50,27 @@ export default {
         {
           title: 'Title',
           key: 'title',
+          width: 230,
         },
         {
           title: 'Author',
           key: 'author',
+          width: 150,
         },
         {
           title: 'Url',
           key: 'url',
+          width: 200,
+        },
+        {
+          title: 'Journal/Conference',
+          key: 'journal',
+          width: 200,
         },
         {
           title: 'Note',
           key: 'note',
+          // width: 300,
         },
         // {
         //   title: 'Ref',
@@ -169,6 +178,7 @@ export default {
           drawerFormData.author,
           drawerFormData.url,
           drawerFormData.note,
+          drawerFormData.journal,
           drawerFormData.article_references)
           .then(() => {
             // this.$Message.info('MT data created');
@@ -178,7 +188,7 @@ export default {
             pushErr(this, err, true);
           });
       } else {
-        // (id, title, author, url, note, ref)
+        // (id, title, author, url, note, journal, ref)
         changeMTdata(drawerFormData)
           .then(() => {
             // this.$Message.info('MT data change');
