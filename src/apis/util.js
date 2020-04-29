@@ -61,7 +61,7 @@ instanceAuth.interceptors.response.use(
           return Promise.reject({ code: 400, response: error.response, error }); // 客户端请求有语法错误
         case 401: // 请求未经授权
         {
-          router.push('/user_login');
+          router.push({ name: 'Login' });
           return Promise.reject({ code: 401, response: error.response, error });
         }
         case 404:
@@ -141,24 +141,4 @@ export const reqNoAuth = (url, _method, params_or_data = {}) => {
     };
   }
   return instanceNoAuth(options);
-};
-
-// eslint-disable-next-line camelcase,no-undef
-export const reqSingle = (url, _method, params_or_data = {}) => {
-  const method = _method.toUpperCase();
-  let options;
-  if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
-    options = {
-      method,
-      url,
-      data: params_or_data,
-    };
-  } else {
-    options = {
-      method,
-      url,
-      params: params_or_data,
-    };
-  }
-  return instance(options);
 };

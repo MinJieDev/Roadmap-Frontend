@@ -36,13 +36,20 @@
         </Content>
       </Layout>
       <Footer class="layout-footer-center"> &copy; footer</Footer>
+      <div class="report">
+        <UserReportButton>
+        </UserReportButton>
+      </div>
     </Layout>
   </div>
 </template>
 <script>
 
+import UserReportButton from '../components/UserReportButton';
+
 export default {
   name: 'RoadmapLayout',
+  components: { UserReportButton },
   data() {
     return {
       title: 'learn anything - programming - programming languages - python',
@@ -84,5 +91,11 @@ export default {
 
   .layout-footer-center {
     text-align: center;
+  }
+
+  .report{
+    position:fixed;
+    bottom: 80px;
+    right: 20px;
   }
 </style>
