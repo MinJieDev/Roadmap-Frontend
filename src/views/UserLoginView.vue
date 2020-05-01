@@ -51,7 +51,9 @@ export default {
         };
         reqNoAuth('/api/login/', 'post', tempData)
           .then(res => this.save_token(res))
-          .catch(res => this.handle_error(res))
+          .catch((err) => {
+            pushErr(this, err, true);
+          })
         ;
       }
     },
@@ -67,7 +69,8 @@ export default {
       if (response.code === 400) {
         pushErr(this, '5020');
       } else {
-        pushErr(this, '0000', false, '网络错误', `${response.code}`);
+        pushErr(this, response, true);
+        // pushErr(this, '0000', false, '网络错误', `${response.code}`);
       }
     },
   },
