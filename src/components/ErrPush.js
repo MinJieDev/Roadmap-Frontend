@@ -80,6 +80,12 @@ export const pushErr = (obj, err, useModal = false, errTitle = '', errContent = 
     errCode = String(err.code);
     response = err.response.data.detail;
     if (!response) {
+      response = err.response.data.non_field_errors;
+      if (response) {
+        response = '用户名或密码错误';
+      }
+    }
+    if (!response) {
       response = err.response.data.username;
       if (response) {
         // eslint-disable-next-line no-param-reassign
