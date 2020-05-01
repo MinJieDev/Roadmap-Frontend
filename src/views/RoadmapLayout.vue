@@ -22,7 +22,8 @@
             </MenuItem>
                 <div v-if="isLoginStatus() !== true">
                   <MenuItem
-                    name="3">
+                    name="3"
+                    @click.native="goToLogin()">
                     <Icon type="md-person"></Icon>
                     登录
                   </MenuItem>

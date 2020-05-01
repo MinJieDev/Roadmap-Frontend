@@ -52,7 +52,7 @@ export default {
         reqNoAuth('/api/login/', 'post', tempData)
           .then(res => this.save_token(res))
           .catch((err) => {
-            pushErr(this, err, true);
+            pushErr(this, err, true, '登陆失败', '用户名密码错误');
           })
         ;
       }

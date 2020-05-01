@@ -80,13 +80,13 @@ export const pushErr = (obj, err, useModal = false, errTitle = '', errContent = 
     errCode = String(err.code);
     response = err.response.data.detail;
     if (!response) {
-      response = err.response.data.non_field_errors;
-      if (response) {
-        response = '用户名或密码错误';
-      }
-    }
-    if (!response) {
       response = err.response.data.username;
+      if (response) {
+        // eslint-disable-next-line no-param-reassign
+        errTitle = '注册错误';
+        // eslint-disable-next-line no-param-reassign
+        errContent = '该用户名已存在';
+      }
     }
   }
   if (errTitle === '' && errContent === '') {
@@ -135,13 +135,13 @@ export const pushErr = (obj, err, useModal = false, errTitle = '', errContent = 
     if (modalType === 'info') {
       obj.$Modal.info({
         title,
-        content: `${content}</br>${response}`,
+        content: `${content}</br>${typeof response !== 'undefined' ? response : ''}`,
         okText: '知道了~',
       });
     } else {
       obj.$Modal.error({
         title,
-        content: `${content}</br>${response}`,
+        content: `${content}</br>${typeof response !== 'undefined' ? response : ''}`,
         okText: '知道了~',
       });
     }
