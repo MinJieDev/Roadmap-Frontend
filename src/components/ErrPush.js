@@ -73,11 +73,18 @@ export const pushErr = (obj, err, useModal = false, errTitle = '', errContent = 
   let content = '';
   let errCode = '';
   let response = '';
+  window.console.log(err);
   if (typeof err === 'string') {
     errCode = err;
   } else {
     errCode = String(err.code);
     response = err.response.data.detail;
+    if (!response) {
+      response = err.response.data.non_field_errors;
+      if (response) {
+        response = '用户名或密码错误';
+      }
+    }
     if (!response) {
       response = err.response.data.username;
     }

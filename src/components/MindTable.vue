@@ -15,6 +15,23 @@
       style="margin-left: 10px; margin-bottom: 10px ">
       创建文献
     </Button>
+    <Button
+      @click="openBibTexModal"
+      type="success"
+      style="margin-left: 10px; margin-bottom: 10px ">
+      导入BibTex
+    </Button>
+    <Modal
+      v-model="BibtexModal"
+      title="导入BibTex"
+      @on-ok="submitBibModal"
+      @on-cancel="cancelBibModal">
+      <Input
+        v-model="BibValue"
+        type="textarea"
+        :autosize="{minRows: 6}"
+        placeholder="请输入您的BibTex  (支持批量导入) " />
+    </Modal>
     <Table row-key="id"
            :columns="columns"
            :data="data"
@@ -24,6 +41,7 @@
 </template>
 <script>
 import _ from 'lodash';
+import bibtexParse from 'bibtex-parse-js';
 import { pushErr } from '../components/ErrPush';
 import ItemEditor from './TableItemEditor';
 import { deleteMTdata, createMTdata, changeMTdata } from '../apis/MindTableEditorApis';
@@ -40,7 +58,9 @@ export default {
   data() {
     return {
       drawer: false,
+      BibtexModal: false,
       index: 0,
+      BibValue: '',
       drawerFormData: {
         title: '',
         url: '',
@@ -146,10 +166,10 @@ export default {
     },
     onDelete(index) {
       deleteMTdata(this.data[index].id)
-        .then((res) => {
+        .then(() => {
           // this.data.splice(index, 1);
           this.data = _.slice(this.data, index, index + 1);
-          this.$Message.info(`${res.title} Deleted`);
+          this.$Message.info(`${this.data[index].title} Deleted`);
           this.$emit('reloadData');
         });
     },
@@ -199,6 +219,39 @@ export default {
           });
       }
       this.drawer = false;
+    },
+    openBibTexModal() {
+      this.BibtexModal = true;
+      this.BibValue = '';
+    },
+    submitBibModal() {
+      const articleJson = bibtexParse.toJSON(this.BibValue);
+      for (let i = 0; i < articleJson.length; i += 1) {
+        let articleUrl = '';
+        if (_.includes(articleJson[i].entryTags.journal, 'arXiv')) {
+          articleUrl = articleJson[i].entryTags.journal.split(':')[1];
+          articleUrl = `https://arxiv.org/pdf/${articleUrl}.pdf`;
+        }
+        createMTdata(
+          articleJson[i].entryTags.title,
+          articleJson[i].entryTags.author,
+          articleUrl,
+          '',
+          articleJson[i].entryTags.journal,
+          [])
+          .catch((err) => {
+            this.$Message.error(`第${i}条BibTex导入失败`);
+            window.console.error(err);
+          });
+      }
+      this.$Message.info(`${articleJson.length}条BibTex导入`);
+      this.$emit('reloadData');
+      this.BibtexModal = false;
+      this.BibValue = '';
+    },
+    cancelBibModal() {
+      this.BibtexModal = false;
+      this.BibValue = '';
     },
   },
 };

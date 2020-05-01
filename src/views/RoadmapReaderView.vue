@@ -18,7 +18,8 @@
       />
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}" v-if="sharedId===-1">
-      <Button type="success" @click="handleClkEdit" id="b-ed">Edit</Button>
+      <Button type="warning" @click="handleClkEdit" class="b-ed">Edit</Button>
+      <Button type="success" @click="handleClkShare" class="b-ed">Share</Button>
     </Sider>
   </Layout>
 </template>
@@ -27,7 +28,7 @@
 import _ from 'lodash';
 import Vue from 'vue';
 import { pushErr } from '../components/ErrPush';
-import { getRoadmap, getRoadmapShareLink } from '../apis/RoadmapEditorApis';
+import { getRoadmap, getRoadmapShareLink, postRoadmapShareLink } from '../apis/RoadmapEditorApis';
 import { req } from '../apis/util';
 import Roadmap from '../components/roadmap/Roadmap';
 
@@ -57,8 +58,9 @@ export default {
     if (!this.$route.query.selected) {
       this.sharedId = this.$route.query.sharedId;
       try {
-        this.articles = (await req('/api/articles/', 'GET')).data;
+        // this.articles = (await req('/api/articles/', 'GET')).data;
         const roadmapData = (await getRoadmapShareLink(this.sharedId)).data;
+        this.articles = roadmapData.articles;
         this.nodes = this.toDisplayNodes(JSON.parse(roadmapData.text).nodes);
         this.connections = this.toDisplayConnections(JSON.parse(roadmapData.text).connections);
         this.roadMapTitle = roadmapData.title;
@@ -123,6 +125,17 @@ export default {
       this.$router.push({
         path: '/editor',
         query: { selected: this.roadMapId },
+      });
+    },
+    handleClkShare() {
+      postRoadmapShareLink(this.roadMapId).then((res) => {
+        this.$Modal.success({
+          title: '路书分享链接',
+          content: `http://47.94.141.56/reader?sharedId=${res.data.share_id}/`,
+          width: '700',
+        });
+      }).catch((err) => {
+        pushErr(this, err, true);
       });
     },
     repaintMindMap() {
@@ -191,7 +204,7 @@ export default {
     font-size: 24px;
     padding: 12px;
   }
-  #b-ed{
+  .b-ed{
     width: 120px;
     margin-bottom: 20px;
     margin-left: 40px;

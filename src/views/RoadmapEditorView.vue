@@ -70,9 +70,13 @@
       />
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}">
-      <Button type="info" @click="handleClkReadOnly"
-              :disabled="roadMapId===-1" id="b-ro">
+      <Button type="primary" @click="handleClkReadOnly"
+              :disabled="roadMapId===-1" class="b-ro">
         Read Only
+      </Button>
+      <Button type="success" @click="handleClkShare"
+              :disabled="roadMapId===-1" class="b-ro">
+        Share
       </Button>
       <Menu active-name="1-2" theme="dark" width="auto" :open-names="['1']">
         <Submenu name="1">
@@ -131,7 +135,14 @@ import EditRoadmapDescriptionForm from '../components/EditRoadmapDescriptionForm
 import FileItem from '../components/FileItem';
 import { req } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
-import { createRoadmap, updateRoadmap, getRoadmap, updateRoadmapTitle, updateRoadmapDescription } from '../apis/RoadmapEditorApis';
+import {
+  createRoadmap,
+  updateRoadmap,
+  getRoadmap,
+  updateRoadmapTitle,
+  updateRoadmapDescription,
+  postRoadmapShareLink,
+} from '../apis/RoadmapEditorApis';
 import Roadmap from '../components/roadmap/Roadmap';
 
 Vue.prototype._ = _;
@@ -447,6 +458,17 @@ export default {
         query: { selected: this.roadMapId },
       });
     },
+    handleClkShare() {
+      postRoadmapShareLink(this.roadMapId).then((res) => {
+        this.$Modal.success({
+          title: '路书分享链接',
+          content: `http://47.94.141.56/reader?sharedId=${res.data.share_id}/`,
+          width: '700',
+        });
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+    },
     getArticleIdByTitle(title) {
       return _(this.articles).find(art => art.title === title).id;
     },
@@ -512,7 +534,7 @@ export default {
     text-align:left;
     font-size: 24px;
   }
-  #b-ro{
+  .b-ro{
     width: 120px;
     margin-bottom: 20px;
     margin-left: 40px;
