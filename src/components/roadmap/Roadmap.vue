@@ -25,6 +25,7 @@ import {
   forceManyBody,
   forceSimulation,
   select,
+  event,
   // zoom,
   // zoomIdentity,
 } from 'd3';
@@ -56,10 +57,15 @@ export default {
       type: Boolean,
       default: false,
     },
+    liveNode: {
+      default: null,
+    },
   },
   data() {
     return {
       simulation: null,
+      clickTimeId: 0,
+      curNode: this.liveNode,
     };
   },
   methods: {
@@ -84,6 +90,12 @@ export default {
      * and start simulation.
      */
     prepareEditor(svg, conns, nodes, subnodes) {
+      svg.on('click', () => {
+        window.console.log('svg1');
+        this.curNode = null;
+        nodes.attr('class', n => `${n.category}-node article-node--editable`);
+        this.$emit('svg-click');
+      });
       nodes
         .attr('class', (node) => {
           if (node.category === 'article') {
@@ -91,12 +103,52 @@ export default {
           }
           return 'mindmap-node mindmap-node--editable';
         })
-        .on('dbclick', (node) => {
-          node.fx = null;
-          node.fy = null;
+        .on('dblclick', (node) => {
+          this.curNode = node;
+          clearTimeout(this.clickTimeId);
+          event.stopPropagation();
+          this.$emit('node-dblclick', node);
+        })
+        .on('click', (node) => {
+          window.console.log('clk node', node);
+          this.curNode = node;
+          nodes.attr('class', (n) => {
+            if (n === node) {
+              return `${n.category}-node-chosen article-node--editable`;
+            }
+            return `${n.category}-node article-node--editable`;
+          });
+          event.stopPropagation();
+          clearTimeout(this.clickTimeId);
+          this.clickTimeId = setTimeout(() => {
+            this.$emit('node-click', node);
+          }, 250);
+          window.console.log('nodeclk', this.curNode);
         });
-
       nodes.call(d3Drag(this.simulation, svg, nodes));
+      subnodes
+        .on('click', (node) => {
+          window.console.log('clk sub', node);
+          this.curNode = node;
+          nodes.attr('class', (n) => {
+            if (n === node) {
+              return `${n.category}-node-chosen article-node--editable`;
+            }
+            return `${n.category}-node article-node--editable`;
+          });
+          event.stopPropagation();
+          clearTimeout(this.clickTimeId);
+          this.clickTimeId = setTimeout(() => {
+            this.$emit('node-click', node);
+          }, 250);
+          window.console.log('nodeclk', this.curNode);
+        })
+        .on('dblclick', (node) => {
+          this.curNode = node;
+          clearTimeout(this.clickTimeId);
+          event.stopPropagation();
+          this.$emit('subnode-dblclick', node);
+        });
 
       // Tick the simulation 100 times
       for (let i = 0; i < 100; i += 1) {
@@ -109,6 +161,16 @@ export default {
             onTick(conns, nodes, subnodes)
           ));
       }, 200);
+      window.console.log('wtf1', this.curNode);
+      if (this.curNode) {
+        window.console.log('wtf');
+        nodes.attr('class', (n) => {
+          if (n === this.curNode) {
+            return `${n.category}-node-chosen article-node--editable`;
+          }
+          return `${n.category}-node article-node--editable`;
+        });
+      }
     },
     /**
      * Render mind map unsing D3
@@ -146,7 +208,7 @@ export default {
 
       svg.attr('viewBox', getViewBox(nodes.data()))
         .call(d3PanZoom(svg))
-        .on('dbClick.zoom', null);
+        .on('dblclick.zoom', null);
     },
   },
   mounted() {

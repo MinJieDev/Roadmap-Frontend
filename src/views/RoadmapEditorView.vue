@@ -67,6 +67,11 @@
         :connections="mergedConnections"
         :editable="true"
         :key="repaint"
+        :live-node="curNode"
+        @node-click="handleNodeClick"
+        @node-dblclick="handleNodeDblClick"
+        @subnode-dblclick="handleSubnodeDblClick"
+        @svg-click="handleSvgClick"
       />
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}">
@@ -78,43 +83,38 @@
               :disabled="roadMapId===-1" class="b-ro">
         Share
       </Button>
-      <Menu active-name="1-2" theme="dark" width="auto" :open-names="['1']">
+      <Button type="warning" @click="handleClkSaveRoadmap"
+              class="b-ro">
+        保存路书
+      </Button>
+      <Button type="info" @click="handleClkSaveRoadmap"
+              class="b-ro">
+        <AddNodeForm @node-added="handleNodeAdded"></AddNodeForm>
+      </Button>
+      <Menu active-name="1-2" theme="light" width="auto" :open-names="['1']" v-if="nodeChosen">
         <Submenu name="1">
           <template slot="title">
             <Icon type="ios-navigate"></Icon>
-            工具栏
+            节点工具
           </template>
-          <MenuItem name="save-roadmap" @click.native="handleClkSaveRoadmap">
-            Save Roadmap
+<!--          <AddConnectionForm-->
+<!--            @connection-added="handleConnectionAdded"-->
+<!--            :node-name-list='nodeNameList'>-->
+<!--          </AddConnectionForm>-->
+          <!--          <DelConnectionForm-->
+          <!--            @connection-deleted="handleConnectionDeleted"-->
+          <!--            :node-name-list='nodeNameList'>-->
+          <!--          </DelConnectionForm>-->
+          <MenuItem name="del-node" @click.native="handleNodeDeleted">删除节点</MenuItem>
+          <AddCommentForm @comment-added="handleCommentAdded" v-if="!commentExist"></AddCommentForm>
+          <ModifyCommentForm
+            @comment-modified="handleCommentAdded"
+            v-if="commentExist"
+            :comment="curComment">
+          </ModifyCommentForm>
+          <MenuItem name="del-comment" @click.native="handleCommentDeleted" v-if="commentExist">
+            删除注释
           </MenuItem>
-          <AddNodeForm @node-added="handleNodeAdded"></AddNodeForm>
-          <AddConnectionForm
-            @connection-added="handleConnectionAdded"
-            :node-name-list='nodeNameList'>
-          </AddConnectionForm>
-          <DelNodeForm
-            @node-deleted="handleNodeDeleted"
-            :node-name-list='nodeNameList'>
-          </DelNodeForm>
-          <DelConnectionForm
-            @connection-deleted="handleConnectionDeleted"
-            :node-name-list='nodeNameList'>
-          </DelConnectionForm>
-          <AddCommentForm
-            @comment-added="handleCommentAdded"
-            :node-name-list="nodeNameList">
-          </AddCommentForm>
-          <DelCommentForm
-            @comment-deleted="handleCommentDeleted"
-            @node-comment-list-changed="handleNodeCommentListChanged"
-            :node-name-list="nodeNameList"
-            :comment-list="commentList">
-          </DelCommentForm>
-<!--          <LoadRoadmapForm @roadmap-form-loaded="handleClkLoadRoadmap">-->
-<!--          </LoadRoadmapForm>-->
-<!--          <MenuItem name="create-roadmap" @click.native="handleClkCreateRoadmap">-->
-<!--            create Roadmap-->
-<!--          </MenuItem>-->
         </Submenu>
       </Menu>
     </Sider>
@@ -132,6 +132,7 @@ import AddCommentForm from '../components/AddCommentForm';
 import DelCommentForm from '../components/DelCommentForm';
 import LoadRoadmapForm from '../components/LoadRoadmapForm';
 import EditRoadmapDescriptionForm from '../components/EditRoadmapDescriptionForm';
+import ModifyCommentForm from '../components/ModifyCommentForm';
 import FileItem from '../components/FileItem';
 import { req } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
@@ -160,6 +161,7 @@ export default {
     FileItem,
     LoadRoadmapForm,
     EditRoadmapDescriptionForm,
+    ModifyCommentForm,
   },
   data() {
     return {
@@ -177,6 +179,8 @@ export default {
       ],
       commentList: [
       ],
+      nodeChosen: false,
+      curNode: null,
     };
   },
   computed: {
@@ -262,6 +266,18 @@ export default {
     mergedConnections() {
       return [...this.connections, ...this.refConnections];
     },
+    curComment() {
+      if (!(this.curNode) || this.curNode.nodes.length === 0) {
+        return null;
+      }
+      return this.curNode.nodes[0].text;
+    },
+    commentExist() {
+      if (!(this.curNode) || this.curNode.nodes.length === 0) {
+        return false;
+      }
+      return true;
+    },
   },
   mounted() {
     // GET articles for l-sider
@@ -327,11 +343,12 @@ export default {
     handleArticleNodeAdded(nodeInfo) {
       this.handleNodeAdded(nodeInfo, 'article');
     },
-    handleNodeDeleted(nodeInfo) {
-      this.nodes = _.filter(this.nodes, node => node.text !== nodeInfo.nodeName);
+    handleNodeDeleted() {
+      this.nodes = _.filter(this.nodes, node => node.text !== this.curNode.text);
       this.connections = _.filter(this.connections, connection =>
-        (connection.source.text !== nodeInfo.nodeName
-          && connection.target.text !== nodeInfo.nodeName));
+        (connection.source.text !== this.curNode.text
+          && connection.target.text !== this.curNode.text));
+      this.curNode = null;
       this.repaintMindMap();
     },
     handleConnectionAdded(connectionInfo) {
@@ -351,9 +368,9 @@ export default {
     },
     handleCommentAdded(commentInfo) {
       _.forEach(this.nodes, (node) => {
-        if (node.text === commentInfo.node) {
+        if (node.text === this.curNode.text) {
           // eslint-disable-next-line no-param-reassign
-          node.nodes = [...node.nodes, {
+          node.nodes = [{
             text: commentInfo.comment,
             nodes: [],
             color: 'rgba(36, 170, 255, 1.0)',
@@ -362,11 +379,11 @@ export default {
       });
       this.repaintMindMap();
     },
-    handleCommentDeleted(commentInfo) {
+    handleCommentDeleted() {
       _.forEach(this.nodes, (node) => {
-        if (node.text === commentInfo.node) {
+        if (node.text === this.curNode.text) {
           // eslint-disable-next-line no-param-reassign
-          node.nodes = _.filter(node.nodes, node2 => node2.text !== commentInfo.comment);
+          node.nodes = [];
         }
       });
       this.repaintMindMap();
@@ -525,6 +542,26 @@ export default {
       });
       return ret;
     },
+    handleNodeClick(node) {
+      this.nodeChosen = true;
+      this.curNode = node;
+      window.console.log('click', node);
+    },
+    handleNodeDblClick(node) {
+      this.nodeChosen = true;
+      this.curNode = node;
+      window.console.log('dbclick', node);
+    },
+    handleSvgClick() {
+      this.nodeChosen = false;
+      this.curNode = null;
+      window.console.log('svg');
+    },
+    handleSubnodeDblClick(node) {
+      this.nodeChosen = true;
+      this.curNode = node;
+      window.console.log('subdbclick', node);
+    },
   },
 };
 </script>
@@ -536,7 +573,7 @@ export default {
   }
   .b-ro{
     width: 120px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     margin-left: 40px;
     margin-right: 40px;
   }

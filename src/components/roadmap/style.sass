@@ -24,7 +24,29 @@ $shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px
   font-family: 'Raleway'
   font-size: 22px
   margin: 0 auto
-  padding: 15px
+  padding: 10px
+  text-align: center
+  text-decoration: none
+  transition: background-color .2s, color .2s ease-out
+
+  &[href]
+    &:hover
+      background-color: $orange700
+      color: $white
+      cursor: pointer
+
+.mindmap-node-chosen > a
+  border: dashed
+  border-width: 2px
+  background: $grey100
+  border-radius: 10px
+  box-shadow: $shadow
+  color: $grey900
+  display: inline-block
+  font-family: 'Raleway'
+  font-size: 22px
+  margin: 0 auto
+  padding: 10px
   text-align: center
   text-decoration: none
   transition: background-color .2s, color .2s ease-out
@@ -44,10 +66,33 @@ $shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px
   font-family: 'Raleway'
   font-size: 22px
   margin: 0 auto
-  padding: 15px
+  padding: 10px
   text-align: center
   text-decoration: none
   transition: background-color .2s, color .2s ease-out
+
+  &[href]
+    &:hover
+      background-color: $orange700
+      color: $white
+      cursor: pointer
+
+.article-node-chosen > a
+  border: dashed
+  border-width: 2px
+  background: $yellow
+  border-radius: 10px
+  box-shadow: $shadow
+  color: $grey900
+  display: inline-block
+  font-family: 'Raleway'
+  font-size: 22px
+  margin: 0px auto
+  padding: 10px
+  text-align: center
+  text-decoration: none
+  transition: background-color .2s, color .2s ease-out
+
 
   &[href]
     &:hover

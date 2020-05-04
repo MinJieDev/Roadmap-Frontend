@@ -1,6 +1,6 @@
 <template>
   <div>
-    <MenuItem name="add-node" @click.native="handleClkAddNode" ref="MenuItem">Add Node</MenuItem>
+    <MenuItem name="add-node" @click.native="handleClkAddNode" ref="MenuItem">新建普通节点</MenuItem>
     <Modal
       v-model="nodeFormModal"
       title="Add Node"
