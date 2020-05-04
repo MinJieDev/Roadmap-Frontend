@@ -128,6 +128,13 @@ $shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px
 .mindmap-connection
   fill: transparent
   stroke: $grey500
+  stroke-dasharray: 10px 2px
+  stroke-width: 3px
+  marker-end: url(#arrow)
+
+.mindmap-connection-chosen
+  fill: transparent
+  stroke: black
   stroke-dasharray: 10px 4px
   stroke-width: 3px
   marker-end: url(#arrow)
@@ -135,7 +142,7 @@ $shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px
 .mindmap-connection-reference
   fill: transparent
   stroke: orange
-  stroke-dasharray: 10px 4px
+  stroke-dasharray: 10px 2px
   stroke-width: 3px
   marker-end: url(#arrow)
 

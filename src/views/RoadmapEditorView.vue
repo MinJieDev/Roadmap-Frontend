@@ -73,6 +73,7 @@
         @node-dblclick="handleNodeDblClick"
         @subnode-dblclick="handleSubnodeDblClick"
         @svg-click="handleSvgClick"
+        @conn-click="handleConnClick"
       />
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}">
@@ -92,7 +93,8 @@
               class="b-ro">
         <AddNodeForm @node-added="handleNodeAdded"></AddNodeForm>
       </Button>
-      <Menu active-name="1-2" theme="light" width="auto" :open-names="['1']" v-if="nodeChosen">
+      <Menu active-name="1-2" theme="light" width="auto" :open-names="['1']"
+            v-if="nodeChosen && !modeConnectionChoosing">
         <Submenu name="1">
           <template slot="title">
             <Icon type="ios-navigate"></Icon>
@@ -107,7 +109,14 @@
           <!--            :node-name-list='nodeNameList'>-->
           <!--          </DelConnectionForm>-->
           <MenuItem name="open-url" @click.native="handleOpenUrl" v-if="openable">打开链接</MenuItem>
+          <ModifyNodeForm
+            @node-modified="handleNodeModified"
+            :node-info-old="curNodeInfo"
+            v-if="curNodeType==='mindmap'"
+            ref="modifyNode">
+          </ModifyNodeForm>
           <MenuItem name="del-node" @click.native="handleNodeDeleted">删除节点</MenuItem>
+          <MenuItem name="add-connection" @click.native="handleClkAddConnection">添加连接</MenuItem>
           <AddCommentForm @comment-added="handleCommentAdded" v-if="!commentExist"></AddCommentForm>
           <ModifyCommentForm
             @comment-modified="handleCommentAdded"
@@ -118,6 +127,16 @@
           <MenuItem name="del-comment" @click.native="handleCommentDeleted" v-if="commentExist">
             删除注释
           </MenuItem>
+        </Submenu>
+      </Menu>
+      <Menu active-name="1-2" theme="light" width="auto" :open-names="['1']"
+            v-if="curConn">
+        <Submenu name="1">
+          <template slot="title">
+            <Icon type="ios-navigate"></Icon>
+            连接工具
+          </template>
+          <MenuItem name="del-conn" @click.native="handleConnectionDeleted">删除连接</MenuItem>
         </Submenu>
       </Menu>
     </Sider>
@@ -136,6 +155,7 @@ import DelCommentForm from '../components/DelCommentForm';
 import LoadRoadmapForm from '../components/LoadRoadmapForm';
 import EditRoadmapDescriptionForm from '../components/EditRoadmapDescriptionForm';
 import ModifyCommentForm from '../components/ModifyCommentForm';
+import ModifyNodeForm from '../components/ModifyNodeForm';
 import FileItem from '../components/FileItem';
 import { req } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
@@ -165,6 +185,7 @@ export default {
     LoadRoadmapForm,
     EditRoadmapDescriptionForm,
     ModifyCommentForm,
+    ModifyNodeForm,
   },
   data() {
     return {
@@ -183,6 +204,8 @@ export default {
       commentList: [
       ],
       curNode: null,
+      curConn: null,
+      modeConnectionChoosing: false,
     };
   },
   computed: {
@@ -287,10 +310,26 @@ export default {
       return false;
     },
     openable() {
-      if (this.curNode.category === 'article' && this.curNode.URI) {
+      window.console.log('openurl', this.curNode.URI);
+      if (this.curNode.URI) {
         return true;
       }
       return false;
+    },
+    curNodeInfo() {
+      if (this.curNode) {
+        return {
+          name: this.curNode.text,
+          URI: this.curNode.URI,
+        };
+      }
+      return null;
+    },
+    curNodeType() {
+      if (this.curNode) {
+        return this.curNode.category;
+      }
+      return null;
     },
   },
   mounted() {
@@ -354,6 +393,17 @@ export default {
         }];
       this.repaintMindMap();
     },
+    handleNodeModified(nodeInfo) {
+      _.forEach(this.nodes, (node) => {
+        if (node.text === this.curNode.text) {
+          // eslint-disable-next-line no-param-reassign
+          node.text = nodeInfo.nodeName;
+          // eslint-disable-next-line no-param-reassign
+          node.URI = nodeInfo.nodeUrl;
+        }
+      });
+      this.repaintMindMap();
+    },
     handleArticleNodeAdded(nodeInfo) {
       this.handleNodeAdded(nodeInfo, 'article');
     },
@@ -373,13 +423,17 @@ export default {
       }];
       this.repaintMindMap();
     },
-    handleConnectionDeleted(connectionInfo) {
+    handleConnectionDeleted() {
       this.connections = _.filter(this.connections, connection => !(
-        (connection.source.text === connectionInfo.node1
-                  && connection.target.text === connectionInfo.node2)
-        || (connection.target.text === connectionInfo.node1
-                  && connection.source.text === connectionInfo.node2)));
+        (connection.source.text === this.curConn.source.text
+                  && connection.target.text === this.curConn.target.text)
+        || (connection.target.text === this.curConn.source.text
+                  && connection.source.text === this.curConn.target.text)));
+      this.curConn = null;
       this.repaintMindMap();
+    },
+    handleClkAddConnection() {
+      this.modeConnectionChoosing = true;
     },
     handleCommentAdded(commentInfo) {
       _.forEach(this.nodes, (node) => {
@@ -560,7 +614,7 @@ export default {
       return ret;
     },
     handleOpenUrl() {
-      if (this.curNode.category === 'article' && this.curNode.URI) {
+      if (this.curNode.URI) {
         if (!_(this.curNode.URI)
           .startsWith('http://')) {
           window.open(`http://${this.curNode.URI}`, '_blank');
@@ -569,30 +623,59 @@ export default {
       }
     },
     handleNodeClick(node) {
-      this.curNode = node;
-      window.console.log('click', node);
+      if (this.modeConnectionChoosing) {
+        this.handleConnectionAdded({
+          sourceNode: this.curNode.text,
+          targetNode: node.text,
+        });
+        this.modeConnectionChoosing = false;
+      } else {
+        this.curNode = node;
+        this.curConn = null;
+        window.console.log('click', node);
+      }
     },
     handleNodeDblClick(node) {
+      this.modeConnectionChoosing = false;
       this.curNode = node;
+      this.curConn = null;
       window.console.log('dbclick', node);
       window.console.log('url', node.URI);
-      if (node.category === 'article' && node.URI) {
-        if (!_(node.URI).startsWith('http://')) {
-          window.open(`http://${node.URI}`, '_blank');
+      if (node.category === 'article') {
+        if (node.URI) {
+          if (!_(node.URI)
+            .startsWith('http://')) {
+            window.open(`http://${node.URI}`, '_blank');
+          }
+          window.open(node.URI, '_blank');
+        } else {
+          window.console.log('pass');
         }
-        window.open(node.URI, '_blank');
       } else {
-        window.console.log('pass');
+        this.$nextTick(() => {
+          this.$refs.modifyNode.handleClkModifyNode();
+        });
       }
     },
     handleSvgClick() {
+      this.modeConnectionChoosing = false;
       this.curNode = null;
+      this.curConn = null;
       window.console.log('svg');
     },
     handleSubnodeDblClick(node) {
+      this.modeConnectionChoosing = false;
       this.curNode = node;
+      this.curConn = null;
       window.console.log('subdbclick', node);
-      this.$refs.modifyComment.handleClkModifyComment();
+      this.$nextTick(() => {
+        this.$refs.modifyComment.handleClkModifyComment();
+      });
+    },
+    handleConnClick(conn) {
+      this.modeConnectionChoosing = false;
+      this.curNode = null;
+      this.curConn = conn;
     },
   },
 };

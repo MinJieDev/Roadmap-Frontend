@@ -94,6 +94,10 @@ export default {
         window.console.log('svg1');
         this.curNode = null;
         nodes.attr('class', n => `${n.category}-node article-node--editable`);
+        conns.attr('class', (c) => {
+          if (c.type === 'ref') { return 'mindmap-connection-reference'; }
+          return 'mindmap-connection';
+        });
         this.$emit('svg-click');
       });
       nodes
@@ -118,6 +122,10 @@ export default {
             }
             return `${n.category}-node article-node--editable`;
           });
+          conns.attr('class', (c) => {
+            if (c.type === 'ref') { return 'mindmap-connection-reference'; }
+            return 'mindmap-connection';
+          });
           event.stopPropagation();
           clearTimeout(this.clickTimeId);
           this.clickTimeId = setTimeout(() => {
@@ -136,6 +144,10 @@ export default {
             }
             return `${n.category}-node article-node--editable`;
           });
+          conns.attr('class', (c) => {
+            if (c.type === 'ref') { return 'mindmap-connection-reference'; }
+            return 'mindmap-connection';
+          });
           event.stopPropagation();
           clearTimeout(this.clickTimeId);
           this.clickTimeId = setTimeout(() => {
@@ -149,7 +161,21 @@ export default {
           event.stopPropagation();
           this.$emit('subnode-dblclick', node);
         });
-
+      conns
+        .on('click', (conn) => {
+          window.console.log('conn', conn);
+          nodes.attr('class', n => `${n.category}-node article-node--editable`);
+          conns.attr('class', (c) => {
+            if (c === conn) {
+              if (c.type === 'ref') { return 'mindmap-connection-reference'; }
+              return 'mindmap-connection-chosen';
+            }
+            if (c.type === 'ref') { return 'mindmap-connection-reference'; }
+            return 'mindmap-connection';
+          });
+          this.$emit('conn-click', conn);
+          event.stopPropagation();
+        });
       // Tick the simulation 100 times
       for (let i = 0; i < 100; i += 1) {
         this.simulation.tick();
