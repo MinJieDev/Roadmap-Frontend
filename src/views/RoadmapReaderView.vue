@@ -15,11 +15,12 @@
         :connections="mergedConnections"
         :editable="true"
         :key="repaint"
+        @node-dblclick="handleNodeDblClick"
       />
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}" v-if="sharedId===-1">
-      <Button type="warning" @click="handleClkEdit" class="b-ed">Edit</Button>
-      <Button type="success" @click="handleClkShare" class="b-ed">Share</Button>
+      <Button type="warning" @click="handleClkEdit" class="b-ed">编辑</Button>
+      <Button type="success" @click="handleClkShare" class="b-ed">分享</Button>
     </Sider>
   </Layout>
 </template>
@@ -193,6 +194,18 @@ export default {
         ret = [...ret, conn];
       });
       return ret;
+    },
+    handleNodeDblClick(node) {
+      window.console.log('dbclick', node);
+      window.console.log('url', node.URI);
+      if (node.URI) {
+        if (!_(node.URI).startsWith('http://')) {
+          window.open(`http://${node.URI}`, '_blank');
+        }
+        window.open(node.URI, '_blank');
+      } else {
+        window.console.log('pass');
+      }
     },
   },
 };

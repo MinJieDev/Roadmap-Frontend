@@ -79,11 +79,11 @@
     <Sider hide-trigger :style="{background: '#fff'}">
       <Button type="primary" @click="handleClkReadOnly"
               :disabled="roadMapId===-1" class="b-ro">
-        Read Only
+        阅览
       </Button>
       <Button type="success" @click="handleClkShare"
               :disabled="roadMapId===-1" class="b-ro">
-        Share
+        分享
       </Button>
       <Button type="warning" @click="handleClkSaveRoadmap"
               class="b-ro">
@@ -100,14 +100,6 @@
             <Icon type="ios-navigate"></Icon>
             节点工具
           </template>
-<!--          <AddConnectionForm-->
-<!--            @connection-added="handleConnectionAdded"-->
-<!--            :node-name-list='nodeNameList'>-->
-<!--          </AddConnectionForm>-->
-          <!--          <DelConnectionForm-->
-          <!--            @connection-deleted="handleConnectionDeleted"-->
-          <!--            :node-name-list='nodeNameList'>-->
-          <!--          </DelConnectionForm>-->
           <MenuItem name="open-url" @click.native="handleOpenUrl" v-if="openable">打开链接</MenuItem>
           <ModifyNodeForm
             @node-modified="handleNodeModified"
@@ -642,15 +634,7 @@ export default {
       window.console.log('dbclick', node);
       window.console.log('url', node.URI);
       if (node.category === 'article') {
-        // if (node.URI) {
-        //   if (!_(node.URI)
-        //     .startsWith('http://')) {
-        //     window.open(`http://${node.URI}`, '_blank');
-        //   }
-        //   window.open(node.URI, '_blank');
-        // } else {
-        //   window.console.log('pass');
-        // }
+        window.console.log('pass');
       } else {
         this.$nextTick(() => {
           this.$refs.modifyNode.handleClkModifyNode();
