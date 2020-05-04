@@ -642,15 +642,15 @@ export default {
       window.console.log('dbclick', node);
       window.console.log('url', node.URI);
       if (node.category === 'article') {
-        if (node.URI) {
-          if (!_(node.URI)
-            .startsWith('http://')) {
-            window.open(`http://${node.URI}`, '_blank');
-          }
-          window.open(node.URI, '_blank');
-        } else {
-          window.console.log('pass');
-        }
+        // if (node.URI) {
+        //   if (!_(node.URI)
+        //     .startsWith('http://')) {
+        //     window.open(`http://${node.URI}`, '_blank');
+        //   }
+        //   window.open(node.URI, '_blank');
+        // } else {
+        //   window.console.log('pass');
+        // }
       } else {
         this.$nextTick(() => {
           this.$refs.modifyNode.handleClkModifyNode();
