@@ -1,9 +1,9 @@
 <template>
   <div>
-    <MenuItem name="add-node" @click.native="handleClkAddNode" ref="MenuItem">新建普通节点</MenuItem>
+    <MenuItem name="modify-node" @click.native="handleClkModifyNode" ref="MenuItem">修改节点</MenuItem>
     <Modal
       v-model="nodeFormModal"
-      title="Add Node"
+      title="Modify Node"
       @on-ok="ok"
       @on-cancel="cancel">
       <p>Node Name</p>
@@ -16,24 +16,25 @@
 <script>
 export default {
   name: 'AddNodeForm',
+  props: ['nodeInfoOld'],
   data() {
     return {
       nodeFormModal: false,
       nodeInfo: {
-        nodeName: '',
-        nodeUrl: '',
+        nodeName: this.nodeInfoOld.name,
+        nodeUrl: this.nodeInfoOld.URI,
       },
     };
   },
   methods: {
     ok() {
-      this.$Message.info('Node added');
-      this.$emit('node-added', this.nodeInfo);
+      this.$Message.info('Node modified');
+      this.$emit('node-modified', this.nodeInfo);
     },
     cancel() {
       //  this.$Message.info('Clicked cancel');
     },
-    handleClkAddNode() {
+    handleClkModifyNode() {
       this.nodeFormModal = true;
       this.$Message.info('handleClk');
     },

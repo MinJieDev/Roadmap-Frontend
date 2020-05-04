@@ -23,7 +23,7 @@
 <script>
 export default {
   name: 'FileItem',
-  props: ['fileName', 'display', 'articleId'],
+  props: ['fileName', 'display', 'articleId', 'articleUrl'],
   data() {
     return {
     };
@@ -43,7 +43,7 @@ export default {
       this.$emit('node-added', {
         nodeName: this.fileName,
         articleId: this.articleId,
-        nodeUrl: '',
+        nodeUrl: this.articleUrl,
       });
     },
     handleDelFileNode() {

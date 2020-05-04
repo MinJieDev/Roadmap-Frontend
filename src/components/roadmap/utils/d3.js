@@ -52,8 +52,8 @@ export const d3Nodes = (svg, nodes) => {
   const d3nodes = selection
     .append('foreignObject')
     .attr('class', 'mindmap-node')
-    .attr('width', node => node.width + 4)
-    .attr('height', node => node.height)
+    .attr('width', node => node.width + 8)
+    .attr('height', node => node.height + 4)
     .html(node => node.html);
 
   const d3subnodes = selection
@@ -108,7 +108,6 @@ export const d3Drag = (simulation, svg, nodes) => {
     if (!event.active) {
       simulation.alphaTarget(0.2).restart();
     }
-
     node.fx = node.x;
     node.fy = node.y;
   };
