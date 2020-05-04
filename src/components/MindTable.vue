@@ -168,7 +168,7 @@ export default {
       deleteMTdata(this.data[index].id)
         .then(() => {
           // this.data.splice(index, 1);
-          this.data = _.slice(this.data, index, index + 1);
+          // this.data = _.slice(this.data, index, index + 1);
           this.$Message.info(`${this.data[index].title} Deleted`);
           this.$emit('reloadData');
         });

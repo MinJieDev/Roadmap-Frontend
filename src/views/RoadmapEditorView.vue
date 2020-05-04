@@ -14,6 +14,7 @@
           <MenuItem v-for="(article, index) in articles" :key="index" :name="'1-'+article.id" >
             <FileItem
               :fileName="article.title"
+              :articleUrl="article.url"
               :display="isFileItemDisplay('1-'+article.id)"
               :articleId="article.id"
               @node-added="handleArticleNodeAdded"
@@ -105,12 +106,14 @@
           <!--            @connection-deleted="handleConnectionDeleted"-->
           <!--            :node-name-list='nodeNameList'>-->
           <!--          </DelConnectionForm>-->
+          <MenuItem name="open-url" @click.native="handleOpenUrl" v-if="openable">打开链接</MenuItem>
           <MenuItem name="del-node" @click.native="handleNodeDeleted">删除节点</MenuItem>
           <AddCommentForm @comment-added="handleCommentAdded" v-if="!commentExist"></AddCommentForm>
           <ModifyCommentForm
             @comment-modified="handleCommentAdded"
             v-if="commentExist"
-            :comment="curComment">
+            :comment="curComment"
+            ref="modifyComment">
           </ModifyCommentForm>
           <MenuItem name="del-comment" @click.native="handleCommentDeleted" v-if="commentExist">
             删除注释
@@ -179,7 +182,6 @@ export default {
       ],
       commentList: [
       ],
-      nodeChosen: false,
       curNode: null,
     };
   },
@@ -278,6 +280,18 @@ export default {
       }
       return true;
     },
+    nodeChosen() {
+      if (this.curNode) {
+        return true;
+      }
+      return false;
+    },
+    openable() {
+      if (this.curNode.category === 'article' && this.curNode.URI) {
+        return true;
+      }
+      return false;
+    },
   },
   mounted() {
     // GET articles for l-sider
@@ -349,6 +363,7 @@ export default {
         (connection.source.text !== this.curNode.text
           && connection.target.text !== this.curNode.text));
       this.curNode = null;
+      window.console.log('del curnode', this.curNode);
       this.repaintMindMap();
     },
     handleConnectionAdded(connectionInfo) {
@@ -500,6 +515,8 @@ export default {
           if (typeof art !== 'undefined') {
             // eslint-disable-next-line no-param-reassign
             node.text = art.title;
+            // eslint-disable-next-line no-param-reassign
+            node.URI = art.url;
           } else {
             // eslint-disable-next-line no-param-reassign
             node.category = 'mindmap';
@@ -542,25 +559,40 @@ export default {
       });
       return ret;
     },
+    handleOpenUrl() {
+      if (this.curNode.category === 'article' && this.curNode.URI) {
+        if (!_(this.curNode.URI)
+          .startsWith('http://')) {
+          window.open(`http://${this.curNode.URI}`, '_blank');
+        }
+        window.open(this.curNode.URI, '_blank');
+      }
+    },
     handleNodeClick(node) {
-      this.nodeChosen = true;
       this.curNode = node;
       window.console.log('click', node);
     },
     handleNodeDblClick(node) {
-      this.nodeChosen = true;
       this.curNode = node;
       window.console.log('dbclick', node);
+      window.console.log('url', node.URI);
+      if (node.category === 'article' && node.URI) {
+        if (!_(node.URI).startsWith('http://')) {
+          window.open(`http://${node.URI}`, '_blank');
+        }
+        window.open(node.URI, '_blank');
+      } else {
+        window.console.log('pass');
+      }
     },
     handleSvgClick() {
-      this.nodeChosen = false;
       this.curNode = null;
       window.console.log('svg');
     },
     handleSubnodeDblClick(node) {
-      this.nodeChosen = true;
       this.curNode = node;
       window.console.log('subdbclick', node);
+      this.$refs.modifyComment.handleClkModifyComment();
     },
   },
 };

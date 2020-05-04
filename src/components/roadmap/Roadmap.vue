@@ -184,7 +184,6 @@ export default {
       svg.append('g').attr('id', 'mindmap-subnodes');
 
       this.prepareNodes();
-
       // Bind data to SVG elements and set all the properties to render them
       const connections = d3CustomConnections(svg, this.connections);
       const { nodes, subnodes } = d3Nodes(svg, this.nodes);
