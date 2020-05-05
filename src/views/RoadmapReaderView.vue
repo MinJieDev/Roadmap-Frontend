@@ -19,6 +19,11 @@
       />
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}" v-if="sharedId===-1">
+      <Button  @click="handleClkHelp"
+               class="b-ed">
+        使用帮助
+        <Icon type="ios-help-circle" />
+      </Button>
       <Button type="warning" @click="handleClkEdit" class="b-ed">
         编&emsp;辑
         <Icon type="ios-create"/>
@@ -212,6 +217,16 @@ export default {
       } else {
         window.console.log('pass');
       }
+    },
+    handleClkHelp() {
+      this.$Modal.info({
+        title: '使用帮助',
+        content:
+          '快捷键：</br>' +
+          '双击节点可以打开节点中的URL。</br>',
+        scrollable: true,
+        closable: true,
+      });
     },
   },
 };
