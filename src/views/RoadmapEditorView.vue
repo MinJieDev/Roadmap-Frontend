@@ -48,7 +48,8 @@
       <Input v-model="roadMapTitle"
              v-if="titleEditable"
              @on-blur="handleUpdateTitle"
-             size="large" style="padding: 12px">
+             size="large" style="padding: 12px"
+             @keydown.native.stop>
       </Input>
       <Collapse value="1">
         <Panel name="1">
