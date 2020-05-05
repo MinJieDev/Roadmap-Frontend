@@ -19,8 +19,14 @@
       />
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}" v-if="sharedId===-1">
-      <Button type="warning" @click="handleClkEdit" class="b-ed">编辑</Button>
-      <Button type="success" @click="handleClkShare" class="b-ed">分享</Button>
+      <Button type="warning" @click="handleClkEdit" class="b-ed">
+        编&emsp;辑
+        <Icon type="ios-create"/>
+      </Button>
+      <Button type="success" @click="handleClkShare" class="b-ed">
+        分&emsp;享
+        <Icon type="ios-share" />
+      </Button>
     </Sider>
   </Layout>
 </template>
@@ -219,7 +225,7 @@ export default {
   }
   .b-ed{
     width: 120px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     margin-left: 40px;
     margin-right: 40px;
   }

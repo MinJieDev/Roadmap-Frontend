@@ -1,6 +1,9 @@
 <template>
   <div>
-    <MenuItem name="add-node" @click.native="handleClkAddNode" ref="MenuItem">新建普通节点</MenuItem>
+    <MenuItem name="add-node" @click.native="handleClkAddNode" ref="MenuItem">
+      &ensp;新建节点
+      <Icon type="md-git-commit" />
+    </MenuItem>
     <Modal
       v-model="nodeFormModal"
       title="Add Node"
