@@ -48,7 +48,8 @@
       <Input v-model="roadMapTitle"
              v-if="titleEditable"
              @on-blur="handleUpdateTitle"
-             size="large" style="padding: 12px">
+             size="large" style="padding: 12px"
+             @keydown.native.stop>
       </Input>
       <Collapse value="1">
         <Panel name="1">
@@ -79,11 +80,11 @@
     <Sider hide-trigger :style="{background: '#fff'}">
       <Button type="primary" @click="handleClkReadOnly"
               :disabled="roadMapId===-1" class="b-ro">
-        Read Only
+        阅览
       </Button>
       <Button type="success" @click="handleClkShare"
               :disabled="roadMapId===-1" class="b-ro">
-        Share
+        分享
       </Button>
       <Button type="warning" @click="handleClkSaveRoadmap"
               class="b-ro">
@@ -91,7 +92,7 @@
       </Button>
       <Button type="info" @click="handleClkSaveRoadmap"
               class="b-ro">
-        <AddNodeForm @node-added="handleNodeAdded"></AddNodeForm>
+        <AddNodeForm @node-added="handleNodeAdded" ref="AddNodeForm"></AddNodeForm>
       </Button>
       <Menu active-name="1-2" theme="light" width="auto" :open-names="['1']"
             v-if="nodeChosen && !modeConnectionChoosing">
@@ -100,14 +101,6 @@
             <Icon type="ios-navigate"></Icon>
             节点工具
           </template>
-<!--          <AddConnectionForm-->
-<!--            @connection-added="handleConnectionAdded"-->
-<!--            :node-name-list='nodeNameList'>-->
-<!--          </AddConnectionForm>-->
-          <!--          <DelConnectionForm-->
-          <!--            @connection-deleted="handleConnectionDeleted"-->
-          <!--            :node-name-list='nodeNameList'>-->
-          <!--          </DelConnectionForm>-->
           <MenuItem name="open-url" @click.native="handleOpenUrl" v-if="openable">打开链接</MenuItem>
           <ModifyNodeForm
             @node-modified="handleNodeModified"
@@ -357,6 +350,44 @@ export default {
       pushErr(this, err, true);
     });
   },
+  created() {
+    // 监控键盘事件
+    document.onkeydown = (e) => {
+      window.console.log('但是噶', e);
+      // 事件对象兼容
+      const e1 = e;
+      // 键盘按键判断:左箭头-37;上箭头-38；右箭头-39;下箭头-40
+      // 左
+      if (e1 && e1.key === 'Backspace') {
+        if (this.curNode !== null) {
+          this.handleNodeDeleted();
+        } else if (this.curConn !== null) {
+          this.handleConnectionDeleted();
+        }
+      } else if (e.metaKey === true && e.key === 's') {
+        this.handleClkSaveRoadmap();
+        e.preventDefault();
+      } else if (e.key === 'Enter') {
+        this.$refs.AddNodeForm.handleClkAddNode();
+      } else if (e.key === 'Tab') {
+        if (this.curNode !== null) {
+          const name = this.createUniName();
+          if (!name) {
+            pushErr(this, 1000, true, '创建新节点失败', '自动生成节点名失败');
+            return;
+          }
+          this.handleNodeAdded({
+            nodeName: name,
+            nodeUrl: '',
+          });
+          this.handleConnectionAdded({
+            sourceNode: this.curNode.text,
+            targetNode: name,
+          });
+        }
+      }
+    };
+  },
   methods: {
     getMidPos() {
       let xMin = +99999;
@@ -414,6 +445,7 @@ export default {
           && connection.target.text !== this.curNode.text));
       this.curNode = null;
       window.console.log('del curnode', this.curNode);
+      this.$Notice.success({ title: 'node deleted' });
       this.repaintMindMap();
     },
     handleConnectionAdded(connectionInfo) {
@@ -430,6 +462,7 @@ export default {
         || (connection.target.text === this.curConn.source.text
                   && connection.source.text === this.curConn.target.text)));
       this.curConn = null;
+      this.$Notice.success({ title: 'connection deleted' });
       this.repaintMindMap();
     },
     handleClkAddConnection() {
@@ -613,6 +646,20 @@ export default {
       });
       return ret;
     },
+    createUniName() {
+      let i = 0;
+      for (i = 1; i < 10000; i += 1) {
+        let flag = true;
+        const name = `新建节点${i}`;
+        _(this.nodes).forEach((node) => {
+          if (node.text === name) {
+            flag = false;
+          }
+        });
+        if (flag) { return name; }
+      }
+      return null;
+    },
     handleOpenUrl() {
       if (this.curNode.URI) {
         if (!_(this.curNode.URI)
@@ -642,15 +689,7 @@ export default {
       window.console.log('dbclick', node);
       window.console.log('url', node.URI);
       if (node.category === 'article') {
-        // if (node.URI) {
-        //   if (!_(node.URI)
-        //     .startsWith('http://')) {
-        //     window.open(`http://${node.URI}`, '_blank');
-        //   }
-        //   window.open(node.URI, '_blank');
-        // } else {
-        //   window.console.log('pass');
-        // }
+        window.console.log('pass');
       } else {
         this.$nextTick(() => {
           this.$refs.modifyNode.handleClkModifyNode();

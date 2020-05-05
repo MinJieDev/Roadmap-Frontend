@@ -5,7 +5,8 @@
       v-model="nodeFormModal"
       title="Modify Node"
       @on-ok="ok"
-      @on-cancel="cancel">
+      @on-cancel="cancel"
+      @keydown.native.stop>
       <p>Node Name</p>
       <Input v-model="nodeInfo.nodeName" placeholder="Enter something..." style="width: 300px" />
       <p>Url</p>
