@@ -2,6 +2,7 @@
   <div>
     <MenuItem name="add-comment" @click.native="handleClkAddComment" ref="MenuItem">
       添加注释
+      <Icon type="md-clipboard" />
     </MenuItem>
     <Modal
       v-model="commentFormModal"

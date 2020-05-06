@@ -1,6 +1,9 @@
 <template>
   <div>
-    <MenuItem name="modify-node" @click.native="handleClkModifyNode" ref="MenuItem">修改节点</MenuItem>
+    <MenuItem name="modify-node" @click.native="handleClkModifyNode" ref="MenuItem">
+      修改节点
+      <Icon type="md-git-commit" />
+    </MenuItem>
     <Modal
       v-model="nodeFormModal"
       title="Modify Node"

@@ -78,17 +78,25 @@
       />
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}">
+      <Button  @click="handleClkHelp"
+              class="b-ro">
+        使用帮助
+        <Icon type="ios-help-circle" />
+      </Button>
       <Button type="primary" @click="handleClkReadOnly"
               :disabled="roadMapId===-1" class="b-ro">
-        阅览
+        阅&emsp;&emsp;览
+        <Icon type="ios-glasses" />
       </Button>
       <Button type="success" @click="handleClkShare"
               :disabled="roadMapId===-1" class="b-ro">
-        分享
+        分&emsp;&emsp;享
+        <Icon type="ios-share" />
       </Button>
       <Button type="warning" @click="handleClkSaveRoadmap"
               class="b-ro">
         保存路书
+        <Icon type="md-cloud-upload" />
       </Button>
       <Button type="info" @click="handleClkSaveRoadmap"
               class="b-ro">
@@ -101,15 +109,24 @@
             <Icon type="ios-navigate"></Icon>
             节点工具
           </template>
-          <MenuItem name="open-url" @click.native="handleOpenUrl" v-if="openable">打开链接</MenuItem>
+          <MenuItem name="open-url" @click.native="handleOpenUrl" v-if="openable">
+            打开链接
+            <Icon type="ios-link" />
+          </MenuItem>
           <ModifyNodeForm
             @node-modified="handleNodeModified"
             :node-info-old="curNodeInfo"
             v-if="curNodeType==='mindmap'"
             ref="modifyNode">
           </ModifyNodeForm>
-          <MenuItem name="del-node" @click.native="handleNodeDeleted">删除节点</MenuItem>
-          <MenuItem name="add-connection" @click.native="handleClkAddConnection">添加连接</MenuItem>
+          <MenuItem name="del-node" @click.native="handleNodeDeleted">
+            删除节点
+            <Icon type="md-trash" />
+          </MenuItem>
+          <MenuItem name="add-connection" @click.native="handleClkAddConnection">
+            添加连接
+            <Icon type="md-trending-up" />
+          </MenuItem>
           <AddCommentForm @comment-added="handleCommentAdded" v-if="!commentExist"></AddCommentForm>
           <ModifyCommentForm
             @comment-modified="handleCommentAdded"
@@ -119,6 +136,7 @@
           </ModifyCommentForm>
           <MenuItem name="del-comment" @click.native="handleCommentDeleted" v-if="commentExist">
             删除注释
+            <Icon type="ios-trash-outline" />
           </MenuItem>
         </Submenu>
       </Menu>
@@ -129,7 +147,10 @@
             <Icon type="ios-navigate"></Icon>
             连接工具
           </template>
-          <MenuItem name="del-conn" @click.native="handleConnectionDeleted">删除连接</MenuItem>
+          <MenuItem name="del-conn" @click.native="handleConnectionDeleted">
+            删除连接
+            <Icon type="md-trash" />
+          </MenuItem>
         </Submenu>
       </Menu>
     </Sider>
@@ -716,6 +737,22 @@ export default {
       this.curNode = null;
       this.curConn = conn;
     },
+    handleClkHelp() {
+      this.$Modal.info({
+        title: '使用帮助',
+        content: '点选左侧文献栏中文献，可以添加文献节点。</br>点选右侧新建节点，可以添加普通节点。</br>' +
+                 '点选画板中节点和边，可以依据右侧工具栏对节点和边进行编辑。</br>' +
+                 '快捷键：</br>' +
+                 '双击普通节点可以编辑普通节点。</br>' +
+                 '双击注释可以编辑注释。</br>' +
+                 '保存：Ctrl+S(PC), Command+S(MAC)</br>' +
+                 '删除：点选元素后按delete</br>' +
+                 '新建普通节点：Enter</br>' +
+                 '新建关联节点: Tab',
+        scrollable: true,
+        closable: true,
+      });
+    },
   },
 };
 </script>
@@ -727,7 +764,11 @@ export default {
   }
   .b-ro{
     width: 120px;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
+    margin-left: 40px;
+    margin-right: 40px;
+  }
+  #help-icon{
     margin-left: 40px;
     margin-right: 40px;
   }

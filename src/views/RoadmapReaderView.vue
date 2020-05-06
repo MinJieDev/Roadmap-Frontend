@@ -19,8 +19,19 @@
       />
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}" v-if="sharedId===-1">
-      <Button type="warning" @click="handleClkEdit" class="b-ed">编辑</Button>
-      <Button type="success" @click="handleClkShare" class="b-ed">分享</Button>
+      <Button  @click="handleClkHelp"
+               class="b-ed">
+        使用帮助
+        <Icon type="ios-help-circle" />
+      </Button>
+      <Button type="warning" @click="handleClkEdit" class="b-ed">
+        编&emsp;辑
+        <Icon type="ios-create"/>
+      </Button>
+      <Button type="success" @click="handleClkShare" class="b-ed">
+        分&emsp;享
+        <Icon type="ios-share" />
+      </Button>
     </Sider>
   </Layout>
 </template>
@@ -207,6 +218,16 @@ export default {
         window.console.log('pass');
       }
     },
+    handleClkHelp() {
+      this.$Modal.info({
+        title: '使用帮助',
+        content:
+          '快捷键：</br>' +
+          '双击节点可以打开节点中的URL。</br>',
+        scrollable: true,
+        closable: true,
+      });
+    },
   },
 };
 </script>
@@ -219,7 +240,7 @@ export default {
   }
   .b-ed{
     width: 120px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     margin-left: 40px;
     margin-right: 40px;
   }
