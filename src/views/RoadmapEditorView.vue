@@ -385,7 +385,7 @@ export default {
         } else if (this.curConn !== null) {
           this.handleConnectionDeleted();
         }
-      } else if (e.metaKey === true && e.key === 's') {
+      } else if ((e.metaKey === true || e.ctrlKey === true) && e.key === 's') {
         this.handleClkSaveRoadmap();
         e.preventDefault();
       } else if (e.key === 'Enter') {
