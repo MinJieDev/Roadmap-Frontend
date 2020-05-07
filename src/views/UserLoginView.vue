@@ -5,7 +5,7 @@
     </div>
     <div id="login-view">
       <i-input v-model="userName" placeholder="用户名"
-               style="width: 300px " />
+               style="width: 300px "/>
       <i-input type="password" v-model="password" placeholder="密码"
                style="width: 300px "/>
       <br>
@@ -60,7 +60,7 @@ export default {
     save_token(response) {
       window.console.info(response.data.token);
       store.commit('pushAuthToken', response.data.token);
-      router.push('/welcome');
+      router.push({ name: 'Welcome' });
     },
     handle_register() {
       router.push('/user_register');
@@ -78,13 +78,14 @@ export default {
 </script>
 
 <style scoped>
-  #logo-view{
-    text-align:center;
+  #logo-view {
+    text-align: center;
     font-size: 24px;
     padding: 12px;
   }
-  #login-view{
-    text-align:center;
+
+  #login-view {
+    text-align: center;
     font-size: 24px;
     padding: 12px;
   }
