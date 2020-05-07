@@ -4,12 +4,16 @@
       v-model="noteModal"
       title="文献笔记"
       @on-ok="ok">
-      <VueMarkdown style="margin-left: 20px">{{ computedNote }}</VueMarkdown>
+      <div class="markdown-body">
+        <VueMarkdown style="margin-left: 20px">{{ computedNote }}</VueMarkdown>
+      </div>
     </Modal>
   </div>
 </template>
 <script>
 import VueMarkdown from 'vue-markdown';
+import 'github-markdown-css';
+
 
 export default {
   components: {
@@ -34,8 +38,8 @@ export default {
   },
   computed: {
     /**
-     * 解决prop无法成功挂getter-setter钩子的问题
-     */
+       * 解决prop无法成功挂getter-setter钩子的问题
+       */
     computedNote() {
       return this.note;
     },
