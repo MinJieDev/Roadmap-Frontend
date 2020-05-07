@@ -103,7 +103,6 @@ export default {
       if (this.editor === null) {
         return '';
       }
-      console.log('here', this.editor.value());
       return this.editor.value();
     },
   },

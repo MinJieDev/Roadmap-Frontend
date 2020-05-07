@@ -5,7 +5,7 @@
       title="文献笔记"
       @on-ok="ok">
       <div class="markdown-body">
-        <VueMarkdown style="margin-left: 20px">{{ computedNote }}</VueMarkdown>
+        <VueMarkdown style="margin-left: 20px" v-if="noteModal">{{ computedNote }}</VueMarkdown>
       </div>
     </Modal>
   </div>
