@@ -15,7 +15,11 @@
         :connections="mergedConnections"
         :editable="true"
         :key="repaint"
+        @node-click="handleNodeClick"
         @node-dblclick="handleNodeDblClick"
+        @subnode-dblclick="handleSubnodeDblClick"
+        @svg-click="handleSvgClick"
+        @conn-click="handleConnClick"
       />
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}" v-if="sharedId===-1">
@@ -25,12 +29,20 @@
         <Icon type="ios-help-circle" />
       </Button>
       <Button type="warning" @click="handleClkEdit" class="b-ed">
-        编&emsp;辑
+        编&emsp;&emsp;辑
         <Icon type="ios-create"/>
       </Button>
       <Button type="success" @click="handleClkShare" class="b-ed">
-        分&emsp;享
+        分&emsp;&emsp;享
         <Icon type="ios-share" />
+      </Button>
+      <Button type="primary" @click="handleOpenUrl" class="b-ed" v-if="openable">
+        查看链接
+        <Icon type="ios-link" />
+      </Button>
+      <Button type="info" @click="handleOpenNote" class="b-ed" v-if="curNodeType==='article'">
+        查看笔记
+        <Icon type="ios-book" />
       </Button>
     </Sider>
   </Layout>
@@ -63,6 +75,7 @@ export default {
       connections: [
       ],
       articles: [],
+      curNode: null,
     };
   },
   async mounted() {
@@ -130,6 +143,20 @@ export default {
      */
     mergedConnections() {
       return [...this.connections, ...this.refConnections];
+    },
+    openable() {
+      window.console.log('open', this.curNode);
+      if (this.curNode && this.curNode.URI) {
+        window.console.log('open url', this.curNode.URI);
+        return true;
+      }
+      return false;
+    },
+    curNodeType() {
+      if (this.curNode) {
+        return this.curNode.category;
+      }
+      return null;
     },
   },
   methods: {
@@ -206,7 +233,15 @@ export default {
       });
       return ret;
     },
+    getArticleByTitle(title) {
+      return _(this.articles).find(art => art.title === title);
+    },
+    handleNodeClick(node) {
+      window.console.log('reader clk', node);
+      this.curNode = node;
+    },
     handleNodeDblClick(node) {
+      this.curNode = node;
       window.console.log('dbclick', node);
       window.console.log('url', node.URI);
       if (node.URI) {
@@ -218,6 +253,15 @@ export default {
         window.console.log('pass');
       }
     },
+    handleSvgClick() {
+      this.curNode = null;
+    },
+    handleSubnodeDblClick(node) {
+      this.curNode = node;
+    },
+    handleConnClick() {
+      this.curNode = null;
+    },
     handleClkHelp() {
       this.$Modal.info({
         title: '使用帮助',
@@ -228,6 +272,22 @@ export default {
         closable: true,
       });
     },
+    handleOpenUrl() {
+      if (this.curNode.URI) {
+        if (!_(this.curNode.URI)
+          .startsWith('http://')) {
+          window.open(`http://${this.curNode.URI}`, '_blank');
+        }
+        window.open(this.curNode.URI, '_blank');
+      }
+    },
+    handleOpenNote() {
+      this.$Modal.info({
+        title: '文献笔记',
+        content: this.getArticleByTitle(this.curNode.text).note,
+      });
+    },
+
   },
 };
 </script>
@@ -240,7 +300,7 @@ export default {
   }
   .b-ed{
     width: 120px;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     margin-left: 40px;
     margin-right: 40px;
   }
