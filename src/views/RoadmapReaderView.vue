@@ -15,11 +15,23 @@
         :connections="mergedConnections"
         :editable="true"
         :key="repaint"
+        @node-dblclick="handleNodeDblClick"
       />
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}" v-if="sharedId===-1">
-      <Button type="warning" @click="handleClkEdit" class="b-ed">Edit</Button>
-      <Button type="success" @click="handleClkShare" class="b-ed">Share</Button>
+      <Button  @click="handleClkHelp"
+               class="b-ed">
+        使用帮助
+        <Icon type="ios-help-circle" />
+      </Button>
+      <Button type="warning" @click="handleClkEdit" class="b-ed">
+        编&emsp;辑
+        <Icon type="ios-create"/>
+      </Button>
+      <Button type="success" @click="handleClkShare" class="b-ed">
+        分&emsp;享
+        <Icon type="ios-share" />
+      </Button>
     </Sider>
   </Layout>
 </template>
@@ -194,6 +206,28 @@ export default {
       });
       return ret;
     },
+    handleNodeDblClick(node) {
+      window.console.log('dbclick', node);
+      window.console.log('url', node.URI);
+      if (node.URI) {
+        if (!_(node.URI).startsWith('http://')) {
+          window.open(`http://${node.URI}`, '_blank');
+        }
+        window.open(node.URI, '_blank');
+      } else {
+        window.console.log('pass');
+      }
+    },
+    handleClkHelp() {
+      this.$Modal.info({
+        title: '使用帮助',
+        content:
+          '快捷键：</br>' +
+          '双击节点可以打开节点中的URL。</br>',
+        scrollable: true,
+        closable: true,
+      });
+    },
   },
 };
 </script>
@@ -206,7 +240,7 @@ export default {
   }
   .b-ed{
     width: 120px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     margin-left: 40px;
     margin-right: 40px;
   }

@@ -14,6 +14,7 @@
           <MenuItem v-for="(article, index) in articles" :key="index" :name="'1-'+article.id" >
             <FileItem
               :fileName="article.title"
+              :articleUrl="article.url"
               :display="isFileItemDisplay('1-'+article.id)"
               :articleId="article.id"
               @node-added="handleArticleNodeAdded"
@@ -47,7 +48,8 @@
       <Input v-model="roadMapTitle"
              v-if="titleEditable"
              @on-blur="handleUpdateTitle"
-             size="large" style="padding: 12px">
+             size="large" style="padding: 12px"
+             @keydown.native.stop>
       </Input>
       <Collapse value="1">
         <Panel name="1">
@@ -67,54 +69,88 @@
         :connections="mergedConnections"
         :editable="true"
         :key="repaint"
+        :live-node="curNode"
+        @node-click="handleNodeClick"
+        @node-dblclick="handleNodeDblClick"
+        @subnode-dblclick="handleSubnodeDblClick"
+        @svg-click="handleSvgClick"
+        @conn-click="handleConnClick"
       />
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}">
+      <Button  @click="handleClkHelp"
+              class="b-ro">
+        使用帮助
+        <Icon type="ios-help-circle" />
+      </Button>
       <Button type="primary" @click="handleClkReadOnly"
               :disabled="roadMapId===-1" class="b-ro">
-        Read Only
+        阅&emsp;&emsp;览
+        <Icon type="ios-glasses" />
       </Button>
       <Button type="success" @click="handleClkShare"
               :disabled="roadMapId===-1" class="b-ro">
-        Share
+        分&emsp;&emsp;享
+        <Icon type="ios-share" />
       </Button>
-      <Menu active-name="1-2" theme="dark" width="auto" :open-names="['1']">
+      <Button type="warning" @click="handleClkSaveRoadmap"
+              class="b-ro">
+        保存路书
+        <Icon type="md-cloud-upload" />
+      </Button>
+      <Button type="info" @click="handleClkSaveRoadmap"
+              class="b-ro">
+        <AddNodeForm @node-added="handleNodeAdded" ref="AddNodeForm"></AddNodeForm>
+      </Button>
+      <Menu active-name="1-2" theme="light" width="auto" :open-names="['1']"
+            v-if="nodeChosen && !modeConnectionChoosing">
         <Submenu name="1">
           <template slot="title">
             <Icon type="ios-navigate"></Icon>
-            工具栏
+            节点工具
           </template>
-          <MenuItem name="save-roadmap" @click.native="handleClkSaveRoadmap">
-            Save Roadmap
+          <MenuItem name="open-url" @click.native="handleOpenUrl" v-if="openable">
+            打开链接
+            <Icon type="ios-link" />
           </MenuItem>
-          <AddNodeForm @node-added="handleNodeAdded"></AddNodeForm>
-          <AddConnectionForm
-            @connection-added="handleConnectionAdded"
-            :node-name-list='nodeNameList'>
-          </AddConnectionForm>
-          <DelNodeForm
-            @node-deleted="handleNodeDeleted"
-            :node-name-list='nodeNameList'>
-          </DelNodeForm>
-          <DelConnectionForm
-            @connection-deleted="handleConnectionDeleted"
-            :node-name-list='nodeNameList'>
-          </DelConnectionForm>
-          <AddCommentForm
-            @comment-added="handleCommentAdded"
-            :node-name-list="nodeNameList">
-          </AddCommentForm>
-          <DelCommentForm
-            @comment-deleted="handleCommentDeleted"
-            @node-comment-list-changed="handleNodeCommentListChanged"
-            :node-name-list="nodeNameList"
-            :comment-list="commentList">
-          </DelCommentForm>
-<!--          <LoadRoadmapForm @roadmap-form-loaded="handleClkLoadRoadmap">-->
-<!--          </LoadRoadmapForm>-->
-<!--          <MenuItem name="create-roadmap" @click.native="handleClkCreateRoadmap">-->
-<!--            create Roadmap-->
-<!--          </MenuItem>-->
+          <ModifyNodeForm
+            @node-modified="handleNodeModified"
+            :node-info-old="curNodeInfo"
+            v-if="curNodeType==='mindmap'"
+            ref="modifyNode">
+          </ModifyNodeForm>
+          <MenuItem name="del-node" @click.native="handleNodeDeleted">
+            删除节点
+            <Icon type="md-trash" />
+          </MenuItem>
+          <MenuItem name="add-connection" @click.native="handleClkAddConnection">
+            添加连接
+            <Icon type="md-trending-up" />
+          </MenuItem>
+          <AddCommentForm @comment-added="handleCommentAdded" v-if="!commentExist"></AddCommentForm>
+          <ModifyCommentForm
+            @comment-modified="handleCommentAdded"
+            v-if="commentExist"
+            :comment="curComment"
+            ref="modifyComment">
+          </ModifyCommentForm>
+          <MenuItem name="del-comment" @click.native="handleCommentDeleted" v-if="commentExist">
+            删除注释
+            <Icon type="ios-trash-outline" />
+          </MenuItem>
+        </Submenu>
+      </Menu>
+      <Menu active-name="1-2" theme="light" width="auto" :open-names="['1']"
+            v-if="curConn">
+        <Submenu name="1">
+          <template slot="title">
+            <Icon type="ios-navigate"></Icon>
+            连接工具
+          </template>
+          <MenuItem name="del-conn" @click.native="handleConnectionDeleted">
+            删除连接
+            <Icon type="md-trash" />
+          </MenuItem>
         </Submenu>
       </Menu>
     </Sider>
@@ -132,6 +168,8 @@ import AddCommentForm from '../components/AddCommentForm';
 import DelCommentForm from '../components/DelCommentForm';
 import LoadRoadmapForm from '../components/LoadRoadmapForm';
 import EditRoadmapDescriptionForm from '../components/EditRoadmapDescriptionForm';
+import ModifyCommentForm from '../components/ModifyCommentForm';
+import ModifyNodeForm from '../components/ModifyNodeForm';
 import FileItem from '../components/FileItem';
 import { req } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
@@ -160,6 +198,8 @@ export default {
     FileItem,
     LoadRoadmapForm,
     EditRoadmapDescriptionForm,
+    ModifyCommentForm,
+    ModifyNodeForm,
   },
   data() {
     return {
@@ -177,6 +217,9 @@ export default {
       ],
       commentList: [
       ],
+      curNode: null,
+      curConn: null,
+      modeConnectionChoosing: false,
     };
   },
   computed: {
@@ -262,6 +305,46 @@ export default {
     mergedConnections() {
       return [...this.connections, ...this.refConnections];
     },
+    curComment() {
+      if (!(this.curNode) || this.curNode.nodes.length === 0) {
+        return null;
+      }
+      return this.curNode.nodes[0].text;
+    },
+    commentExist() {
+      if (!(this.curNode) || this.curNode.nodes.length === 0) {
+        return false;
+      }
+      return true;
+    },
+    nodeChosen() {
+      if (this.curNode) {
+        return true;
+      }
+      return false;
+    },
+    openable() {
+      window.console.log('openurl', this.curNode.URI);
+      if (this.curNode.URI) {
+        return true;
+      }
+      return false;
+    },
+    curNodeInfo() {
+      if (this.curNode) {
+        return {
+          name: this.curNode.text,
+          URI: this.curNode.URI,
+        };
+      }
+      return null;
+    },
+    curNodeType() {
+      if (this.curNode) {
+        return this.curNode.category;
+      }
+      return null;
+    },
   },
   mounted() {
     // GET articles for l-sider
@@ -287,6 +370,44 @@ export default {
     }).catch((err) => {
       pushErr(this, err, true);
     });
+  },
+  created() {
+    // 监控键盘事件
+    document.onkeydown = (e) => {
+      window.console.log('但是噶', e);
+      // 事件对象兼容
+      const e1 = e;
+      // 键盘按键判断:左箭头-37;上箭头-38；右箭头-39;下箭头-40
+      // 左
+      if (e1 && e1.key === 'Backspace') {
+        if (this.curNode !== null) {
+          this.handleNodeDeleted();
+        } else if (this.curConn !== null) {
+          this.handleConnectionDeleted();
+        }
+      } else if ((e.metaKey === true || e.ctrlKey === true) && e.key === 's') {
+        this.handleClkSaveRoadmap();
+        e.preventDefault();
+      } else if (e.key === 'Enter') {
+        this.$refs.AddNodeForm.handleClkAddNode();
+      } else if (e.key === 'Tab') {
+        if (this.curNode !== null) {
+          const name = this.createUniName();
+          if (!name) {
+            pushErr(this, 1000, true, '创建新节点失败', '自动生成节点名失败');
+            return;
+          }
+          this.handleNodeAdded({
+            nodeName: name,
+            nodeUrl: '',
+          });
+          this.handleConnectionAdded({
+            sourceNode: this.curNode.text,
+            targetNode: name,
+          });
+        }
+      }
+    };
   },
   methods: {
     getMidPos() {
@@ -324,14 +445,28 @@ export default {
         }];
       this.repaintMindMap();
     },
+    handleNodeModified(nodeInfo) {
+      _.forEach(this.nodes, (node) => {
+        if (node.text === this.curNode.text) {
+          // eslint-disable-next-line no-param-reassign
+          node.text = nodeInfo.nodeName;
+          // eslint-disable-next-line no-param-reassign
+          node.URI = nodeInfo.nodeUrl;
+        }
+      });
+      this.repaintMindMap();
+    },
     handleArticleNodeAdded(nodeInfo) {
       this.handleNodeAdded(nodeInfo, 'article');
     },
-    handleNodeDeleted(nodeInfo) {
-      this.nodes = _.filter(this.nodes, node => node.text !== nodeInfo.nodeName);
+    handleNodeDeleted() {
+      this.nodes = _.filter(this.nodes, node => node.text !== this.curNode.text);
       this.connections = _.filter(this.connections, connection =>
-        (connection.source.text !== nodeInfo.nodeName
-          && connection.target.text !== nodeInfo.nodeName));
+        (connection.source.text !== this.curNode.text
+          && connection.target.text !== this.curNode.text));
+      this.curNode = null;
+      window.console.log('del curnode', this.curNode);
+      this.$Notice.success({ title: 'node deleted' });
       this.repaintMindMap();
     },
     handleConnectionAdded(connectionInfo) {
@@ -341,19 +476,24 @@ export default {
       }];
       this.repaintMindMap();
     },
-    handleConnectionDeleted(connectionInfo) {
+    handleConnectionDeleted() {
       this.connections = _.filter(this.connections, connection => !(
-        (connection.source.text === connectionInfo.node1
-                  && connection.target.text === connectionInfo.node2)
-        || (connection.target.text === connectionInfo.node1
-                  && connection.source.text === connectionInfo.node2)));
+        (connection.source.text === this.curConn.source.text
+                  && connection.target.text === this.curConn.target.text)
+        || (connection.target.text === this.curConn.source.text
+                  && connection.source.text === this.curConn.target.text)));
+      this.curConn = null;
+      this.$Notice.success({ title: 'connection deleted' });
       this.repaintMindMap();
+    },
+    handleClkAddConnection() {
+      this.modeConnectionChoosing = true;
     },
     handleCommentAdded(commentInfo) {
       _.forEach(this.nodes, (node) => {
-        if (node.text === commentInfo.node) {
+        if (node.text === this.curNode.text) {
           // eslint-disable-next-line no-param-reassign
-          node.nodes = [...node.nodes, {
+          node.nodes = [{
             text: commentInfo.comment,
             nodes: [],
             color: 'rgba(36, 170, 255, 1.0)',
@@ -362,11 +502,11 @@ export default {
       });
       this.repaintMindMap();
     },
-    handleCommentDeleted(commentInfo) {
+    handleCommentDeleted() {
       _.forEach(this.nodes, (node) => {
-        if (node.text === commentInfo.node) {
+        if (node.text === this.curNode.text) {
           // eslint-disable-next-line no-param-reassign
-          node.nodes = _.filter(node.nodes, node2 => node2.text !== commentInfo.comment);
+          node.nodes = [];
         }
       });
       this.repaintMindMap();
@@ -483,6 +623,8 @@ export default {
           if (typeof art !== 'undefined') {
             // eslint-disable-next-line no-param-reassign
             node.text = art.title;
+            // eslint-disable-next-line no-param-reassign
+            node.URI = art.url;
           } else {
             // eslint-disable-next-line no-param-reassign
             node.category = 'mindmap';
@@ -525,6 +667,92 @@ export default {
       });
       return ret;
     },
+    createUniName() {
+      let i = 0;
+      for (i = 1; i < 10000; i += 1) {
+        let flag = true;
+        const name = `新建节点${i}`;
+        _(this.nodes).forEach((node) => {
+          if (node.text === name) {
+            flag = false;
+          }
+        });
+        if (flag) { return name; }
+      }
+      return null;
+    },
+    handleOpenUrl() {
+      if (this.curNode.URI) {
+        if (!_(this.curNode.URI)
+          .startsWith('http://')) {
+          window.open(`http://${this.curNode.URI}`, '_blank');
+        }
+        window.open(this.curNode.URI, '_blank');
+      }
+    },
+    handleNodeClick(node) {
+      if (this.modeConnectionChoosing) {
+        this.handleConnectionAdded({
+          sourceNode: this.curNode.text,
+          targetNode: node.text,
+        });
+        this.modeConnectionChoosing = false;
+      } else {
+        this.curNode = node;
+        this.curConn = null;
+        window.console.log('click', node);
+      }
+    },
+    handleNodeDblClick(node) {
+      this.modeConnectionChoosing = false;
+      this.curNode = node;
+      this.curConn = null;
+      window.console.log('dbclick', node);
+      window.console.log('url', node.URI);
+      if (node.category === 'article') {
+        window.console.log('pass');
+      } else {
+        this.$nextTick(() => {
+          this.$refs.modifyNode.handleClkModifyNode();
+        });
+      }
+    },
+    handleSvgClick() {
+      this.modeConnectionChoosing = false;
+      this.curNode = null;
+      this.curConn = null;
+      window.console.log('svg');
+    },
+    handleSubnodeDblClick(node) {
+      this.modeConnectionChoosing = false;
+      this.curNode = node;
+      this.curConn = null;
+      window.console.log('subdbclick', node);
+      this.$nextTick(() => {
+        this.$refs.modifyComment.handleClkModifyComment();
+      });
+    },
+    handleConnClick(conn) {
+      this.modeConnectionChoosing = false;
+      this.curNode = null;
+      this.curConn = conn;
+    },
+    handleClkHelp() {
+      this.$Modal.info({
+        title: '使用帮助',
+        content: '点选左侧文献栏中文献，可以添加文献节点。</br>点选右侧新建节点，可以添加普通节点。</br>' +
+                 '点选画板中节点和边，可以依据右侧工具栏对节点和边进行编辑。</br>' +
+                 '快捷键：</br>' +
+                 '双击普通节点可以编辑普通节点。</br>' +
+                 '双击注释可以编辑注释。</br>' +
+                 '保存：Ctrl+S(PC), Command+S(MAC)</br>' +
+                 '删除：点选元素后按delete</br>' +
+                 '新建普通节点：Enter</br>' +
+                 '新建关联节点: Tab',
+        scrollable: true,
+        closable: true,
+      });
+    },
   },
 };
 </script>
@@ -536,7 +764,11 @@ export default {
   }
   .b-ro{
     width: 120px;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
+    margin-left: 40px;
+    margin-right: 40px;
+  }
+  #help-icon{
     margin-left: 40px;
     margin-right: 40px;
   }

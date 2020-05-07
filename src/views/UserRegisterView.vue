@@ -21,14 +21,19 @@
       <br>
       <br>
       <i-button
-        type="primary"
-        @click.native="register">
-        注册
-      </i-button>
-      <i-button
         type="warning"
         @click.native="forget_password">
         忘记密码
+      </i-button>
+      <i-button
+        type="primary"
+        @click.native="register">
+        提交注册
+      </i-button>
+      <i-button
+        type="success"
+        @click.native="jump_login">
+        返回登陆
       </i-button>
     </div>
   </div>
@@ -60,6 +65,9 @@ export default {
     this.check_mes = `验证码：计算 ${this.add_a} + ${this.add_b} = `;
   },
   methods: {
+    jump_login() {
+      router.push('/');
+    },
     register() {
       // eslint-disable-next-line max-len
       if (!this.userName.trim() || !this.password.trim() || !this.email.trim() || !this.password_twice.trim()) {

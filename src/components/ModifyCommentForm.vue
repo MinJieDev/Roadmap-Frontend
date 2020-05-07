@@ -1,14 +1,15 @@
 <template>
   <div>
-    <MenuItem name="add-comment" @click.native="handleClkAddComment" ref="MenuItem">
-      添加注释
+    <MenuItem name="modify-comment" @click.native="handleClkModifyComment" ref="MenuItem">
+      修改注释
       <Icon type="md-clipboard" />
     </MenuItem>
     <Modal
       v-model="commentFormModal"
-      title="添加注释"
+      title="修改注释"
       @on-ok="ok"
-      @on-cancel="cancel">
+      @on-cancel="cancel"
+      @keydown.native.stop>
       <p>注释内容</p>
       <Input v-model="commentInfo.comment" type="textarea" placeholder="请输入注释内容..."/>
     </Modal>
@@ -16,24 +17,25 @@
 </template>
 <script>
 export default {
-  name: 'AddCommentForm',
+  name: 'ModifyCommentForm',
+  props: ['comment'],
   data() {
     return {
       commentFormModal: false,
       commentInfo: {
-        comment: '',
+        comment: this.comment,
       },
     };
   },
   methods: {
     ok() {
-      this.$Message.info('Connection added');
-      this.$emit('comment-added', this.commentInfo);
+      this.$Message.info('Connection modified');
+      this.$emit('comment-modified', this.commentInfo);
     },
     cancel() {
       //  this.$Message.info('Clicked cancel');
     },
-    handleClkAddComment() {
+    handleClkModifyComment() {
       this.commentFormModal = true;
       this.$Message.info('handleClk');
     },
