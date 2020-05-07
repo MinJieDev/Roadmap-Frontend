@@ -44,6 +44,7 @@
         查看笔记
         <Icon type="ios-book" />
       </Button>
+      <NoteMarkdown :note="curNote" ref="NoteMarkdown"></NoteMarkdown>
     </Sider>
   </Layout>
 </template>
@@ -55,6 +56,7 @@ import { pushErr } from '../components/ErrPush';
 import { getRoadmap, getRoadmapShareLink, postRoadmapShareLink } from '../apis/RoadmapEditorApis';
 import { req } from '../apis/util';
 import Roadmap from '../components/roadmap/Roadmap';
+import NoteMarkdown from '../components/NoteMarkdown';
 
 Vue.prototype._ = _;
 
@@ -62,6 +64,7 @@ export default {
   name: 'RoadmapReader',
   components: {
     Roadmap,
+    NoteMarkdown,
   },
   data() {
     return {
@@ -157,6 +160,11 @@ export default {
         return this.curNode.category;
       }
       return null;
+    },
+    curNote() {
+      if (!this.curNode) return '';
+      window.console.log('curnote', this.getArticleByTitle(this.curNode.text).note);
+      return this.getArticleByTitle(this.curNode.text).note;
     },
   },
   methods: {
@@ -282,12 +290,8 @@ export default {
       }
     },
     handleOpenNote() {
-      this.$Modal.info({
-        title: '文献笔记',
-        content: this.getArticleByTitle(this.curNode.text).note,
-      });
+      this.$refs.NoteMarkdown.handleShowNoteModal();
     },
-
   },
 };
 </script>
