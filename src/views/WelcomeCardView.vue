@@ -1,8 +1,8 @@
 <template>
 <div>
-  <Row type="flex" justify="center" align="middle">
-    <i-col span="6">
-      <Card style="width:320px; height: 260px">
+  <Row type="flex" justify="center" align="middle" gutter="10">
+    <i-col span="5">
+      <Card >
         <div style="text-align:center">
           <a href="editor">
             <img src="../assets/welcome/mindmap.png" style="width:70%" alt="Load Fail">
@@ -11,8 +11,8 @@
         </div>
       </Card>
     </i-col>
-    <i-col span="6">
-      <Card style="width:320px; height: 260px">
+    <i-col span="5">
+      <Card >
         <div style="text-align:center">
           <a href="articleTable">
             <img src="../assets/welcome/books.png" style="width:70%" alt="Load Fail">
@@ -21,8 +21,8 @@
         </div>
       </Card>
     </i-col>
-    <i-col span="6">
-      <Card style="width:320px; height: 260px">
+    <i-col span="5">
+      <Card >
         <div style="text-align:center">
           <a href="RoadMapTable">
             <img src="../assets/welcome/folder.png" style="width:70%" alt="Load Fail">
