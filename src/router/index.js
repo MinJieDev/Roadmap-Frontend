@@ -10,6 +10,11 @@ const routes = [
     component: () => import('../views/UserLoginView.vue'),
   },
   {
+    path: '/welcome',
+    name: 'Welcome',
+    component: () => import('../views/WelcomeCardView.vue'),
+  },
+  {
     path: '/articleTable',
     name: 'ArticleTable',
     component: () => import(/* webpackChunkName: "about" */ '../views/ArticleTableView.vue'),
