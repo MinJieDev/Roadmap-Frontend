@@ -9,7 +9,7 @@
               alt="MinJieDev · 知识路书"
               width=120px
               style="cursor:pointer"
-              @click="goToLogin">
+              @click="goToWelcome">
           </div>
           <div class="layout-nav">
             <MenuItem name="1" :to="{name: 'ArticleTable'}">
@@ -89,6 +89,11 @@ export default {
     goToLogin() {
       if (this.$route.name !== 'Login') {
         router.push({ name: 'Login' });
+      }
+    },
+    goToWelcome() {
+      if (this.$route.name !== 'Welcome') {
+        router.push({ name: 'Welcome' });
       }
     },
     isLoginStatus() {

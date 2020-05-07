@@ -1,6 +1,6 @@
 <template>
 <div>
-  <Row type="flex" justify="center" align="middle" gutter="10">
+  <Row type="flex" justify="center" align="middle" :gutter="10">
     <i-col span="5">
       <Card >
         <div style="text-align:center">

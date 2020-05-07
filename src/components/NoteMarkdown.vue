@@ -4,7 +4,7 @@
       v-model="noteModal"
       title="文献笔记"
       @on-ok="ok">
-      <VueMarkdown style="margin-left: 20px">{{ note }}</VueMarkdown>
+      <VueMarkdown style="margin-left: 20px">{{ computedNote }}</VueMarkdown>
     </Modal>
   </div>
 </template>
@@ -30,6 +30,14 @@ export default {
     handleShowNoteModal() {
       this.noteModal = true;
       window.console.log('handleShowNoteModa:bug here:', this.note);
+    },
+  },
+  computed: {
+    /**
+     * 解决prop无法成功挂getter-setter钩子的问题
+     */
+    computedNote() {
+      return this.note;
     },
   },
 };
