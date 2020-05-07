@@ -44,7 +44,7 @@
         查看笔记
         <Icon type="ios-book" />
       </Button>
-      <NoteMarkdown :note="curNote" ref="NoteMarkdown"></NoteMarkdown>
+      <NoteMarkdown :note="curNote" ref="notemdReader"></NoteMarkdown>
     </Sider>
   </Layout>
 </template>
@@ -290,7 +290,7 @@ export default {
       }
     },
     handleOpenNote() {
-      this.$refs.NoteMarkdown.handleShowNoteModal();
+      this.$refs.notemdReader.handleShowNoteModal();
     },
   },
 };

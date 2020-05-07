@@ -2259,7 +2259,7 @@ codemirror-spell-checker@*:
 
 codemirror@*:
   version "5.53.2"
-  resolved "https://registry.npm.taobao.org/codemirror/download/codemirror-5.53.2.tgz?cache=0&sync_timestamp=1587527168737&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fcodemirror%2Fdownload%2Fcodemirror-5.53.2.tgz#9799121cf8c50809cca487304e9de3a74d33f428"
+  resolved "https://registry.npm.taobao.org/codemirror/download/codemirror-5.53.2.tgz?cache=0&sync_timestamp=1587526597074&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fcodemirror%2Fdownload%2Fcodemirror-5.53.2.tgz#9799121cf8c50809cca487304e9de3a74d33f428"
   integrity sha1-l5kSHPjFCAnMpIcwTp3jp00z9Cg=
 
 collection-visit@^1.0.0:
@@ -6858,7 +6858,7 @@ markdown-it@^6.0.1:
 
 marked@*:
   version "1.0.0"
-  resolved "https://registry.npm.taobao.org/marked/download/marked-1.0.0.tgz#d35784245a04871e5988a491e28867362e941693"
+  resolved "https://registry.npm.taobao.org/marked/download/marked-1.0.0.tgz?cache=0&sync_timestamp=1587458721452&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fmarked%2Fdownload%2Fmarked-1.0.0.tgz#d35784245a04871e5988a491e28867362e941693"
   integrity sha1-01eEJFoEhx5ZiKSR4ohnNi6UFpM=
 
 match-at@^0.1.0:
