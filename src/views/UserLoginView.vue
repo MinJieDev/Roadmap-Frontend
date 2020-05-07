@@ -60,7 +60,7 @@ export default {
     save_token(response) {
       window.console.info(response.data.token);
       store.commit('pushAuthToken', response.data.token);
-      router.push('/ArticleTable');
+      router.push('/welcome');
     },
     handle_register() {
       router.push('/user_register');
