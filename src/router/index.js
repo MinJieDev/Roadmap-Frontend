@@ -6,6 +6,11 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: '/',
+    name: 'Welcome',
+    component: () => import('../views/WelcomeCardView.vue'),
+  },
+  {
+    path: '/login',
     name: 'Login',
     component: () => import('../views/UserLoginView.vue'),
   },
