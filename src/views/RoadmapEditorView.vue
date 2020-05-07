@@ -113,6 +113,10 @@
             打开链接
             <Icon type="ios-link" />
           </MenuItem>
+          <MenuItem name="open-note" @click.native="handleOpenNote" v-if="curNodeType==='article'">
+            打开笔记
+            <Icon type="ios-book" />
+          </MenuItem>
           <ModifyNodeForm
             @node-modified="handleNodeModified"
             :node-info-old="curNodeInfo"
@@ -147,7 +151,7 @@
             <Icon type="ios-navigate"></Icon>
             连接工具
           </template>
-          <MenuItem name="del-conn" @click.native="handleConnectionDeleted">
+          <MenuItem name="del-conn" @click.native="handleConnectionDeleted" v-if="conndeletable">
             删除连接
             <Icon type="md-trash" />
           </MenuItem>
@@ -344,6 +348,12 @@ export default {
         return this.curNode.category;
       }
       return null;
+    },
+    conndeletable() {
+      if (this.curConn && this.curConn.type !== 'ref') {
+        return true;
+      }
+      return false;
     },
   },
   mounted() {
@@ -609,6 +619,9 @@ export default {
         pushErr(this, err, true);
       });
     },
+    getArticleByTitle(title) {
+      return _(this.articles).find(art => art.title === title);
+    },
     getArticleIdByTitle(title) {
       return _(this.articles).find(art => art.title === title).id;
     },
@@ -751,6 +764,12 @@ export default {
                  '新建关联节点: Tab',
         scrollable: true,
         closable: true,
+      });
+    },
+    handleOpenNote() {
+      this.$Modal.info({
+        title: '文献笔记',
+        content: this.getArticleByTitle(this.curNode.text).note,
       });
     },
   },

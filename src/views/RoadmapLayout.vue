@@ -87,8 +87,8 @@ export default {
   },
   methods: {
     goToLogin() {
-      if (this.$route.path !== '/') {
-        router.push('/');
+      if (this.$route.name !== 'Login') {
+        router.push({ name: 'Login' });
       }
     },
     isLoginStatus() {
@@ -96,9 +96,7 @@ export default {
     },
     logOut() {
       logout();
-      if (this.$route.path !== '/') {
-        router.push('/');
-      }
+      this.goToLogin();
     },
   },
   created() {

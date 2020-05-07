@@ -60,8 +60,8 @@ export default {
     };
   },
   mounted() {
-    this.add_a = Math.round(Math.random() * 100);
-    this.add_b = Math.round(Math.random() * 100);
+    this.add_a = Math.round(Math.random() * 30);
+    this.add_b = Math.round(Math.random() * 30);
     this.check_mes = `验证码：计算 ${this.add_a} + ${this.add_b} = `;
   },
   methods: {
