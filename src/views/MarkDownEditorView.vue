@@ -16,9 +16,9 @@
 <script>
 import Simplemde from 'simplemde';
 import 'simplemde/dist/simplemde.min.css';
-// import VueMarkdown from 'vue-markdown';
+import { changeMTdata } from '../apis/MindTableEditorApis';
+import { pushErr } from '../components/ErrPush';
 // import { req } from '../apis/util';
-// import { pushErr } from '../components/ErrPush';
 
 export default {
   name: 'MarkDownEditorView',
@@ -32,9 +32,29 @@ export default {
   },
   methods: {
     save() {
-      window.console.info(this.editor.value());
+      const dataChange = {
+        id: this.$route.query.selected,
+        note: this.editor.value(),
+      };
+      window.console.info(dataChange);
+      changeMTdata(dataChange)
+        .then(() => {
+          this.$Message.info('修改成功!');
+          this.$emit('reloadData');
+        })
+        .catch((err) => {
+          pushErr(this, err, true);
+        });
+      this.$router.push({
+        path: '/articleTable',
+      });
     },
     cancel() {
+      this.$router.push({
+        path: '/articleTable',
+      });
+    },
+    getData() {
 
     },
   },
