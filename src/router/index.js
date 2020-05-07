@@ -6,6 +6,11 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: '/',
+    name: 'Welcome',
+    component: () => import('../views/WelcomeCardView.vue'),
+  },
+  {
+    path: '/login',
     name: 'Login',
     component: () => import('../views/UserLoginView.vue'),
   },
@@ -15,7 +20,16 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/ArticleTableView.vue'),
     meta: {
       name: ['文献目录'],
-      path: ['/ArticleTable'],
+      path: ['/articleTable'],
+    },
+  },
+  {
+    path: '/articleMde',
+    name: 'ArticleMarkDownEditor',
+    component: () => import('../views/MarkDownEditorView'),
+    meta: {
+      name: ['文献目录', '文献笔记'],
+      path: ['/articleTable', '/articleMde'],
     },
   },
   {

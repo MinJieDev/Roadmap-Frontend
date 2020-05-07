@@ -44,6 +44,7 @@ import _ from 'lodash';
 import bibtexParse from 'bibtex-parse-js';
 import { pushErr } from '../components/ErrPush';
 import ItemEditor from './TableItemEditor';
+import MindTableExpand from './MindTableExpand';
 import { deleteMTdata, createMTdata, changeMTdata } from '../apis/MindTableEditorApis';
 
 export default {
@@ -54,7 +55,7 @@ export default {
       required: true,
     },
   },
-  components: { ItemEditor },
+  components: { ItemEditor, MindTableExpand },
   data() {
     return {
       drawer: false,
@@ -68,29 +69,53 @@ export default {
       },
       columns: [
         {
+          type: 'expand',
+          width: 50,
+          render: (h, params) => h(MindTableExpand, {
+            props: {
+              row: params.row,
+            },
+          }),
+        },
+        {
           title: 'Title',
           key: 'title',
-          width: 230,
+          width: 300,
         },
         {
           title: 'Author',
           key: 'author',
-          width: 150,
-        },
-        {
-          title: 'Url',
-          key: 'url',
           width: 200,
         },
-        {
-          title: 'Journal/Conference',
-          key: 'journal',
-          width: 200,
-        },
+        // {
+        //   title: 'Url',
+        //   key: 'url',
+        //   width: 200,
+        // },
+        // {
+        //   title: 'Journal/Conference',
+        //   key: 'journal',
+        //   width: 200,
+        // },
         {
           title: 'Note',
           key: 'note',
-          // width: 300,
+          render: (h, params) => h('div', [
+            h('Button', {
+              props: {
+                type: 'primary',
+                size: 'small',
+              },
+              style: {
+                marginRight: '5px',
+              },
+              on: {
+                click: () => {
+                  this.editNote(params.index);
+                },
+              },
+            }, '编辑笔记'),
+          ]),
         },
         // {
         //   title: 'Ref',
@@ -252,6 +277,12 @@ export default {
     cancelBibModal() {
       this.BibtexModal = false;
       this.BibValue = '';
+    },
+    editNote(index) {
+      this.$router.push({
+        path: '/articleMde',
+        query: { selected: this.data[index].id },
+      });
     },
   },
 };
