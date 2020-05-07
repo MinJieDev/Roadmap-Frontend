@@ -4,12 +4,16 @@
       v-model="noteModal"
       title="文献笔记"
       @on-ok="ok">
-      <VueMarkdown style="margin-left: 20px">{{ note }}</VueMarkdown>
+      <div class="markdown-body">
+        <VueMarkdown style="margin-left: 20px">{{ note }}</VueMarkdown>
+      </div>
     </Modal>
   </div>
 </template>
 <script>
 import VueMarkdown from 'vue-markdown';
+import 'github-markdown-css';
+
 
 export default {
   components: {
