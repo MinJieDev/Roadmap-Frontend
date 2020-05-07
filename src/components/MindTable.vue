@@ -100,7 +100,22 @@ export default {
         {
           title: 'Note',
           key: 'note',
-          // width: 300,
+          render: (h, params) => h('div', [
+            h('Button', {
+              props: {
+                type: 'primary',
+                size: 'small',
+              },
+              style: {
+                marginRight: '5px',
+              },
+              on: {
+                click: () => {
+                  this.editNote(params.index);
+                },
+              },
+            }, '编辑笔记'),
+          ]),
         },
         // {
         //   title: 'Ref',
@@ -262,6 +277,12 @@ export default {
     cancelBibModal() {
       this.BibtexModal = false;
       this.BibValue = '';
+    },
+    editNote(index) {
+      this.$router.push({
+        path: '/articleMde',
+        query: { selected: this.data[index].id },
+      });
     },
   },
 };
