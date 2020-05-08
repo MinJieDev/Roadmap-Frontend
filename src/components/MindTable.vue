@@ -83,8 +83,8 @@ export default {
           // width: 300,
         },
         {
-          title: 'Author',
-          key: 'author',
+          title: 'First Author',
+          key: 'firstAuthor',
           // width: 500,
         },
         {
@@ -109,11 +109,6 @@ export default {
           ]),
           width: 150,
         },
-        // {
-        //   title: 'Ref',
-        //   key: 'ref',
-        //   tree: true,
-        // },
         {
           title: 'Action',
           key: 'action',
@@ -173,7 +168,13 @@ export default {
   },
   computed: {
     data() {
-      return _.slice(this.tableData, 0, this.tableData.length);
+      const res = _.slice(this.tableData, 0, this.tableData.length);
+      _.forEach(res, (article) => {
+        const authorArr = _.split(article.author, 'and', 2);
+        _.merge(article, { firstAuthor: authorArr[0] });
+        window.console.log(article);
+      });
+      return res;
     },
   },
   methods: {
