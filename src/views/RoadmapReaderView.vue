@@ -162,9 +162,11 @@ export default {
       return null;
     },
     curNote() {
-      if (!this.curNode) return '';
-      window.console.log('curnote', this.getArticleByTitle(this.curNode.text).note);
-      return this.getArticleByTitle(this.curNode.text).note;
+      if (!this.curNode || this.curNode.category !== 'article') return '';
+      if (this.getArticleByTitle(this.curNode.text).note) {
+        return this.getArticleByTitle(this.curNode.text).note;
+      }
+      return '';
     },
   },
   methods: {
