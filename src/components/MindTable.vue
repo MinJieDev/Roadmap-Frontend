@@ -21,6 +21,13 @@
       style="margin-left: 10px; margin-bottom: 10px ">
       导入BibTex
     </Button>
+<!--  TODO: 放置在最右端  -->
+    <Button
+      @click="deleteSelectItem"
+      type="error"
+      style="margin-left : 10px; margin-bottom: 10px; ">
+      删除勾选项
+    </Button>
     <Modal
       v-model="BibtexModal"
       title="导入BibTex"
@@ -35,8 +42,19 @@
     <Table row-key="id"
            :columns="columns"
            :data="data"
-           border>
+           border
+           ref="selection">
     </Table>
+    <Button
+      @click="handleSelectAll(true)"
+      style="margin-left: 10px; margin-top: 10px ">
+      设置全选
+    </Button>
+    <Button
+      @click="handleSelectAll(false)"
+      style="margin-left: 10px; margin-top: 10px ">
+      取消全选
+    </Button>
   </div>
 </template>
 <script>
@@ -76,6 +94,11 @@ export default {
               row: params.row,
             },
           }),
+        },
+        {
+          type: 'selection',
+          width: 60,
+          align: 'center',
         },
         {
           title: 'Title',
@@ -185,8 +208,6 @@ export default {
     onDelete(index) {
       deleteMTdata(this.data[index].id)
         .then(() => {
-          // this.data.splice(index, 1);
-          // this.data = _.slice(this.data, index, index + 1);
           this.$Message.info(`${this.data[index].title} Deleted`);
           this.$emit('reloadData');
         });
@@ -275,6 +296,21 @@ export default {
       this.$router.push({
         path: '/articleMde',
         query: { selected: this.data[index].id },
+      });
+    },
+    handleSelectAll(status) {
+      this.$refs.selection.selectAll(status);
+    },
+    deleteSelectItem() {
+      _.forEach(this.$refs.selection.objData, (article) => {
+        // eslint-disable-next-line no-underscore-dangle
+        if (article._isChecked === true) {
+          window.console.log('delete article content: ', article);
+          deleteMTdata(article.id).then(() => {
+            this.$Message.info(`${article.title} Deleted`);
+            this.$emit('reloadData');
+          });
+        }
       });
     },
   },
