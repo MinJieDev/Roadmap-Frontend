@@ -80,26 +80,17 @@ export default {
         {
           title: 'Title',
           key: 'title',
-          width: 300,
+          // width: 300,
         },
         {
           title: 'Author',
           key: 'author',
-          width: 200,
+          // width: 500,
         },
-        // {
-        //   title: 'Url',
-        //   key: 'url',
-        //   width: 200,
-        // },
-        // {
-        //   title: 'Journal/Conference',
-        //   key: 'journal',
-        //   width: 200,
-        // },
         {
           title: 'Note',
           key: 'note',
+          align: 'center',
           render: (h, params) => h('div', [
             h('Button', {
               props: {
@@ -116,6 +107,7 @@ export default {
               },
             }, '编辑笔记'),
           ]),
+          width: 150,
         },
         // {
         //   title: 'Ref',
