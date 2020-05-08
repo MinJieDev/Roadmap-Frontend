@@ -359,8 +359,11 @@ export default {
       return false;
     },
     curNote() {
-      if (!this.curNode) return '';
-      return this.getArticleByTitle(this.curNode.text).note;
+      if (!this.curNode || this.curNode.category !== 'article') return '';
+      if (this.getArticleByTitle(this.curNode.text).note) {
+        return this.getArticleByTitle(this.curNode.text).note;
+      }
+      return '';
     },
   },
   mounted() {
