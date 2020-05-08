@@ -8,7 +8,8 @@
       v-model="commentFormModal"
       title="添加注释"
       @on-ok="ok"
-      @on-cancel="cancel">
+      @on-cancel="cancel"
+      @keydown.native.stop>
       <p>注释内容</p>
       <Input v-model="commentInfo.comment" type="textarea" placeholder="请输入注释内容..."/>
     </Modal>
