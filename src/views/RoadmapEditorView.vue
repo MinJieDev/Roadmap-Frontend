@@ -117,6 +117,7 @@
             打开笔记
             <Icon type="ios-book" />
           </MenuItem>
+          <NoteMarkdown :note="curNote" ref="NoteMarkdown"></NoteMarkdown>
           <ModifyNodeForm
             @node-modified="handleNodeModified"
             :node-info-old="curNodeInfo"
@@ -175,6 +176,7 @@ import EditRoadmapDescriptionForm from '../components/EditRoadmapDescriptionForm
 import ModifyCommentForm from '../components/ModifyCommentForm';
 import ModifyNodeForm from '../components/ModifyNodeForm';
 import FileItem from '../components/FileItem';
+import NoteMarkdown from '../components/NoteMarkdown';
 import { req } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
 import {
@@ -204,6 +206,7 @@ export default {
     EditRoadmapDescriptionForm,
     ModifyCommentForm,
     ModifyNodeForm,
+    NoteMarkdown,
   },
   data() {
     return {
@@ -355,6 +358,10 @@ export default {
       }
       return false;
     },
+    curNote() {
+      if (!this.curNode) return '';
+      return this.getArticleByTitle(this.curNode.text).note;
+    },
   },
   mounted() {
     // GET articles for l-sider
@@ -384,6 +391,7 @@ export default {
   created() {
     // 监控键盘事件
     document.onkeydown = (e) => {
+      if (this.$route.name !== 'Editor') return;
       window.console.log('但是噶', e);
       // 事件对象兼容
       const e1 = e;
@@ -767,10 +775,8 @@ export default {
       });
     },
     handleOpenNote() {
-      this.$Modal.info({
-        title: '文献笔记',
-        content: this.getArticleByTitle(this.curNode.text).note,
-      });
+      window.console.log('notemarkdown', this.$refs);
+      this.$refs.NoteMarkdown.handleShowNoteModal();
     },
   },
 };
