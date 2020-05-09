@@ -66,7 +66,7 @@ export default {
   },
   methods: {
     jump_login() {
-      router.push('/');
+      router.push({ name: 'Login' });
     },
     register() {
       // eslint-disable-next-line max-len
@@ -90,7 +90,7 @@ export default {
             this.$Notice.success({
               title: '注册成功',
             });
-            router.push('/');
+            router.push({ name: 'Login' });
           })
           .catch((err) => {
             pushErr(this, err, true);
