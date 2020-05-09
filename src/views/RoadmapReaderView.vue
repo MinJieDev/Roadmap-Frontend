@@ -79,7 +79,6 @@ export default {
       ],
       articles: [],
       curNode: null,
-      cc: null,
     };
   },
   async mounted() {
