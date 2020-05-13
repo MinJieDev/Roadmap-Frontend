@@ -18,7 +18,7 @@
               :display="isFileItemDisplay('1-'+article.id)"
               :articleId="article.id"
               @node-added="handleArticleNodeAdded"
-              @node-deleted="handleNodeDeleted">
+              @node-deleted="handleArticleNodeDeleted(article.title)">
             </FileItem>
           </MenuItem>
         </Submenu>
@@ -45,7 +45,8 @@
         {{roadMapTitle}}
         <Icon type="ios-create-outline" @click="handleClkEditTitle" />
       </div>
-      <Input v-model="roadMapTitle"
+      <Input ref="roadmapTitleInput"
+             v-model="roadMapTitle"
              v-if="titleEditable"
              @on-blur="handleUpdateTitle"
              size="large" style="padding: 12px"
@@ -480,6 +481,17 @@ export default {
     handleArticleNodeAdded(nodeInfo) {
       this.handleNodeAdded(nodeInfo, 'article');
     },
+    // 删除文献结点
+    handleArticleNodeDeleted(articleTitle) {
+      window.console.log(this.nodes);
+      window.console.log(articleTitle);
+      this.nodes = _.filter(this.nodes, node => node.text !== articleTitle);
+      this.connections = _.filter(this.connections, connection =>
+        (connection.source.text !== articleTitle
+          && connection.target.text !== articleTitle));
+      this.$Notice.success({ title: 'node deleted' });
+      this.repaintMindMap();
+    },
     handleNodeDeleted() {
       this.nodes = _.filter(this.nodes, node => node.text !== this.curNode.text);
       this.connections = _.filter(this.connections, connection =>
@@ -589,6 +601,8 @@ export default {
     },
     handleClkEditTitle() {
       this.titleEditable = true;
+      // 焦点定位于输入框
+      this.$nextTick(() => this.$refs.roadmapTitleInput.focus());
     },
     handleClkEditDescription() {
       this.$refs.edit_desc.handleTrig();
