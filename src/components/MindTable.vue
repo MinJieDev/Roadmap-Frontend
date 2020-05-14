@@ -3,7 +3,7 @@
     <ItemEditor
       v-bind:drawer="drawer"
       v-bind:index="index"
-      v-bind:drawerFormData="drawerFormData"
+      v-bind:drawerFormData="formData"
       v-bind:articles="tableData"
       @cancelDrawer="cancelDrawer"
       @submitDrawer="submitDrawer"
@@ -80,10 +80,11 @@ export default {
       BibtexModal: false,
       index: 0,
       BibValue: '',
-      drawerFormData: {
+      formData: {
         title: '',
         url: '',
-        note: '',
+        author: '',
+        read_state: false,
       },
       columns: [
         {
@@ -103,12 +104,33 @@ export default {
         {
           title: 'Title',
           key: 'title',
-          // width: 300,
+          width: 400,
         },
         {
           title: 'First Author',
           key: 'firstAuthor',
           // width: 500,
+        },
+        {
+          title: 'Read State',
+          key: 'status',
+          align: 'center',
+          width: 100,
+          render: (h, params) => {
+            const type = params.row.read_state === false ? 'error' : 'success';
+            const text = params.row.read_state === false ? 'Unread' : 'Read';
+            return h('Button', {
+              props: {
+                type,
+                size: 'small',
+              },
+              on: {
+                click: () => {
+                  this.changeReadStatus(params.index);
+                },
+              },
+            }, text);
+          },
         },
         {
           title: 'Note',
@@ -130,7 +152,7 @@ export default {
               },
             }, '编辑笔记'),
           ]),
-          width: 150,
+          width: 120,
         },
         {
           title: 'Action',
@@ -195,7 +217,7 @@ export default {
       _.forEach(res, (article) => {
         const authorArr = _.split(article.author, 'and', 2);
         _.merge(article, { firstAuthor: authorArr[0] });
-        window.console.log(article);
+        // window.console.log(article);
       });
       return res;
     },
@@ -216,12 +238,12 @@ export default {
       this.index = index;
       if (this.data[this.index] === undefined) {
         // TODO improve style here
-        this.drawerFormData = {
+        this.formData = {
           // this is required by iview transfer inside the editor
           article_references: [],
         };
       } else {
-        this.drawerFormData = _.clone(this.data[this.index]);
+        this.formData = _.clone(this.data[this.index]);
       }
       this.drawer = true;
     },
@@ -312,6 +334,23 @@ export default {
           });
         }
       });
+    },
+    changeReadStatus(index) {
+      this.formData = _.clone(this.data[index]);
+      if (this.formData.read_state === false) {
+        this.formData.read_state = true;
+        this.$Message.info(`${this.formData.title} Read`);
+      } else {
+        this.formData.read_state = false;
+        this.$Message.info(`${this.formData.title} Unread`);
+      }
+      changeMTdata(this.formData)
+        .then(() => {
+          this.$emit('reloadData');
+        })
+        .catch((err) => {
+          pushErr(this, err, true);
+        });
     },
   },
 };
