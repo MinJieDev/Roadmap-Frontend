@@ -21,11 +21,10 @@
       style="margin-left: 10px; margin-bottom: 10px ">
       导入BibTex
     </Button>
-<!--  TODO: 放置在最右端  -->
     <Button
       @click="deleteSelectItem"
       type="error"
-      style="margin-left : 10px; margin-bottom: 10px; ">
+      style="margin-left : 10px; margin-bottom: 10px; float: right; margin-right: 20px">
       删除勾选项
     </Button>
     <Modal
@@ -45,16 +44,31 @@
            border
            ref="selection">
     </Table>
-    <Button
-      @click="handleSelectAll(true)"
-      style="margin-left: 10px; margin-top: 10px ">
-      设置全选
-    </Button>
-    <Button
-      @click="handleSelectAll(false)"
-      style="margin-left: 10px; margin-top: 10px ">
-      取消全选
-    </Button>
+    <div style="margin: 10px;overflow: hidden">
+      <Button
+        @click="handleSelectAll(true)"
+        style="margin-left: 10px; margin-top: 8px;">
+        设置全选
+      </Button>
+      <Button
+        @click="handleSelectAll(false)"
+        style="margin-left: 10px; margin-top: 8px;">
+        取消全选
+      </Button>
+      <div style="float: right; margin-top: 18px;">
+        <Page
+          :total="page.total"
+          :current="page.current"
+          :size="page.size"
+          show-total
+          show-sizer
+          show-elevator
+          @on-change="changePage"
+          @on-page-size-change="changePageSize"
+        >
+        </Page>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -86,6 +100,13 @@ export default {
         author: '',
         read_state: false,
       },
+      page: {
+        // TODO: Link with backend data.
+        // Load page rather than articles.
+        total: 50,
+        current: 1,
+        size: 10,
+      },
       columns: [
         {
           type: 'expand',
@@ -104,12 +125,12 @@ export default {
         {
           title: 'Title',
           key: 'title',
-          width: 400,
+          // width: 400,
         },
         {
           title: 'First Author',
           key: 'firstAuthor',
-          // width: 500,
+          width: 180,
         },
         {
           title: 'Read State',
@@ -351,6 +372,15 @@ export default {
         .catch((err) => {
           pushErr(this, err, true);
         });
+    },
+    changePage(pageIndex) {
+      // TODO: Wait page apis of BackEnd
+      this.page.current = pageIndex;
+      this.$Message.success(`Change to Page ${pageIndex}`);
+    },
+    changePageSize(pageSize) {
+      this.page.size = pageSize;
+      this.$Message.success(`Change Page Size to ${pageSize}`);
     },
   },
 };
