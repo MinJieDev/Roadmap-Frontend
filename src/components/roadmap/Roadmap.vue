@@ -33,6 +33,7 @@ import {
 import {
   d3Nodes,
   d3Drag,
+  d3DragConn,
   d3PanZoom,
   onTick, d3CustomConnections,
 } from './utils/d3';
@@ -176,6 +177,7 @@ export default {
           this.$emit('conn-click', conn);
           event.stopPropagation();
         });
+      conns.call(d3DragConn(this.simulation, svg, conns));
       // Tick the simulation 100 times
       for (let i = 0; i < 100; i += 1) {
         this.simulation.tick();
