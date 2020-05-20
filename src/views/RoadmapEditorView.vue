@@ -228,6 +228,8 @@ export default {
       curNode: null,
       curConn: null,
       modeConnectionChoosing: false,
+      refCurves: [
+      ],
     };
   },
   computed: {
@@ -296,9 +298,16 @@ export default {
       _.forEach(articleNodes, (ni) => {
         _.forEach(articleNodes, (nj) => {
           if (_.includes(ni.article.article_references, nj.article.id)) {
+            let curve = { x: 0, y: 0 };
+            const tempConn = _.find(this.refCurves, nk =>
+              (nk.curve && (ni.text === nk.source) && (nj.text === nk.target)));
+            if (tempConn) {
+              curve = tempConn.curve;
+            }
             conn = _.concat(conn, {
               source: ni.text,
               target: nj.text,
+              curve,
               type: 'ref',
             });
           }
@@ -380,6 +389,7 @@ export default {
           .then((res) => {
             this.nodes = this.toDisplayNodes(JSON.parse(res.data.text).nodes);
             this.connections = this.toDisplayConnections(JSON.parse(res.data.text).connections);
+            this.refCurves = JSON.parse(res.data.text).refConnections;
             this.roadMapTitle = res.data.title;
             this.description = res.data.description;
             this.repaintMindMap();
@@ -571,8 +581,16 @@ export default {
             pushErr(this, err, true);
           });
       } else {
+        let saveRefConnections = [];
+        _.forEach(this.refConnections, (refConn) => {
+          saveRefConnections = [...saveRefConnections, {
+            source: refConn.source.text,
+            target: refConn.target.text,
+            curve: refConn.curve ? refConn.curve : { x: 0, y: 0 },
+          }];
+        });
         updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.description)
+          saveRefConnections, this.description)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
           }).catch((err) => {
