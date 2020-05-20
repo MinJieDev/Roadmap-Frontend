@@ -77,9 +77,12 @@ export const onTick = (conns, nodes, subnodes) => {
     'M',
     conn.source.x,
     conn.source.y,
-    'Q',
-    conn.source.x + (conn.curve && conn.curve.x ? conn.curve.x : 0),
-    conn.source.y + (conn.curve && conn.curve.y ? conn.curve.y : 0),
+    'C',
+    (conn.curve && conn.curve.x ? conn.curve.x : conn.source.x),
+    (conn.curve && conn.curve.y ? conn.curve.y : conn.source.y),
+    ',',
+    (conn.curve && conn.curve.x ? conn.curve.x : conn.source.x),
+    (conn.curve && conn.curve.y ? conn.curve.y : conn.source.y),
     ',',
     conn.target.x,
     conn.target.y,
@@ -115,6 +118,38 @@ export const d3Drag = (simulation, svg, nodes) => {
   const dragged = (node) => {
     node.fx = event.x;
     node.fy = event.y;
+  };
+
+  const dragEnd = () => {
+    if (!event.active) {
+      simulation.alphaTarget(0);
+    }
+    // svg.attr('viewBox', getViewBox(nodes.data()));
+  };
+
+  return drag()
+    .on('start', dragStart)
+    .on('drag', dragged)
+    .on('end', dragEnd);
+};
+
+// eslint-disable-next-line
+export const d3DragConn = (simulation, svg, conns) => {
+  const dragStart = (conn) => {
+    if (!event.active) {
+      simulation.alphaTarget(0.2).restart();
+    }
+    if (!conn.curve) {
+      conn.curve = {
+        x: 0,
+        y: 0,
+      };
+    }
+  };
+
+  const dragged = (conn) => {
+    conn.curve.x = event.x;
+    conn.curve.y = event.y;
   };
 
   const dragEnd = () => {
