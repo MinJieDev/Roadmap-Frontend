@@ -274,6 +274,7 @@ export default {
         ret = [...ret, {
           source: sourceTxt,
           target: targetTxt,
+          curve: connection.curve,
           source_category: connection.source.category,
           target_category: connection.target.category,
         }];
@@ -579,6 +580,7 @@ export default {
           });
       }
     },
+    // @deprecated
     handleClkLoadRoadmap(roadmapInfo) {
       getRoadmap(roadmapInfo.roadmapId).then((res) => {
         this.nodes = JSON.parse(res.data.text).nodes;
