@@ -284,17 +284,6 @@ export default {
       });
       return ret;
     },
-    saveRefConnections() {
-      let ret = [];
-      _.forEach(this.refConnections, (refConn) => {
-        ret = [...ret, {
-          source: refConn.source,
-          target: refConn.target,
-          curve: refConn.curve ? refConn.curve : { x: 0, y: 0 },
-        }];
-      });
-      return ret;
-    },
 
     /**
      * auto generated reference connections
@@ -592,11 +581,10 @@ export default {
           }];
         }
       });
-      this.refCurves = curves;
       // id ==
       if (this.roadMapId === -1) {
         createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.saveRefConnections, this.description)
+          curves, this.description)
           .then((res) => {
             this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
             this.roadMapId = res.data.id;
@@ -605,7 +593,7 @@ export default {
           });
       } else {
         updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.saveRefConnections, this.description)
+          curves, this.description)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
           }).catch((err) => {
