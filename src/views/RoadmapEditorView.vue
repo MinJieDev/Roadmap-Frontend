@@ -313,6 +313,8 @@ export default {
           }
         });
       });
+      window.console.log('conn');
+      window.console.log(conn);
       return conn;
     },
 
@@ -571,9 +573,24 @@ export default {
       this.SideMenuActiveItem = itemName;
     },
     handleClkSaveRoadmap() {
+      let saveRefConnections = [];
+      _.forEach(this.refConnections, (refConn) => {
+        saveRefConnections = [...saveRefConnections, {
+          source: refConn.source.text,
+          target: refConn.target.text,
+          curve: refConn.curve ? refConn.curve : { x: 0, y: 0 },
+        }];
+        window.console.log('refConn.curve');
+        window.console.log(refConn.curve);
+      });
+      window.console.log('this.refConnections');
+      window.console.log(this.refConnections);
+      window.console.log('saveRefConnections');
+      window.console.log(saveRefConnections);
       // id ==
       if (this.roadMapId === -1) {
-        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections, this.description)
+        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections,
+          saveRefConnections, this.description)
           .then((res) => {
             this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
             this.roadMapId = res.data.id;
@@ -581,14 +598,6 @@ export default {
             pushErr(this, err, true);
           });
       } else {
-        let saveRefConnections = [];
-        _.forEach(this.refConnections, (refConn) => {
-          saveRefConnections = [...saveRefConnections, {
-            source: refConn.source.text,
-            target: refConn.target.text,
-            curve: refConn.curve ? refConn.curve : { x: 0, y: 0 },
-          }];
-        });
         updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
           saveRefConnections, this.description)
           .then(() => {
