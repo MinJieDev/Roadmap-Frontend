@@ -18,7 +18,7 @@
               :display="isFileItemDisplay('1-'+article.id)"
               :articleId="article.id"
               @node-added="handleArticleNodeAdded"
-              @node-deleted="handleArticleNodeDeleted(article.title)">
+            >
             </FileItem>
           </MenuItem>
         </Submenu>
@@ -228,9 +228,11 @@ export default {
       curNode: null,
       curConn: null,
       modeConnectionChoosing: false,
+      nextNodeId: 1,
     };
   },
   computed: {
+    // @deprecated method
     nodeNameList() {
       let ret = [];
       _(this.nodes).forEach((node) => {
@@ -245,12 +247,13 @@ export default {
     savedNodes() {
       let ret = [];
       _(this.nodes).forEach((node) => {
-        let saveTxt = node.text;
+        let saveTxt = node.content;
         if (node.category === 'article') {
-          saveTxt = `$${this.getArticleIdByTitle(node.text)}`;
+          saveTxt = `$${this.getArticleIdByTitle(node.content)}`;
         }
         ret = [...ret, {
-          text: saveTxt,
+          text: node.text,
+          content: saveTxt,
           URI: node.URI,
           fx: node.fx,
           fy: node.fy,
@@ -263,19 +266,11 @@ export default {
     savedConnections() {
       let ret = [];
       _(this.connections).forEach((connection) => {
-        let sourceTxt = connection.source.text;
-        let targetTxt = connection.target.text;
-        if (connection.source.category === 'article') {
-          sourceTxt = `$${this.getArticleIdByTitle(sourceTxt)}`;
-        }
-        if (connection.target.category === 'article') {
-          targetTxt = `$${this.getArticleIdByTitle(targetTxt)}`;
-        }
+        const sourceTxt = connection.source.text;
+        const targetTxt = connection.target.text;
         ret = [...ret, {
           source: sourceTxt,
           target: targetTxt,
-          source_category: connection.source.category,
-          target_category: connection.target.category,
         }];
       });
       return ret;
@@ -289,7 +284,7 @@ export default {
       let conn = [];
       let articleNodes = _.filter(this.nodes, node => (node.category === 'article'));
       articleNodes = _.map(articleNodes, (node) => {
-        const article = _.find(this.articles, atc => (atc.title === node.text));
+        const article = _.find(this.articles, atc => (atc.title === node.content));
         return { ...node, article };
       });
       _.forEach(articleNodes, (ni) => {
@@ -341,7 +336,7 @@ export default {
     curNodeInfo() {
       if (this.curNode) {
         return {
-          name: this.curNode.text,
+          name: this.curNode.content,
           URI: this.curNode.URI,
         };
       }
@@ -361,8 +356,8 @@ export default {
     },
     curNote() {
       if (!this.curNode || this.curNode.category !== 'article') return '';
-      if (this.getArticleByTitle(this.curNode.text).note) {
-        return this.getArticleByTitle(this.curNode.text).note;
+      if (this.getArticleByTitle(this.curNode.content).note) {
+        return this.getArticleByTitle(this.curNode.content).note;
       }
       return '';
     },
@@ -381,6 +376,7 @@ export default {
             this.connections = this.toDisplayConnections(JSON.parse(res.data.text).connections);
             this.roadMapTitle = res.data.title;
             this.description = res.data.description;
+            this.nextNodeId = JSON.parse(res.data.text).nextNodeId;
             this.repaintMindMap();
             this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
           })
@@ -419,13 +415,13 @@ export default {
             pushErr(this, 1000, true, '创建新节点失败', '自动生成节点名失败');
             return;
           }
-          this.handleNodeAdded({
+          const thisId = this.handleNodeAdded({
             nodeName: name,
             nodeUrl: '',
           });
           this.handleConnectionAdded({
             sourceNode: this.curNode.text,
-            targetNode: name,
+            targetNode: thisId,
           });
         }
       }
@@ -458,20 +454,23 @@ export default {
       const pos = this.getMidPos();
       this.nodes = [...this.nodes,
         {
-          text: nodeInfo.nodeName,
+          text: `#${this.nextNodeId}`, // 为#nodeId，保证不重名
+          content: nodeInfo.nodeName,
           URI: nodeInfo.nodeUrl,
           fx: pos.fx,
           fy: pos.fy,
           nodes: [],
           category: category || 'mindmap',
         }];
+      this.nextNodeId += 1;
       this.repaintMindMap();
+      return `#${this.nextNodeId - 1}`;
     },
     handleNodeModified(nodeInfo) {
       _.forEach(this.nodes, (node) => {
         if (node.text === this.curNode.text) {
           // eslint-disable-next-line no-param-reassign
-          node.text = nodeInfo.nodeName;
+          node.content = nodeInfo.nodeName;
           // eslint-disable-next-line no-param-reassign
           node.URI = nodeInfo.nodeUrl;
         }
@@ -482,7 +481,9 @@ export default {
       this.handleNodeAdded(nodeInfo, 'article');
     },
     // 删除文献结点
+    // @deprecated method
     handleArticleNodeDeleted(articleTitle) {
+      window.console.log('handleArticleNodeDeleted: deprecated method');
       window.console.log(this.nodes);
       window.console.log(articleTitle);
       this.nodes = _.filter(this.nodes, node => node.text !== articleTitle);
@@ -498,7 +499,6 @@ export default {
         (connection.source.text !== this.curNode.text
           && connection.target.text !== this.curNode.text));
       this.curNode = null;
-      window.console.log('del curnode', this.curNode);
       this.$Notice.success({ title: 'node deleted' });
       this.repaintMindMap();
     },
@@ -512,9 +512,7 @@ export default {
     handleConnectionDeleted() {
       this.connections = _.filter(this.connections, connection => !(
         (connection.source.text === this.curConn.source.text
-                  && connection.target.text === this.curConn.target.text)
-        || (connection.target.text === this.curConn.source.text
-                  && connection.source.text === this.curConn.target.text)));
+                  && connection.target.text === this.curConn.target.text)));
       this.curConn = null;
       this.$Notice.success({ title: 'connection deleted' });
       this.repaintMindMap();
@@ -544,6 +542,7 @@ export default {
       });
       this.repaintMindMap();
     },
+    // @deprecated
     handleNodeCommentListChanged(nodeName) {
       this.commentList = [];
       const tmplist = _(this.nodes).filter(node => node.text === nodeName);
@@ -562,7 +561,8 @@ export default {
     handleClkSaveRoadmap() {
       // id ==
       if (this.roadMapId === -1) {
-        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections, this.description)
+        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections, this.description,
+          this.nextNodeId)
           .then((res) => {
             this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
             this.roadMapId = res.data.id;
@@ -571,7 +571,7 @@ export default {
           });
       } else {
         updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.description)
+          this.description, this.nextNodeId)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
           }).catch((err) => {
@@ -579,6 +579,7 @@ export default {
           });
       }
     },
+    // @deprecated
     handleClkLoadRoadmap(roadmapInfo) {
       getRoadmap(roadmapInfo.roadmapId).then((res) => {
         this.nodes = JSON.parse(res.data.text).nodes;
@@ -591,6 +592,7 @@ export default {
         pushErr(this, err, true);
       });
     },
+    // @deprecated
     handleClkCreateRoadmap() {
       createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections).then((res) => {
         this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
@@ -657,17 +659,17 @@ export default {
       let ret = [];
       _(savedNodes).forEach((node) => {
         if (node.category === 'article') {
-          const art = this.getArticleById(_.split(node.text, '$', 2)[1]);
+          const art = this.getArticleById(_.split(node.content, '$', 2)[1]);
           if (typeof art !== 'undefined') {
             // eslint-disable-next-line no-param-reassign
-            node.text = art.title;
+            node.content = art.title;
             // eslint-disable-next-line no-param-reassign
             node.URI = art.url;
           } else {
             // eslint-disable-next-line no-param-reassign
             node.category = 'mindmap';
             // eslint-disable-next-line no-param-reassign
-            node.text += ': article not found';
+            node.content += ': article not found';
           }
         }
         ret = [...ret, node];
@@ -675,49 +677,10 @@ export default {
       return ret;
     },
     toDisplayConnections(savedConnections) {
-      let ret = [];
-      _(savedConnections).forEach((conn) => {
-        if (conn.source_category === 'article') {
-          const art = this.getArticleById(_.split(conn.source, '$', 2)[1]);
-          if (typeof art !== 'undefined') {
-            // eslint-disable-next-line no-param-reassign
-            conn.source = art.title;
-          } else {
-            // eslint-disable-next-line no-param-reassign
-            conn.source_category = 'mindmap';
-            // eslint-disable-next-line no-param-reassign
-            conn.source += ': article not found';
-          }
-        }
-        if (conn.target_category === 'article') {
-          const art = this.getArticleById(_.split(conn.target, '$', 2)[1]);
-          if (typeof art !== 'undefined') {
-            // eslint-disable-next-line no-param-reassign
-            conn.target = art.title;
-          } else {
-            // eslint-disable-next-line no-param-reassign
-            conn.target_category = 'mindmap';
-            // eslint-disable-next-line no-param-reassign
-            conn.target += ': article not found';
-          }
-        }
-        ret = [...ret, conn];
-      });
-      return ret;
+      return savedConnections;
     },
     createUniName() {
-      let i = 0;
-      for (i = 1; i < 10000; i += 1) {
-        let flag = true;
-        const name = `新建节点${i}`;
-        _(this.nodes).forEach((node) => {
-          if (node.text === name) {
-            flag = false;
-          }
-        });
-        if (flag) { return name; }
-      }
-      return null;
+      return '新建节点';
     },
     handleOpenUrl() {
       if (this.curNode.URI) {
