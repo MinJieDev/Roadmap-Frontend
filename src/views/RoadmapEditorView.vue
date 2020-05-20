@@ -66,6 +66,7 @@
         </Panel>
       </Collapse>
       <roadmap
+        ref="road_map"
         :nodes="nodes"
         :connections="mergedConnections"
         :editable="true"
@@ -228,6 +229,8 @@ export default {
       curNode: null,
       curConn: null,
       modeConnectionChoosing: false,
+      refCurves: [
+      ],
     };
   },
   computed: {
@@ -274,6 +277,7 @@ export default {
         ret = [...ret, {
           source: sourceTxt,
           target: targetTxt,
+          curve: connection.curve,
           source_category: connection.source.category,
           target_category: connection.target.category,
         }];
@@ -295,9 +299,16 @@ export default {
       _.forEach(articleNodes, (ni) => {
         _.forEach(articleNodes, (nj) => {
           if (_.includes(ni.article.article_references, nj.article.id)) {
+            let curve = { x: 0, y: 0 };
+            const tempConn = _.find(this.refCurves, nk =>
+              (nk.curve && (ni.text === nk.source) && (nj.text === nk.target)));
+            if (tempConn) {
+              curve = tempConn.curve;
+            }
             conn = _.concat(conn, {
               source: ni.text,
               target: nj.text,
+              curve,
               type: 'ref',
             });
           }
@@ -379,6 +390,7 @@ export default {
           .then((res) => {
             this.nodes = this.toDisplayNodes(JSON.parse(res.data.text).nodes);
             this.connections = this.toDisplayConnections(JSON.parse(res.data.text).connections);
+            this.refCurves = JSON.parse(res.data.text).refConnections;
             this.roadMapTitle = res.data.title;
             this.description = res.data.description;
             this.repaintMindMap();
@@ -483,8 +495,6 @@ export default {
     },
     // 删除文献结点
     handleArticleNodeDeleted(articleTitle) {
-      window.console.log(this.nodes);
-      window.console.log(articleTitle);
       this.nodes = _.filter(this.nodes, node => node.text !== articleTitle);
       this.connections = _.filter(this.connections, connection =>
         (connection.source.text !== articleTitle
@@ -560,9 +570,21 @@ export default {
       this.SideMenuActiveItem = itemName;
     },
     handleClkSaveRoadmap() {
+      let curves = [];
+      const allConns = this.$refs.road_map.getConn();
+      _.forEach(allConns, (conn) => {
+        if (conn.type === 'ref') {
+          curves = [...curves, {
+            source: conn.source,
+            target: conn.target,
+            curve: conn.curve,
+          }];
+        }
+      });
       // id ==
       if (this.roadMapId === -1) {
-        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections, this.description)
+        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections,
+          curves, this.description)
           .then((res) => {
             this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
             this.roadMapId = res.data.id;
@@ -571,7 +593,7 @@ export default {
           });
       } else {
         updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.description)
+          curves, this.description)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
           }).catch((err) => {
@@ -579,6 +601,7 @@ export default {
           });
       }
     },
+    // @deprecated
     handleClkLoadRoadmap(roadmapInfo) {
       getRoadmap(roadmapInfo.roadmapId).then((res) => {
         this.nodes = JSON.parse(res.data.text).nodes;
