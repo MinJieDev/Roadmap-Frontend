@@ -19,6 +19,7 @@
 <script>
 /* eslint-disable no-param-reassign */
 // TODO solve param reassign
+import _ from 'lodash';
 import {
   forceCollide,
   forceLink,
@@ -67,6 +68,7 @@ export default {
       simulation: null,
       clickTimeId: 0,
       curNode: this.liveNode,
+      allConn: [],
     };
   },
   methods: {
@@ -178,6 +180,21 @@ export default {
           event.stopPropagation();
         });
       conns.call(d3DragConn(this.simulation, svg, conns));
+      let ret = [];
+      // eslint-disable-next-line
+      _.forEach(conns._groups[0], (conn) => {
+        ret = [...ret, {
+          // eslint-disable-next-line
+          source: conn.__data__.source.text,
+          // eslint-disable-next-line
+          target: conn.__data__.target.text,
+          // eslint-disable-next-line
+          curve: conn.__data__.curve,
+          // eslint-disable-next-line
+          type: conn.__data__.type,
+        }];
+      });
+      this.allConn = ret;
       // Tick the simulation 100 times
       for (let i = 0; i < 100; i += 1) {
         this.simulation.tick();
@@ -236,6 +253,9 @@ export default {
       svg.attr('viewBox', getViewBox(nodes.data()))
         .call(d3PanZoom(svg))
         .on('dblclick.zoom', null);
+    },
+    getConn() {
+      return this.allConn;
     },
   },
   mounted() {

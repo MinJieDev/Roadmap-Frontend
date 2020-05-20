@@ -66,6 +66,7 @@
         </Panel>
       </Collapse>
       <roadmap
+        ref="road_map"
         :nodes="nodes"
         :connections="mergedConnections"
         :editable="true"
@@ -283,6 +284,17 @@ export default {
       });
       return ret;
     },
+    saveRefConnections() {
+      let ret = [];
+      _.forEach(this.refConnections, (refConn) => {
+        ret = [...ret, {
+          source: refConn.source,
+          target: refConn.target,
+          curve: refConn.curve ? refConn.curve : { x: 0, y: 0 },
+        }];
+      });
+      return ret;
+    },
 
     /**
      * auto generated reference connections
@@ -313,8 +325,6 @@ export default {
           }
         });
       });
-      window.console.log('conn');
-      window.console.log(conn);
       return conn;
     },
 
@@ -496,8 +506,6 @@ export default {
     },
     // 删除文献结点
     handleArticleNodeDeleted(articleTitle) {
-      window.console.log(this.nodes);
-      window.console.log(articleTitle);
       this.nodes = _.filter(this.nodes, node => node.text !== articleTitle);
       this.connections = _.filter(this.connections, connection =>
         (connection.source.text !== articleTitle
@@ -573,24 +581,22 @@ export default {
       this.SideMenuActiveItem = itemName;
     },
     handleClkSaveRoadmap() {
-      let saveRefConnections = [];
-      _.forEach(this.refConnections, (refConn) => {
-        saveRefConnections = [...saveRefConnections, {
-          source: refConn.source.text,
-          target: refConn.target.text,
-          curve: refConn.curve ? refConn.curve : { x: 0, y: 0 },
-        }];
-        window.console.log('refConn.curve');
-        window.console.log(refConn.curve);
+      let curves = [];
+      const allConns = this.$refs.road_map.getConn();
+      _.forEach(allConns, (conn) => {
+        if (conn.type === 'ref') {
+          curves = [...curves, {
+            source: conn.source,
+            target: conn.target,
+            curve: conn.curve,
+          }];
+        }
       });
-      window.console.log('this.refConnections');
-      window.console.log(this.refConnections);
-      window.console.log('saveRefConnections');
-      window.console.log(saveRefConnections);
+      this.refCurves = curves;
       // id ==
       if (this.roadMapId === -1) {
         createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections,
-          saveRefConnections, this.description)
+          this.saveRefConnections, this.description)
           .then((res) => {
             this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
             this.roadMapId = res.data.id;
@@ -599,7 +605,7 @@ export default {
           });
       } else {
         updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
-          saveRefConnections, this.description)
+          this.saveRefConnections, this.description)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
           }).catch((err) => {
