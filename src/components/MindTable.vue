@@ -3,7 +3,7 @@
     <ItemEditor
       v-bind:drawer="drawer"
       v-bind:index="index"
-      v-bind:drawerFormData="drawerFormData"
+      v-bind:drawerFormData="formData"
       v-bind:articles="tableData"
       @cancelDrawer="cancelDrawer"
       @submitDrawer="submitDrawer"
@@ -21,11 +21,10 @@
       style="margin-left: 10px; margin-bottom: 10px ">
       导入BibTex
     </Button>
-<!--  TODO: 放置在最右端  -->
     <Button
       @click="deleteSelectItem"
       type="error"
-      style="margin-left : 10px; margin-bottom: 10px; ">
+      style="margin-left : 10px; margin-bottom: 10px; float: right; margin-right: 20px">
       删除勾选项
     </Button>
     <Modal
@@ -45,16 +44,31 @@
            border
            ref="selection">
     </Table>
-    <Button
-      @click="handleSelectAll(true)"
-      style="margin-left: 10px; margin-top: 10px ">
-      设置全选
-    </Button>
-    <Button
-      @click="handleSelectAll(false)"
-      style="margin-left: 10px; margin-top: 10px ">
-      取消全选
-    </Button>
+    <div style="margin: 10px;overflow: hidden">
+      <Button
+        @click="handleSelectAll(true)"
+        style="margin-left: 10px; margin-top: 8px;">
+        设置全选
+      </Button>
+      <Button
+        @click="handleSelectAll(false)"
+        style="margin-left: 10px; margin-top: 8px;">
+        取消全选
+      </Button>
+      <div style="float: right; margin-top: 18px;">
+        <Page
+          :total="page.total"
+          :current="page.current"
+          :size="page.size"
+          show-total
+          show-sizer
+          show-elevator
+          @on-change="changePage"
+          @on-page-size-change="changePageSize"
+        >
+        </Page>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -80,10 +94,18 @@ export default {
       BibtexModal: false,
       index: 0,
       BibValue: '',
-      drawerFormData: {
+      formData: {
         title: '',
         url: '',
-        note: '',
+        author: '',
+        read_state: false,
+      },
+      page: {
+        // TODO: Link with backend data.
+        // Load page rather than articles.
+        total: 50,
+        current: 1,
+        size: 10,
       },
       columns: [
         {
@@ -103,12 +125,33 @@ export default {
         {
           title: 'Title',
           key: 'title',
-          // width: 300,
+          // width: 400,
         },
         {
           title: 'First Author',
           key: 'firstAuthor',
-          // width: 500,
+          width: 180,
+        },
+        {
+          title: 'Read State',
+          key: 'status',
+          align: 'center',
+          width: 100,
+          render: (h, params) => {
+            const type = params.row.read_state === false ? 'error' : 'success';
+            const text = params.row.read_state === false ? 'Unread' : 'Read';
+            return h('Button', {
+              props: {
+                type,
+                size: 'small',
+              },
+              on: {
+                click: () => {
+                  this.changeReadStatus(params.index);
+                },
+              },
+            }, text);
+          },
         },
         {
           title: 'Note',
@@ -130,7 +173,7 @@ export default {
               },
             }, '编辑笔记'),
           ]),
-          width: 150,
+          width: 120,
         },
         {
           title: 'Action',
@@ -195,7 +238,7 @@ export default {
       _.forEach(res, (article) => {
         const authorArr = _.split(article.author, 'and', 2);
         _.merge(article, { firstAuthor: authorArr[0] });
-        window.console.log(article);
+        // window.console.log(article);
       });
       return res;
     },
@@ -216,12 +259,12 @@ export default {
       this.index = index;
       if (this.data[this.index] === undefined) {
         // TODO improve style here
-        this.drawerFormData = {
+        this.formData = {
           // this is required by iview transfer inside the editor
           article_references: [],
         };
       } else {
-        this.drawerFormData = _.clone(this.data[this.index]);
+        this.formData = _.clone(this.data[this.index]);
       }
       this.drawer = true;
     },
@@ -312,6 +355,32 @@ export default {
           });
         }
       });
+    },
+    changeReadStatus(index) {
+      this.formData = _.clone(this.data[index]);
+      if (this.formData.read_state === false) {
+        this.formData.read_state = true;
+        this.$Message.info(`${this.formData.title} Read`);
+      } else {
+        this.formData.read_state = false;
+        this.$Message.info(`${this.formData.title} Unread`);
+      }
+      changeMTdata(this.formData)
+        .then(() => {
+          this.$emit('reloadData');
+        })
+        .catch((err) => {
+          pushErr(this, err, true);
+        });
+    },
+    changePage(pageIndex) {
+      // TODO: Wait page apis of BackEnd
+      this.page.current = pageIndex;
+      this.$Message.success(`Change to Page ${pageIndex}`);
+    },
+    changePageSize(pageSize) {
+      this.page.size = pageSize;
+      this.$Message.success(`Change Page Size to ${pageSize}`);
     },
   },
 };
