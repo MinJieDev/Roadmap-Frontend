@@ -134,7 +134,8 @@
             打开笔记
             <Icon type="ios-book" />
           </MenuItem>
-          <NoteMarkdown :note="curNote" ref="NoteMarkdown"></NoteMarkdown>
+          <NoteMarkdown :note="curNote" ref="NoteMarkdown"
+                        @article-note-edit="jumpArticleNoteEdit"></NoteMarkdown>
           <ModifyNodeForm
             @node-modified="handleNodeModified"
             :node-info-old="curNodeInfo"
@@ -798,6 +799,11 @@ export default {
       window.console.log('notemarkdown', this.$refs);
       this.$refs.NoteMarkdown.handleShowNoteModal();
     },
+    jumpArticleNoteEdit() {
+      this.$router.push({
+        path: '/articleMde',
+        query: { selected: this.getArticleIdByTitle(this.curNode.content) },
+      });
     handleArticleDraggedIn(evt) {
       this.handleNodeAdded({
         nodeName: evt.added.element.title,

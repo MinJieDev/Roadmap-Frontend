@@ -2,10 +2,13 @@
   <div>
     <Modal
       v-model="noteModal"
-      title="文献笔记"
-      @on-ok="ok">
+      title="文献笔记">
       <div class="markdown-body">
         <VueMarkdown style="margin-left: 20px" v-if="noteModal">{{ computedNote }}</VueMarkdown>
+      </div>
+      <div slot="footer">
+        <Button type="info" @click="handleClkEdit">编辑</Button>
+        <Button type="error" @click="handleClkClose">关闭</Button>
       </div>
     </Modal>
   </div>
@@ -34,6 +37,14 @@ export default {
     handleShowNoteModal() {
       this.noteModal = true;
       window.console.log('handleShowNoteModa:bug here:', this.note);
+    },
+    handleClkEdit() {
+      this.noteModal = false;
+      this.$emit('article-note-edit');
+      window.console.log('edit clk');
+    },
+    handleClkClose() {
+      this.noteModal = false;
     },
   },
   computed: {
