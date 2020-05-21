@@ -81,8 +81,9 @@
       </Button>
       <div style="float: right; margin-top: 18px;">
         <Page
-          :total="page.total"
+          :total="articleTotal"
           :current="page.current"
+          :page-size="10"
           show-total
           show-elevator
           @on-change="changePage"
@@ -107,6 +108,10 @@ export default {
       type: Array,
       required: true,
     },
+    articleTotal: {
+      type: Number,
+      required: true,
+    },
   },
   components: { ItemEditor, MindTableExpand },
   data() {
@@ -124,9 +129,6 @@ export default {
         read_state: false,
       },
       page: {
-        // TODO: Link with backend data.
-        // Load page rather than articles.
-        total: 100,
         current: 1,
         // default size: 10,
       },
@@ -397,8 +399,8 @@ export default {
         });
     },
     changePage(pageIndex) {
-      // TODO: Wait page apis of BackEnd
       this.page.current = pageIndex;
+      this.$emit('reloadData', this.page.current);
       this.$Message.success(`Change to Page ${pageIndex}`);
     },
     openBibTexExportModal() {
