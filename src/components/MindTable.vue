@@ -22,6 +22,12 @@
       导入BibTex
     </Button>
     <Button
+      @click="openBibTexExportModal"
+      type="success"
+      style="margin-left: 10px; margin-bottom: 10px ">
+      导出BibTex
+    </Button>
+    <Button
       @click="deleteSelectItem"
       type="error"
       style="margin-left : 10px; margin-bottom: 10px; float: right; margin-right: 20px">
@@ -37,6 +43,24 @@
         type="textarea"
         :autosize="{minRows: 6}"
         placeholder="请输入您的BibTex  (支持批量导入) " />
+    </Modal>
+    <Modal
+      v-model="BibTexExportModal"
+      title="导出BibTex"
+      :styles="{top: '20px'}"
+      @on-cancel="cancelBibExportModal">
+      <p v-html="BibTexExportContent"></p>
+      <p slot="header" style="text-align:center">
+        <Icon type="md-checkmark-circle-outline" />
+        <span>批量导出成功</span>
+      </p>
+      <div slot="footer">
+        <Button
+          type="primary"
+          @click="copyBibTex">
+          复制BibTex
+        </Button>
+      </div>
     </Modal>
     <Table row-key="id"
            :columns="columns"
@@ -59,12 +83,9 @@
         <Page
           :total="page.total"
           :current="page.current"
-          :size="page.size"
           show-total
-          show-sizer
           show-elevator
           @on-change="changePage"
-          @on-page-size-change="changePageSize"
         >
         </Page>
       </div>
@@ -92,6 +113,8 @@ export default {
     return {
       drawer: false,
       BibtexModal: false,
+      BibTexExportModal: false,
+      BibTexExportContent: '',
       index: 0,
       BibValue: '',
       formData: {
@@ -103,9 +126,9 @@ export default {
       page: {
         // TODO: Link with backend data.
         // Load page rather than articles.
-        total: 50,
+        total: 100,
         current: 1,
-        size: 10,
+        // default size: 10,
       },
       columns: [
         {
@@ -238,7 +261,7 @@ export default {
       _.forEach(res, (article) => {
         const authorArr = _.split(article.author, 'and', 2);
         _.merge(article, { firstAuthor: authorArr[0] });
-        // window.console.log(article);
+        window.console.log(article);
       });
       return res;
     },
@@ -378,9 +401,51 @@ export default {
       this.page.current = pageIndex;
       this.$Message.success(`Change to Page ${pageIndex}`);
     },
-    changePageSize(pageSize) {
-      this.page.size = pageSize;
-      this.$Message.success(`Change Page Size to ${pageSize}`);
+    openBibTexExportModal() {
+      this.BibTexExportModal = true;
+      _.forEach(this.$refs.selection.objData, (article) => {
+        let artStr = '';
+        // eslint-disable-next-line no-underscore-dangle
+        if (article._isChecked === true) {
+          // window.console.log('bib export article content: ', article.bibtext);
+          window.console.log('No bib');
+          artStr = artStr.concat(`@article{,</br>
+              title={${article.title}},</br>`);
+          if (article.author !== undefined && article.author !== '') {
+            artStr = artStr.concat(`author={${article.author}},</br>`);
+          }
+          if (article.journal !== undefined && article.journal !== '') {
+            artStr = artStr.concat(`journal={${article.journal}},</br>`);
+          }
+          if (article.volume !== undefined && article.volume > 0) {
+            artStr = artStr.concat(`volume={${article.volume}},</br>`);
+          }
+          if (article.number !== undefined) {
+            artStr = artStr.concat(`number={${article.number}},</br>`);
+          }
+          if (article.page !== undefined) {
+            artStr = artStr.concat(`pages={${article.page}},</br>`);
+          }
+          if (article.year !== undefined) {
+            artStr = artStr.concat(`year={${article.year}},</br>`);
+          }
+          // if (article.publisher !== null) {
+          //   artStr = artStr.concat(`publisher={${article.publisher}},</br>`);
+          // }
+          artStr = artStr.concat('}</br>');
+          this.BibTexExportContent = this.BibTexExportContent + artStr;
+        }
+        window.console.log(`bibtexExport ${this.BibTexExportContent}`);
+      });
+    },
+    cancelBibExportModal() {
+      this.BibTexExportModal = false;
+      this.BibTexExportContent = '';
+    },
+    copyBibTex() {
+      this.$Message.info('Copy Success');
+      this.BibTexExportModal = false;
+      this.BibTexExportContent = '';
     },
   },
 };
