@@ -41,12 +41,12 @@
       </Header>
       <Layout :style="{padding: '0 50px'}">
         <Breadcrumb :style="{margin: '16px 0px'}">
-          <BreadcrumbItem>HomePage</BreadcrumbItem>
+<!--          <BreadcrumbItem>HomePage</BreadcrumbItem>-->
           <BreadcrumbItem
-            :to="path(index)"
-            v-for="(item, index) in $route.meta.name"
+            :to="{name: name}"
+            v-for="(name, index) in getRouterStack()"
             :key="index">
-            {{ item }}
+            {{ name }}
           </BreadcrumbItem>
         </Breadcrumb>
         <Content :style="{padding: '24px 0', minHeight: '500px', background: '#fff'}">
@@ -69,6 +69,7 @@
 import UserReportButton from '../components/UserReportButton';
 import router from '../router';
 import { isLogin, logout } from '../apis/User';
+import pushRouter from '../components/Breadcrumb';
 
 export default {
   name: 'RoadmapLayout',
@@ -86,6 +87,11 @@ export default {
     },
   },
   methods: {
+    getRouterStack() {
+      pushRouter(this.$router.history.current.name);
+      window.console.info('[DEBUG] MY PAGE: ', this.$router);
+      return window.routerStack;
+    },
     goToLogin() {
       if (this.$route.name !== 'Login') {
         router.push({ name: 'Login' });
