@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import RoadmapTable from '../components/RoadmapTable';
+import RoadmapTable from '../components/RoadmapCardTable';
 
 export default {
   name: 'RoadmapTableView',
