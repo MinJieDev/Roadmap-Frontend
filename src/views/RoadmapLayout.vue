@@ -41,12 +41,11 @@
       </Header>
       <Layout :style="{padding: '0 50px'}">
         <Breadcrumb :style="{margin: '16px 0px'}">
-<!--          <BreadcrumbItem>HomePage</BreadcrumbItem>-->
           <BreadcrumbItem
-            :to="{name: name}"
-            v-for="(name, index) in getRouterStack()"
+            :to="item.fullPath"
+            v-for="(item, index) in getRouterStack()"
             :key="index">
-            {{ name }}
+            {{ item.nickName }}
           </BreadcrumbItem>
         </Breadcrumb>
         <Content :style="{padding: '24px 0', minHeight: '500px', background: '#fff'}">
@@ -88,8 +87,11 @@ export default {
   },
   methods: {
     getRouterStack() {
-      pushRouter(this.$router.history.current.name);
-      window.console.info('[DEBUG] MY PAGE: ', this.$router);
+      pushRouter(
+        this.$router.history.current.name,
+        this.$router.history.current.meta.nickName,
+        this.$router.history.current.fullPath,
+        this.$router.history.current.meta.level);
       return window.routerStack;
     },
     goToLogin() {
