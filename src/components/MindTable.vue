@@ -47,6 +47,8 @@
     <Modal
       v-model="BibTexExportModal"
       title="导出BibTex"
+      :content="BibTexExportContent"
+      scrollable draggable
       @on-cancel="cancelBibExportModal">
       <p slot="header" style="text-align:center">
         <Icon type="md-checkmark-circle-outline" />
@@ -112,6 +114,7 @@ export default {
       drawer: false,
       BibtexModal: false,
       BibTexExportModal: false,
+      BibTexExportContent: '',
       index: 0,
       BibValue: '',
       formData: {
@@ -400,6 +403,12 @@ export default {
     },
     openBibTexExportModal() {
       this.BibTexExportModal = true;
+      _.forEach(this.$refs.selection.objData, (article) => {
+        // eslint-disable-next-line no-underscore-dangle
+        if (article._isChecked === true) {
+          window.console.log('bib export article content: ', article);
+        }
+      });
     },
     cancelBibExportModal() {
       this.BibTexExportModal = false;
