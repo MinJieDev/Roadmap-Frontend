@@ -11,16 +11,23 @@
             <Icon type="ios-navigate"></Icon>
             文献栏
           </template>
-          <MenuItem v-for="(article, index) in articles" :key="index" :name="'1-'+article.id" >
-            <FileItem
-              :fileName="article.title"
-              :articleUrl="article.url"
-              :display="isFileItemDisplay('1-'+article.id)"
-              :articleId="article.id"
-              @node-added="handleArticleNodeAdded"
-            >
-            </FileItem>
-          </MenuItem>
+          <draggable
+            class="dragArea list-group"
+            :list="articles"
+            :group="{ name: 'article', pull: 'clone', put: false }"
+            :sort="false"
+          >
+            <MenuItem v-for="(article, index) in articles" :key="index" :name="'1-'+article.id" >
+              <FileItem
+                :fileName="article.title"
+                :articleUrl="article.url"
+                :display="isFileItemDisplay('1-'+article.id)"
+                :articleId="article.id"
+                @node-added="handleArticleNodeAdded"
+              >
+              </FileItem>
+            </MenuItem>
+          </draggable>
         </Submenu>
 <!--        <Submenu name="2">-->
 <!--          <template slot="title">-->
@@ -65,19 +72,27 @@
           </EditRoadmapDescriptionForm>
         </Panel>
       </Collapse>
-      <roadmap
-        ref="road_map"
-        :nodes="nodes"
-        :connections="mergedConnections"
-        :editable="true"
-        :key="repaint"
-        :live-node="curNode"
-        @node-click="handleNodeClick"
-        @node-dblclick="handleNodeDblClick"
-        @subnode-dblclick="handleSubnodeDblClick"
-        @svg-click="handleSvgClick"
-        @conn-click="handleConnClick"
-      />
+      <draggable
+        class="dragArea list-group"
+        :list="roadmapDragArticleList"
+        :group="{ name: 'article', put: true }"
+        ghostClass="ghost"
+        @change="handleArticleDraggedIn"
+      >
+        <roadmap
+          ref="road_map"
+          :nodes="nodes"
+          :connections="mergedConnections"
+          :editable="true"
+          :key="repaint"
+          :live-node="curNode"
+          @node-click="handleNodeClick"
+          @node-dblclick="handleNodeDblClick"
+          @subnode-dblclick="handleSubnodeDblClick"
+          @svg-click="handleSvgClick"
+          @conn-click="handleConnClick"
+        />
+      </draggable>
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}">
       <Button  @click="handleClkHelp"
@@ -168,6 +183,7 @@
 <script>
 import _ from 'lodash';
 import Vue from 'vue';
+import draggable from 'vuedraggable';
 import AddNodeForm from '../components/AddNodeForm';
 import AddConnectionForm from '../components/AddConnectionForm';
 import DelNodeForm from '../components/DelNodeForm';
@@ -210,6 +226,7 @@ export default {
     ModifyCommentForm,
     ModifyNodeForm,
     NoteMarkdown,
+    draggable,
   },
   data() {
     return {
@@ -232,6 +249,8 @@ export default {
       modeConnectionChoosing: false,
       nextNodeId: 1,
       refCurves: [
+      ],
+      roadmapDragArticleList: [
       ],
     };
   },
@@ -785,6 +804,13 @@ export default {
         path: '/articleMde',
         query: { selected: this.getArticleIdByTitle(this.curNode.content) },
       });
+    handleArticleDraggedIn(evt) {
+      this.handleNodeAdded({
+        nodeName: evt.added.element.title,
+        articleId: evt.added.element.id,
+        nodeUrl: evt.added.element.url,
+      }, 'article');
+      window.console.log(evt);
     },
   },
 };
@@ -804,5 +830,8 @@ export default {
   #help-icon{
     margin-left: 40px;
     margin-right: 40px;
+  }
+  .ghost {
+    display: none;
   }
 </style>
