@@ -1,9 +1,9 @@
 <template>
   <div>
-    <Row v-for="r in rows*2" v-bind:key="r" type="flex" justify="center" :gutter="20">
+    <Row v-for="r in rows" v-bind:key="r" type="flex" justify="center" :gutter="20">
       <i-col v-for="c in cols" v-bind:key="c" span="6" align="center" >
         <!-- getIndex函数用于获取指定r和c后，路书在index中的索引。对于新建路书，getIndex会返回-1 -->
-        <Card v-show="getIndex(r, c, cols) + 1 < data.length + 1">
+        <Card v-show="getIndex(r, c, cols) + 1 < data.length + 1" style="margin-bottom: 20px">
           <!--新建路书部件-->
           <div class="card_content" v-if="r === 1 && c === 1">
             <p class="single_line">
@@ -60,7 +60,6 @@ export default {
   data() {
     return {
       drawer: false,
-      rows: 4,
       cols: 3,
       data: [],
       roadmaps: [],
@@ -75,6 +74,13 @@ export default {
       .catch((err) => {
         pushErr(this, err, true);
       });
+  },
+  computed: {
+    rows() {
+      const newRows = parseInt(String(((this.data.length + 1) / this.cols) + 1), 10);
+      window.console.info('Card Rows Change', newRows);
+      return newRows;
+    },
   },
   methods: {
     getIndex(r, c, col) {
