@@ -63,7 +63,7 @@ export default {
       router.push({ name: 'Welcome' });
     },
     handle_register() {
-      router.push('/user_register');
+      router.push({ name: 'Register' });
     },
     handle_error(response) {
       if (response.code === 400) {
