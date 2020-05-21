@@ -13,7 +13,6 @@
           </a>
           <DropdownMenu slot="list">
             <DropdownItem @click.native="handleAddFileNode">添加文献节点</DropdownItem>
-            <DropdownItem @click.native="handleDelFileNode">删除文献节点</DropdownItem>
           </DropdownMenu>
         </Dropdown>
       </Col>
@@ -44,12 +43,6 @@ export default {
         nodeName: this.fileName,
         articleId: this.articleId,
         nodeUrl: this.articleUrl,
-      });
-    },
-    handleDelFileNode() {
-      this.$Message.info('Node deleted');
-      this.$emit('node-deleted', {
-        nodeName: this.fileName,
       });
     },
   },
