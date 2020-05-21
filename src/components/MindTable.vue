@@ -261,7 +261,7 @@ export default {
       _.forEach(res, (article) => {
         const authorArr = _.split(article.author, 'and', 2);
         _.merge(article, { firstAuthor: authorArr[0] });
-        window.console.log(article);
+        // window.console.log(article);
       });
       return res;
     },
@@ -407,8 +407,6 @@ export default {
         let artStr = '';
         // eslint-disable-next-line no-underscore-dangle
         if (article._isChecked === true) {
-          // window.console.log('bib export article content: ', article.bibtext);
-          window.console.log('No bib');
           artStr = artStr.concat(`@article{,</br>
               title={${article.title}},</br>`);
           if (article.author !== undefined && article.author !== '') {
@@ -435,7 +433,7 @@ export default {
           artStr = artStr.concat('}</br>');
           this.BibTexExportContent = this.BibTexExportContent + artStr;
         }
-        window.console.log(`bibtexExport ${this.BibTexExportContent}`);
+        // window.console.log(`bibtexExport ${this.BibTexExportContent}`);
       });
     },
     cancelBibExportModal() {

@@ -9,7 +9,7 @@
 
 <script>
 import MindTable from '../components/MindTable';
-import { req } from '../apis/util';
+import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
 
 export default {
@@ -21,8 +21,13 @@ export default {
     };
   },
   methods: {
-    reloadData() {
-      req('/api/articles/', 'GET').then((res) => {
+    reloadData(page) {
+      if (page === undefined) {
+        // eslint-disable-next-line no-param-reassign
+        page = 1;
+      }
+      reqSingle('/api/articles/', 'GET', { page }).then((res) => {
+        window.console.log('get page data', res);
         this.articles = res.data;
       }).catch((err) => {
         pushErr(this, err, true);
