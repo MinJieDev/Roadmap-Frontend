@@ -47,9 +47,9 @@
     <Modal
       v-model="BibTexExportModal"
       title="导出BibTex"
-      v-bind:content="BibTexExportContent"
-      scrollable draggable
+      :styles="{top: '20px'}"
       @on-cancel="cancelBibExportModal">
+      <p v-html="BibTexExportContent"></p>
       <p slot="header" style="text-align:center">
         <Icon type="md-checkmark-circle-outline" />
         <span>批量导出成功</span>
@@ -407,28 +407,35 @@ export default {
         let artStr = '';
         // eslint-disable-next-line no-underscore-dangle
         if (article._isChecked === true) {
-          window.console.log('bib export article content: ', article.bibtext);
-          if (article.bibtext !== '') {
-            window.console.log('Have bib');
-            artStr = article.bibtext;
-          } else {
-            window.console.log('No bib');
-            artStr = artStr.concat(`@article{,
-              title={${article.title}},\
-              author={${article.author}},
-              journal={${article.journal}},
-              volume={${article.volume}},
-              number={},
-              pages={${article.page}},
-              year={${article.year}},
-              publisher={}
-            }\n`);
+          // window.console.log('bib export article content: ', article.bibtext);
+          window.console.log('No bib');
+          artStr = artStr.concat(`@article{,</br>
+              title={${article.title}},</br>`);
+          if (article.author !== undefined && article.author !== '') {
+            artStr = artStr.concat(`author={${article.author}},</br>`);
           }
-          // this.BibTexExportContent = _.join(this.BibTexExportContent, artStr);
-          // this.BibTexExportContent = this.BibTexExportContent.concat(artStr);
+          if (article.journal !== undefined && article.journal !== '') {
+            artStr = artStr.concat(`journal={${article.journal}},</br>`);
+          }
+          if (article.volume !== undefined && article.volume > 0) {
+            artStr = artStr.concat(`volume={${article.volume}},</br>`);
+          }
+          if (article.number !== undefined) {
+            artStr = artStr.concat(`number={${article.number}},</br>`);
+          }
+          if (article.page !== undefined) {
+            artStr = artStr.concat(`pages={${article.page}},</br>`);
+          }
+          if (article.year !== undefined) {
+            artStr = artStr.concat(`year={${article.year}},</br>`);
+          }
+          // if (article.publisher !== null) {
+          //   artStr = artStr.concat(`publisher={${article.publisher}},</br>`);
+          // }
+          artStr = artStr.concat('}</br>');
           this.BibTexExportContent = this.BibTexExportContent + artStr;
-          window.console.log(`bibtexExport ${this.BibTexExportContent}`);
         }
+        window.console.log(`bibtexExport ${this.BibTexExportContent}`);
       });
     },
     cancelBibExportModal() {
