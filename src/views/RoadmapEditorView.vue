@@ -804,6 +804,7 @@ export default {
         path: '/articleMde',
         query: { selected: this.getArticleIdByTitle(this.curNode.content) },
       });
+    },
     handleArticleDraggedIn(evt) {
       this.handleNodeAdded({
         nodeName: evt.added.element.title,
