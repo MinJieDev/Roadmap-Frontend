@@ -1,11 +1,40 @@
 <template>
   <div>
+    <div style="margin-right: 10px; float: right;">
+      切换布局
+      <i-switch
+        @on-change="onChangeViewStyle"
+        size="large">
+        <span slot="open">Card</span>
+        <span slot="close">Table</span>
+      </i-switch>
+    </div>
+    <div v-if="this.viewStyle==='table'">
+        <Button
+          @click="onClickNewRoadmap(0)"
+          type="primary"
+          style="margin-left: 10px; margin-bottom: 10px ">
+          新建路书
+        </Button>
+        <Table row-key="id"
+               :columns="columns"
+               :data="data"
+               border>
+        </Table>
+        <ItemEditor
+          v-bind:drawer="drawer"
+          @cancelDrawer="cancelDrawer">
+        </ItemEditor>
+    </div>
+    <div v-else-if="this.viewStyle==='card'">
     <Row v-for="r in rows" v-bind:key="r" type="flex" justify="center" :gutter="20">
       <i-col v-for="c in cols" v-bind:key="c" span="6" align="center" >
         <!-- getIndex函数用于获取指定r和c后，路书在index中的索引。对于新建路书，getIndex会返回-1 -->
-        <Card v-show="getIndex(r, c, cols) + 1 < data.length + 1" style="margin-bottom: 20px">
+        <Card v-show="getIndex(r, c, cols) + 1 < data.length + 1"
+              style="margin-bottom: 20px">
           <!--新建路书部件-->
-          <div class="card_content" v-if="r === 1 && c === 1">
+          <div class="card_content" v-if="r === 1 && c === 1"
+               @click="onClickNewRoadmap(0)">
             <p class="single_line">
               新建路书
             </p>
@@ -15,7 +44,8 @@
             </Button>
           </div>
           <!--已有路书卡片-->
-          <div class="card_content" v-else>
+          <div class="card_content" v-else
+               @click="onEdit(roadmaps[getIndex(r, c, cols)].id)">
             <p class=single_line v-if="getIndex(r, c, cols) < data.length">
               {{data[getIndex(r, c, cols)].title}}
             </p>
@@ -44,6 +74,7 @@
       v-bind:drawer="drawer"
       @cancelDrawer="cancelDrawer">
     </ItemEditor>
+    </div>
   </div>
 </template>
 
@@ -61,8 +92,110 @@ export default {
     return {
       drawer: false,
       cols: 3,
+      viewStyle: 'card',
       data: [],
       roadmaps: [],
+      columns: [
+        {
+          title: '序号',
+          key: 'id',
+          width: 100,
+          align: 'center',
+        },
+        {
+          title: '标题',
+          key: 'title',
+          align: 'center',
+        },
+        // {
+        //   title: '标签',
+        //   key: 'tag',
+        //   width: 300,
+        //   align: 'center',
+        //   render: (h, params) => {
+        //     const tags = this.data[params.index].tags;
+        //     return h('div', (tags || []).map(item => h('Tag', {
+        //       props: {
+        //         // type: 'border',
+        //         key: item.name,
+        //         name: item.name,
+        //         color: item.color,
+        //         closable: true,
+        //         style: 'margin-left: 3px',
+        //       },
+        //     },
+        //     item.name,
+        //     )));
+        //   },
+        // },
+        {
+          title: '描述',
+          key: 'description',
+          width: 300,
+          align: 'center',
+        },
+        {
+          title: '操作',
+          key: 'action',
+          width: 300,
+          align: 'center',
+          render: (h, params) => h('div', [
+            h('Button', {
+              props: {
+                type: 'primary',
+                size: 'small',
+              },
+              style: {
+                marginRight: '10px',
+              },
+              on: {
+                click: () => {
+                  this.onView(this.roadmaps[params.index].id);
+                },
+              },
+            }, '查看'),
+            h('Button', {
+              props: {
+                type: 'warning',
+                size: 'small',
+              },
+              style: {
+                marginRight: '10px',
+              },
+              on: {
+                click: () => {
+                  this.onEdit(this.roadmaps[params.index].id);
+                },
+              },
+            }, '修改'),
+            h('Button', {
+              props: {
+                type: 'success',
+                size: 'small',
+              },
+              style: {
+                marginRight: '10px',
+              },
+              on: {
+                click: () => {
+                  this.onShare(this.roadmaps[params.index].id);
+                },
+              },
+            }, '分享'),
+            h('Button', {
+              props: {
+                type: 'error',
+                size: 'small',
+              },
+              on: {
+                click: () => {
+                  this.onDelete(this.roadmaps[params.index].id, params.index);
+                },
+              },
+            }, '删除'),
+          ]),
+        },
+      ],
     };
   },
   mounted() {
@@ -160,6 +293,14 @@ export default {
       });
       this.$Message.info('onNew');
     },
+    onChangeViewStyle() {
+      window.console.log('switch view style');
+      if (this.viewStyle === 'card') {
+        this.viewStyle = 'table';
+      } else {
+        this.viewStyle = 'card';
+      }
+    },
   },
 };
 </script>
@@ -177,5 +318,6 @@ export default {
     width: 250px;
     text-align: center;
     align-content: center;
+    cursor: pointer;  /*鼠标悬停变小手*/
   }
 </style>
