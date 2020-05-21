@@ -22,6 +22,12 @@
       导入BibTex
     </Button>
     <Button
+      @click="openBibTexExportModal"
+      type="success"
+      style="margin-left: 10px; margin-bottom: 10px ">
+      导出BibTex
+    </Button>
+    <Button
       @click="deleteSelectItem"
       type="error"
       style="margin-left : 10px; margin-bottom: 10px; float: right; margin-right: 20px">
@@ -37,6 +43,22 @@
         type="textarea"
         :autosize="{minRows: 6}"
         placeholder="请输入您的BibTex  (支持批量导入) " />
+    </Modal>
+    <Modal
+      v-model="BibTexExportModal"
+      title="导出BibTex"
+      @on-cancel="cancelBibExportModal">
+      <p slot="header" style="text-align:center">
+        <Icon type="md-checkmark-circle-outline" />
+        <span>导出成功</span>
+      </p>
+      <div slot="footer">
+        <Button
+          type="primary"
+          @click="copyBibTex">
+          复制BibTex
+        </Button>
+      </div>
     </Modal>
     <Table row-key="id"
            :columns="columns"
@@ -92,6 +114,7 @@ export default {
     return {
       drawer: false,
       BibtexModal: false,
+      BibTexExportModal: false,
       index: 0,
       BibValue: '',
       formData: {
@@ -381,6 +404,16 @@ export default {
     changePageSize(pageSize) {
       this.page.size = pageSize;
       this.$Message.success(`Change Page Size to ${pageSize}`);
+    },
+    openBibTexExportModal() {
+      this.BibTexExportModal = true;
+    },
+    cancelBibExportModal() {
+      this.BibTexExportModal = false;
+    },
+    copyBibTex() {
+      this.$Message.info('Copy Success');
+      this.BibTexExportModal = false;
     },
   },
 };
