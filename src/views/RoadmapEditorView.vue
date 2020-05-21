@@ -11,16 +11,23 @@
             <Icon type="ios-navigate"></Icon>
             文献栏
           </template>
-          <MenuItem v-for="(article, index) in articles" :key="index" :name="'1-'+article.id" >
-            <FileItem
-              :fileName="article.title"
-              :articleUrl="article.url"
-              :display="isFileItemDisplay('1-'+article.id)"
-              :articleId="article.id"
-              @node-added="handleArticleNodeAdded"
-              @node-deleted="handleArticleNodeDeleted(article.title)">
-            </FileItem>
-          </MenuItem>
+          <draggable
+            class="dragArea list-group"
+            :list="articles"
+            :group="{ name: 'article', pull: 'clone', put: false }"
+            :sort="false"
+          >
+            <MenuItem v-for="(article, index) in articles" :key="index" :name="'1-'+article.id" >
+              <FileItem
+                :fileName="article.title"
+                :articleUrl="article.url"
+                :display="isFileItemDisplay('1-'+article.id)"
+                :articleId="article.id"
+                @node-added="handleArticleNodeAdded"
+              >
+              </FileItem>
+            </MenuItem>
+          </draggable>
         </Submenu>
 <!--        <Submenu name="2">-->
 <!--          <template slot="title">-->
@@ -65,18 +72,27 @@
           </EditRoadmapDescriptionForm>
         </Panel>
       </Collapse>
-      <roadmap
-        :nodes="nodes"
-        :connections="mergedConnections"
-        :editable="true"
-        :key="repaint"
-        :live-node="curNode"
-        @node-click="handleNodeClick"
-        @node-dblclick="handleNodeDblClick"
-        @subnode-dblclick="handleSubnodeDblClick"
-        @svg-click="handleSvgClick"
-        @conn-click="handleConnClick"
-      />
+      <draggable
+        class="dragArea list-group"
+        :list="roadmapDragArticleList"
+        :group="{ name: 'article', put: true }"
+        ghostClass="ghost"
+        @change="handleArticleDraggedIn"
+      >
+        <roadmap
+          ref="road_map"
+          :nodes="nodes"
+          :connections="mergedConnections"
+          :editable="true"
+          :key="repaint"
+          :live-node="curNode"
+          @node-click="handleNodeClick"
+          @node-dblclick="handleNodeDblClick"
+          @subnode-dblclick="handleSubnodeDblClick"
+          @svg-click="handleSvgClick"
+          @conn-click="handleConnClick"
+        />
+      </draggable>
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}">
       <Button  @click="handleClkHelp"
@@ -118,7 +134,8 @@
             打开笔记
             <Icon type="ios-book" />
           </MenuItem>
-          <NoteMarkdown :note="curNote" ref="NoteMarkdown"></NoteMarkdown>
+          <NoteMarkdown :note="curNote" ref="NoteMarkdown"
+                        @article-note-edit="jumpArticleNoteEdit"></NoteMarkdown>
           <ModifyNodeForm
             @node-modified="handleNodeModified"
             :node-info-old="curNodeInfo"
@@ -166,6 +183,7 @@
 <script>
 import _ from 'lodash';
 import Vue from 'vue';
+import draggable from 'vuedraggable';
 import AddNodeForm from '../components/AddNodeForm';
 import AddConnectionForm from '../components/AddConnectionForm';
 import DelNodeForm from '../components/DelNodeForm';
@@ -208,6 +226,7 @@ export default {
     ModifyCommentForm,
     ModifyNodeForm,
     NoteMarkdown,
+    draggable,
   },
   data() {
     return {
@@ -228,9 +247,15 @@ export default {
       curNode: null,
       curConn: null,
       modeConnectionChoosing: false,
+      nextNodeId: 1,
+      refCurves: [
+      ],
+      roadmapDragArticleList: [
+      ],
     };
   },
   computed: {
+    // @deprecated method
     nodeNameList() {
       let ret = [];
       _(this.nodes).forEach((node) => {
@@ -245,12 +270,13 @@ export default {
     savedNodes() {
       let ret = [];
       _(this.nodes).forEach((node) => {
-        let saveTxt = node.text;
+        let saveTxt = node.content;
         if (node.category === 'article') {
-          saveTxt = `$${this.getArticleIdByTitle(node.text)}`;
+          saveTxt = `$${this.getArticleIdByTitle(node.content)}`;
         }
         ret = [...ret, {
-          text: saveTxt,
+          text: node.text,
+          content: saveTxt,
           URI: node.URI,
           fx: node.fx,
           fy: node.fy,
@@ -263,19 +289,12 @@ export default {
     savedConnections() {
       let ret = [];
       _(this.connections).forEach((connection) => {
-        let sourceTxt = connection.source.text;
-        let targetTxt = connection.target.text;
-        if (connection.source.category === 'article') {
-          sourceTxt = `$${this.getArticleIdByTitle(sourceTxt)}`;
-        }
-        if (connection.target.category === 'article') {
-          targetTxt = `$${this.getArticleIdByTitle(targetTxt)}`;
-        }
+        const sourceTxt = connection.source.text;
+        const targetTxt = connection.target.text;
         ret = [...ret, {
           source: sourceTxt,
           target: targetTxt,
-          source_category: connection.source.category,
-          target_category: connection.target.category,
+          curve: connection.curve,
         }];
       });
       return ret;
@@ -289,15 +308,22 @@ export default {
       let conn = [];
       let articleNodes = _.filter(this.nodes, node => (node.category === 'article'));
       articleNodes = _.map(articleNodes, (node) => {
-        const article = _.find(this.articles, atc => (atc.title === node.text));
+        const article = _.find(this.articles, atc => (atc.title === node.content));
         return { ...node, article };
       });
       _.forEach(articleNodes, (ni) => {
         _.forEach(articleNodes, (nj) => {
           if (_.includes(ni.article.article_references, nj.article.id)) {
+            let curve = { x: 0, y: 0 };
+            const tempConn = _.find(this.refCurves, nk =>
+              (nk.curve && (ni.text === nk.source) && (nj.text === nk.target)));
+            if (tempConn) {
+              curve = tempConn.curve;
+            }
             conn = _.concat(conn, {
               source: ni.text,
               target: nj.text,
+              curve,
               type: 'ref',
             });
           }
@@ -341,7 +367,7 @@ export default {
     curNodeInfo() {
       if (this.curNode) {
         return {
-          name: this.curNode.text,
+          name: this.curNode.content,
           URI: this.curNode.URI,
         };
       }
@@ -361,8 +387,8 @@ export default {
     },
     curNote() {
       if (!this.curNode || this.curNode.category !== 'article') return '';
-      if (this.getArticleByTitle(this.curNode.text).note) {
-        return this.getArticleByTitle(this.curNode.text).note;
+      if (this.getArticleByTitle(this.curNode.content).note) {
+        return this.getArticleByTitle(this.curNode.content).note;
       }
       return '';
     },
@@ -379,8 +405,10 @@ export default {
           .then((res) => {
             this.nodes = this.toDisplayNodes(JSON.parse(res.data.text).nodes);
             this.connections = this.toDisplayConnections(JSON.parse(res.data.text).connections);
+            this.refCurves = JSON.parse(res.data.text).refConnections;
             this.roadMapTitle = res.data.title;
             this.description = res.data.description;
+            this.nextNodeId = JSON.parse(res.data.text).nextNodeId;
             this.repaintMindMap();
             this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
           })
@@ -419,13 +447,13 @@ export default {
             pushErr(this, 1000, true, '创建新节点失败', '自动生成节点名失败');
             return;
           }
-          this.handleNodeAdded({
+          const thisId = this.handleNodeAdded({
             nodeName: name,
             nodeUrl: '',
           });
           this.handleConnectionAdded({
             sourceNode: this.curNode.text,
-            targetNode: name,
+            targetNode: thisId,
           });
         }
       }
@@ -458,20 +486,23 @@ export default {
       const pos = this.getMidPos();
       this.nodes = [...this.nodes,
         {
-          text: nodeInfo.nodeName,
+          text: `#${this.nextNodeId}`, // 为#nodeId，保证不重名
+          content: nodeInfo.nodeName,
           URI: nodeInfo.nodeUrl,
           fx: pos.fx,
           fy: pos.fy,
           nodes: [],
           category: category || 'mindmap',
         }];
+      this.nextNodeId += 1;
       this.repaintMindMap();
+      return `#${this.nextNodeId - 1}`;
     },
     handleNodeModified(nodeInfo) {
       _.forEach(this.nodes, (node) => {
         if (node.text === this.curNode.text) {
           // eslint-disable-next-line no-param-reassign
-          node.text = nodeInfo.nodeName;
+          node.content = nodeInfo.nodeName;
           // eslint-disable-next-line no-param-reassign
           node.URI = nodeInfo.nodeUrl;
         }
@@ -482,9 +513,9 @@ export default {
       this.handleNodeAdded(nodeInfo, 'article');
     },
     // 删除文献结点
+    // @deprecated method
     handleArticleNodeDeleted(articleTitle) {
-      window.console.log(this.nodes);
-      window.console.log(articleTitle);
+      window.console.log('handleArticleNodeDeleted: deprecated method');
       this.nodes = _.filter(this.nodes, node => node.text !== articleTitle);
       this.connections = _.filter(this.connections, connection =>
         (connection.source.text !== articleTitle
@@ -498,7 +529,6 @@ export default {
         (connection.source.text !== this.curNode.text
           && connection.target.text !== this.curNode.text));
       this.curNode = null;
-      window.console.log('del curnode', this.curNode);
       this.$Notice.success({ title: 'node deleted' });
       this.repaintMindMap();
     },
@@ -512,9 +542,7 @@ export default {
     handleConnectionDeleted() {
       this.connections = _.filter(this.connections, connection => !(
         (connection.source.text === this.curConn.source.text
-                  && connection.target.text === this.curConn.target.text)
-        || (connection.target.text === this.curConn.source.text
-                  && connection.source.text === this.curConn.target.text)));
+                  && connection.target.text === this.curConn.target.text)));
       this.curConn = null;
       this.$Notice.success({ title: 'connection deleted' });
       this.repaintMindMap();
@@ -544,6 +572,7 @@ export default {
       });
       this.repaintMindMap();
     },
+    // @deprecated
     handleNodeCommentListChanged(nodeName) {
       this.commentList = [];
       const tmplist = _(this.nodes).filter(node => node.text === nodeName);
@@ -560,9 +589,21 @@ export default {
       this.SideMenuActiveItem = itemName;
     },
     handleClkSaveRoadmap() {
+      let curves = [];
+      const allConns = this.$refs.road_map.getConn();
+      _.forEach(allConns, (conn) => {
+        if (conn.type === 'ref') {
+          curves = [...curves, {
+            source: conn.source,
+            target: conn.target,
+            curve: conn.curve,
+          }];
+        }
+      });
       // id ==
       if (this.roadMapId === -1) {
-        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections, this.description)
+        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections,
+          curves, this.description, this.nextNodeId)
           .then((res) => {
             this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
             this.roadMapId = res.data.id;
@@ -571,7 +612,7 @@ export default {
           });
       } else {
         updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.description)
+          curves, this.description, this.nextNodeId)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
           }).catch((err) => {
@@ -579,6 +620,7 @@ export default {
           });
       }
     },
+    // @deprecated
     handleClkLoadRoadmap(roadmapInfo) {
       getRoadmap(roadmapInfo.roadmapId).then((res) => {
         this.nodes = JSON.parse(res.data.text).nodes;
@@ -591,6 +633,7 @@ export default {
         pushErr(this, err, true);
       });
     },
+    // @deprecated
     handleClkCreateRoadmap() {
       createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections).then((res) => {
         this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
@@ -657,17 +700,17 @@ export default {
       let ret = [];
       _(savedNodes).forEach((node) => {
         if (node.category === 'article') {
-          const art = this.getArticleById(_.split(node.text, '$', 2)[1]);
+          const art = this.getArticleById(_.split(node.content, '$', 2)[1]);
           if (typeof art !== 'undefined') {
             // eslint-disable-next-line no-param-reassign
-            node.text = art.title;
+            node.content = art.title;
             // eslint-disable-next-line no-param-reassign
             node.URI = art.url;
           } else {
             // eslint-disable-next-line no-param-reassign
             node.category = 'mindmap';
             // eslint-disable-next-line no-param-reassign
-            node.text += ': article not found';
+            node.content += ': article not found';
           }
         }
         ret = [...ret, node];
@@ -675,49 +718,10 @@ export default {
       return ret;
     },
     toDisplayConnections(savedConnections) {
-      let ret = [];
-      _(savedConnections).forEach((conn) => {
-        if (conn.source_category === 'article') {
-          const art = this.getArticleById(_.split(conn.source, '$', 2)[1]);
-          if (typeof art !== 'undefined') {
-            // eslint-disable-next-line no-param-reassign
-            conn.source = art.title;
-          } else {
-            // eslint-disable-next-line no-param-reassign
-            conn.source_category = 'mindmap';
-            // eslint-disable-next-line no-param-reassign
-            conn.source += ': article not found';
-          }
-        }
-        if (conn.target_category === 'article') {
-          const art = this.getArticleById(_.split(conn.target, '$', 2)[1]);
-          if (typeof art !== 'undefined') {
-            // eslint-disable-next-line no-param-reassign
-            conn.target = art.title;
-          } else {
-            // eslint-disable-next-line no-param-reassign
-            conn.target_category = 'mindmap';
-            // eslint-disable-next-line no-param-reassign
-            conn.target += ': article not found';
-          }
-        }
-        ret = [...ret, conn];
-      });
-      return ret;
+      return savedConnections;
     },
     createUniName() {
-      let i = 0;
-      for (i = 1; i < 10000; i += 1) {
-        let flag = true;
-        const name = `新建节点${i}`;
-        _(this.nodes).forEach((node) => {
-          if (node.text === name) {
-            flag = false;
-          }
-        });
-        if (flag) { return name; }
-      }
-      return null;
+      return '新建节点';
     },
     handleOpenUrl() {
       if (this.curNode.URI) {
@@ -795,6 +799,20 @@ export default {
       window.console.log('notemarkdown', this.$refs);
       this.$refs.NoteMarkdown.handleShowNoteModal();
     },
+    jumpArticleNoteEdit() {
+      this.$router.push({
+        path: '/articleMde',
+        query: { selected: this.getArticleIdByTitle(this.curNode.content) },
+      });
+    },
+    handleArticleDraggedIn(evt) {
+      this.handleNodeAdded({
+        nodeName: evt.added.element.title,
+        articleId: evt.added.element.id,
+        nodeUrl: evt.added.element.url,
+      }, 'article');
+      window.console.log(evt);
+    },
   },
 };
 </script>
@@ -813,5 +831,8 @@ export default {
   #help-icon{
     margin-left: 40px;
     margin-right: 40px;
+  }
+  .ghost {
+    display: none;
   }
 </style>
