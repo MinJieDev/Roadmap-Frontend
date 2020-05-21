@@ -47,12 +47,12 @@
     <Modal
       v-model="BibTexExportModal"
       title="导出BibTex"
-      :content="BibTexExportContent"
+      v-bind:content="BibTexExportContent"
       scrollable draggable
       @on-cancel="cancelBibExportModal">
       <p slot="header" style="text-align:center">
         <Icon type="md-checkmark-circle-outline" />
-        <span>导出成功</span>
+        <span>批量导出成功</span>
       </p>
       <div slot="footer">
         <Button
@@ -261,7 +261,7 @@ export default {
       _.forEach(res, (article) => {
         const authorArr = _.split(article.author, 'and', 2);
         _.merge(article, { firstAuthor: authorArr[0] });
-        // window.console.log(article);
+        window.console.log(article);
       });
       return res;
     },
@@ -404,18 +404,41 @@ export default {
     openBibTexExportModal() {
       this.BibTexExportModal = true;
       _.forEach(this.$refs.selection.objData, (article) => {
+        let artStr = '';
         // eslint-disable-next-line no-underscore-dangle
         if (article._isChecked === true) {
-          window.console.log('bib export article content: ', article);
+          window.console.log('bib export article content: ', article.bibtext);
+          if (article.bibtext !== '') {
+            window.console.log('Have bib');
+            artStr = article.bibtext;
+          } else {
+            window.console.log('No bib');
+            artStr = artStr.concat(`@article{,
+              title={${article.title}},\
+              author={${article.author}},
+              journal={${article.journal}},
+              volume={${article.volume}},
+              number={},
+              pages={${article.page}},
+              year={${article.year}},
+              publisher={}
+            }\n`);
+          }
+          // this.BibTexExportContent = _.join(this.BibTexExportContent, artStr);
+          // this.BibTexExportContent = this.BibTexExportContent.concat(artStr);
+          this.BibTexExportContent = this.BibTexExportContent + artStr;
+          window.console.log(`bibtexExport ${this.BibTexExportContent}`);
         }
       });
     },
     cancelBibExportModal() {
       this.BibTexExportModal = false;
+      this.BibTexExportContent = '';
     },
     copyBibTex() {
       this.$Message.info('Copy Success');
       this.BibTexExportModal = false;
+      this.BibTexExportContent = '';
     },
   },
 };
