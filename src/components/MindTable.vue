@@ -81,12 +81,9 @@
         <Page
           :total="page.total"
           :current="page.current"
-          :size="page.size"
           show-total
-          show-sizer
           show-elevator
           @on-change="changePage"
-          @on-page-size-change="changePageSize"
         >
         </Page>
       </div>
@@ -126,9 +123,9 @@ export default {
       page: {
         // TODO: Link with backend data.
         // Load page rather than articles.
-        total: 50,
+        total: 100,
         current: 1,
-        size: 10,
+        // default size: 10,
       },
       columns: [
         {
@@ -400,10 +397,6 @@ export default {
       // TODO: Wait page apis of BackEnd
       this.page.current = pageIndex;
       this.$Message.success(`Change to Page ${pageIndex}`);
-    },
-    changePageSize(pageSize) {
-      this.page.size = pageSize;
-      this.$Message.success(`Change Page Size to ${pageSize}`);
     },
     openBibTexExportModal() {
       this.BibTexExportModal = true;
