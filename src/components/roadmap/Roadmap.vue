@@ -7,7 +7,7 @@
                 markerWidth="10"
                 markerHeight="10"
                 viewBox="0 0 12 12"
-                refX="50"
+                refX="25"
                 refY="6"
                 orient="auto">
           <path d="M2,2 L10,6 L2,10 L6,6 L2,2" style="fill: #000000;" />
@@ -19,6 +19,7 @@
 <script>
 /* eslint-disable no-param-reassign */
 // TODO solve param reassign
+import _ from 'lodash';
 import {
   forceCollide,
   forceLink,
@@ -33,6 +34,7 @@ import {
 import {
   d3Nodes,
   d3Drag,
+  d3DragConn,
   d3PanZoom,
   onTick, d3CustomConnections,
 } from './utils/d3';
@@ -66,6 +68,7 @@ export default {
       simulation: null,
       clickTimeId: 0,
       curNode: this.liveNode,
+      allConn: [],
     };
   },
   methods: {
@@ -176,6 +179,22 @@ export default {
           this.$emit('conn-click', conn);
           event.stopPropagation();
         });
+      conns.call(d3DragConn(this.simulation, svg, conns));
+      let ret = [];
+      // eslint-disable-next-line
+      _.forEach(conns._groups[0], (conn) => {
+        ret = [...ret, {
+          // eslint-disable-next-line
+          source: conn.__data__.source.text,
+          // eslint-disable-next-line
+          target: conn.__data__.target.text,
+          // eslint-disable-next-line
+          curve: conn.__data__.curve,
+          // eslint-disable-next-line
+          type: conn.__data__.type,
+        }];
+      });
+      this.allConn = ret;
       // Tick the simulation 100 times
       for (let i = 0; i < 100; i += 1) {
         this.simulation.tick();
@@ -234,6 +253,9 @@ export default {
       svg.attr('viewBox', getViewBox(nodes.data()))
         .call(d3PanZoom(svg))
         .on('dblclick.zoom', null);
+    },
+    getConn() {
+      return this.allConn;
     },
   },
   mounted() {

@@ -44,7 +44,8 @@
         查看笔记
         <Icon type="ios-book" />
       </Button>
-      <NoteMarkdown :note="curNote" ref="notemdReader"></NoteMarkdown>
+      <NoteMarkdown :note="curNote" ref="notemdReader"
+                    @article-note-edit="jumpArticleNoteEdit"></NoteMarkdown>
     </Sider>
   </Layout>
 </template>
@@ -293,6 +294,12 @@ export default {
     },
     handleOpenNote() {
       this.$refs.notemdReader.handleShowNoteModal();
+    },
+    jumpArticleNoteEdit() {
+      this.$router.push({
+        path: '/articleMde',
+        query: { selected: this.getArticleIdByTitle(this.curNode.content) },
+      });
     },
   },
 };
