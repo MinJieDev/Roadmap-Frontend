@@ -607,6 +607,10 @@ export default {
           .then((res) => {
             this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
             this.roadMapId = res.data.id;
+            this.$router.push({
+              path: '/editor',
+              query: { selected: res.data.id },
+            });
           }).catch((err) => {
             pushErr(this, err, true);
           });
