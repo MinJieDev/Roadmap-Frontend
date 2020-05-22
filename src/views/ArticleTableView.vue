@@ -28,12 +28,12 @@ export default {
         // eslint-disable-next-line no-param-reassign
         page = 1;
       }
-      window.console.log('current page', page);
+      // window.console.log('current page', page);
       reqSingle('/api/articles/', 'GET', { page }).then((res) => {
-        window.console.log('get page data', res);
-        this.articles = res.data;
-        this.articleTotal = res.data.length;
-        window.console.log('article total:', this.articleTotal);
+        // window.console.log('get page data', res);
+        this.articles = res.data.results;
+        this.articleTotal = res.data.count;
+        // window.console.log('article total:', this.articleTotal);
       }).catch((err) => {
         pushErr(this, err, true);
       });
