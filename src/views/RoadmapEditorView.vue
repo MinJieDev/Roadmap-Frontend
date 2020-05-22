@@ -196,7 +196,7 @@ import ModifyCommentForm from '../components/ModifyCommentForm';
 import ModifyNodeForm from '../components/ModifyNodeForm';
 import FileItem from '../components/FileItem';
 import NoteMarkdown from '../components/NoteMarkdown';
-import { req } from '../apis/util';
+import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
 import {
   createRoadmap,
@@ -395,8 +395,8 @@ export default {
   },
   mounted() {
     // GET articles for l-sider
-    req('/api/articles/', 'GET').then((res1) => {
-      this.articles = res1.data;
+    reqSingle('/api/articles/', 'GET', { page: 1 }).then((res1) => {
+      this.articles = res1.data.results;
       // load roadMap if has query
       if ((typeof (this.$route.query.selected) !== 'undefined') &&
         (String(this.$route.query.selected) !== '-1')) {
