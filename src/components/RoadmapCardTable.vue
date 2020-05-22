@@ -33,23 +33,22 @@
         <Card v-show="getIndex(r, c, cols) + 1 < data.length + 1"
               style="margin-bottom: 20px">
           <!--新建路书部件-->
-          <div class="card_content" v-if="r === 1 && c === 1"
-               @click="onClickNewRoadmap(0)">
+          <div class="card_content" v-if="r === 1 && c === 1">
             <p class="single_line">
               新建路书
             </p>
-            <Icon type="ios-book" size="250"></Icon>
+            <Icon class="card_img" type="ios-book" size="250" @click="onClickNewRoadmap(0)"></Icon>
             <Button type="primary" size="small" @click="onClickNewRoadmap(0)">
               创建新的路书
             </Button>
           </div>
           <!--已有路书卡片-->
-          <div class="card_content" v-else
-               @click="onEdit(roadmaps[getIndex(r, c, cols)].id)">
+          <div class="card_content" v-else>
             <p class=single_line v-if="getIndex(r, c, cols) < data.length">
               {{data[getIndex(r, c, cols)].title}}
             </p>
-            <img src="../assets/RoadmapDefault.png" height="250">
+            <img class="card_img" src="../assets/RoadmapDefault.png" height="250"
+                 @click="onEdit(roadmaps[getIndex(r, c, cols)].id)">
             <br>
             <Button type="primary" size="small" @click="onView(roadmaps[getIndex(r, c, cols)].id)">
               查看
@@ -318,6 +317,8 @@ export default {
     width: 250px;
     text-align: center;
     align-content: center;
+  }
+  .card_img{
     cursor: pointer;  /*鼠标悬停变小手*/
   }
 </style>

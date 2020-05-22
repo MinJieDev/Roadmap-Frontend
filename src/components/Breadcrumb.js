@@ -1,6 +1,6 @@
 // eslint-disable-next-line no-array-constructor
 window.routerStack = new Array();
-window.routerStack.push({ name: 'Welcome', nickName: '主页', fullPath: '\\', level: 1 });
+window.routerStack.push({ name: 'Welcome', nickName: '主页', fullPath: '/', level: 1 });
 
 export default function pushRouter(name, nickName, fullPath, level) {
   let hasHomePage = false;
@@ -13,7 +13,7 @@ export default function pushRouter(name, nickName, fullPath, level) {
     }
   }
   if (!hasHomePage) {
-    window.routerStack.push({ name: 'Welcome', nickName: '主页', fullPath: '\\', level: 1 });
+    window.routerStack.push({ name: 'Welcome', nickName: '主页', fullPath: '/', level: 1 });
   }
   if (level > 1) {
     window.routerStack.push({ name, nickName, fullPath, level });

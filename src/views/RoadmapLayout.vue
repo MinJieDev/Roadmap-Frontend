@@ -41,7 +41,6 @@
       </Header>
       <Layout :style="{padding: '0 50px'}">
         <Breadcrumb :style="{margin: '16px 0px'}">
-<!--          <BreadcrumbItem>HomePage</BreadcrumbItem>-->
           <BreadcrumbItem
             :to="item.fullPath"
             v-for="(item, index) in getRouterStack()"
