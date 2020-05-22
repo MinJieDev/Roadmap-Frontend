@@ -81,8 +81,9 @@
       </Button>
       <div style="float: right; margin-top: 18px;">
         <Page
-          :total="page.total"
+          :total="articleTotal"
           :current="page.current"
+          :page-size="10"
           show-total
           show-elevator
           @on-change="changePage"
@@ -107,6 +108,10 @@ export default {
       type: Array,
       required: true,
     },
+    articleTotal: {
+      type: Number,
+      required: true,
+    },
   },
   components: { ItemEditor, MindTableExpand },
   data() {
@@ -124,9 +129,6 @@ export default {
         read_state: false,
       },
       page: {
-        // TODO: Link with backend data.
-        // Load page rather than articles.
-        total: 100,
         current: 1,
         // default size: 10,
       },
@@ -261,7 +263,7 @@ export default {
       _.forEach(res, (article) => {
         const authorArr = _.split(article.author, 'and', 2);
         _.merge(article, { firstAuthor: authorArr[0] });
-        window.console.log(article);
+        // window.console.log(article);
       });
       return res;
     },
@@ -397,8 +399,8 @@ export default {
         });
     },
     changePage(pageIndex) {
-      // TODO: Wait page apis of BackEnd
       this.page.current = pageIndex;
+      this.$emit('reloadData', this.page.current);
       this.$Message.success(`Change to Page ${pageIndex}`);
     },
     openBibTexExportModal() {
@@ -407,8 +409,6 @@ export default {
         let artStr = '';
         // eslint-disable-next-line no-underscore-dangle
         if (article._isChecked === true) {
-          // window.console.log('bib export article content: ', article.bibtext);
-          window.console.log('No bib');
           artStr = artStr.concat(`@article{,</br>
               title={${article.title}},</br>`);
           if (article.author !== undefined && article.author !== '') {
@@ -435,7 +435,7 @@ export default {
           artStr = artStr.concat('}</br>');
           this.BibTexExportContent = this.BibTexExportContent + artStr;
         }
-        window.console.log(`bibtexExport ${this.BibTexExportContent}`);
+        // window.console.log(`bibtexExport ${this.BibTexExportContent}`);
       });
     },
     cancelBibExportModal() {
