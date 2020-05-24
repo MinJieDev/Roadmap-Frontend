@@ -203,18 +203,21 @@ export default {
         {
           title: 'Action',
           key: 'action',
-          width: 250,
+          width: 140,
           align: 'center',
-          render: (h, params) => h('div', [
+          render: (h, params) => h('Dropdown', {
+            props: {
+              trigger: 'hover',
+              transfer: 'true',
+            } }, [
             h('Button', {
               props: {
-                type: 'success',
                 size: 'small',
+                icon: 'ios-arrow-down',
               },
-              style: {
-                marginRight: '5px',
-              },
-              on: {
+            }, '更多选项'),
+            h('DropdownMenu', { slot: 'list' }, [
+              h('DropdownItem', { nativeOn: {
                 click: () => {
                   const ref = this.data[params.index].article_references;
                   const refNames = _.map(ref, id =>
@@ -225,33 +228,39 @@ export default {
                     content: `${_.join(refNames, '<br>') || '空'}`,
                   });
                 },
-              },
-            }, '查看引用'),
-            h('Button', {
-              props: {
-                type: 'primary',
-                size: 'small',
-              },
-              style: {
-                marginRight: '5px',
-              },
-              on: {
+              } }, [h('Button', {
+                props: {
+                  icon: 'md-search',
+                  size: 'small',
+                  type: 'text',
+                } },
+              '查看引用'),
+              ]),
+              h('DropdownItem', { nativeOn: {
                 click: () => {
                   this.onView(params.index);
-                },
-              },
-            }, '编辑'),
-            h('Button', {
-              props: {
-                type: 'error',
-                size: 'small',
-              },
-              on: {
+                } },
+              }, [h('Button', {
+                props: {
+                  icon: 'md-document',
+                  size: 'small',
+                  type: 'text',
+                } },
+              '编辑文献'),
+              ]),
+              h('DropdownItem', { nativeOn: {
                 click: () => {
                   this.onDelete(params.index);
-                },
-              },
-            }, '删除'),
+                } },
+              }, [h('Button', {
+                props: {
+                  icon: 'md-trash',
+                  size: 'small',
+                  type: 'text',
+                } },
+              '删除文献'),
+              ]),
+            ]),
           ]),
         },
       ],
