@@ -80,6 +80,8 @@ export default {
       ],
       articles: [],
       curNode: null,
+      refCurves: [
+      ],
     };
   },
   async mounted() {
@@ -92,6 +94,7 @@ export default {
         this.articles = roadmapData.articles;
         this.nodes = this.toDisplayNodes(JSON.parse(roadmapData.text).nodes);
         this.connections = this.toDisplayConnections(JSON.parse(roadmapData.text).connections);
+        this.refCurves = JSON.parse(roadmapData.text).refConnections;
         this.roadMapTitle = roadmapData.title;
         this.description = roadmapData.description;
         this.repaintMindMap();
@@ -106,6 +109,7 @@ export default {
         const roadmapData = (await getRoadmap(this.roadMapId)).data;
         this.nodes = this.toDisplayNodes(JSON.parse(roadmapData.text).nodes);
         this.connections = this.toDisplayConnections(JSON.parse(roadmapData.text).connections);
+        this.refCurves = JSON.parse(roadmapData.text).refConnections;
         this.roadMapTitle = roadmapData.title;
         this.description = roadmapData.description;
         this.repaintMindMap();
@@ -130,9 +134,16 @@ export default {
       _.forEach(articleNodes, (ni) => {
         _.forEach(articleNodes, (nj) => {
           if (_.includes(ni.article.article_references, nj.article.id)) {
+            let curve = { x: 0, y: 0 };
+            const tempConn = _.find(this.refCurves, nk =>
+              (nk.curve && (ni.text === nk.source) && (nj.text === nk.target)));
+            if (tempConn) {
+              curve = tempConn.curve;
+            }
             conn = _.concat(conn, {
               source: ni.text,
               target: nj.text,
+              curve,
               type: 'ref',
             });
           }
