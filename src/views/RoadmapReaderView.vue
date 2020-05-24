@@ -55,7 +55,7 @@ import _ from 'lodash';
 import Vue from 'vue';
 import { pushErr } from '../components/ErrPush';
 import { getRoadmap, getRoadmapShareLink, postRoadmapShareLink } from '../apis/RoadmapEditorApis';
-import { req } from '../apis/util';
+import { reqSingle } from '../apis/util';
 import Roadmap from '../components/roadmap/Roadmap';
 import NoteMarkdown from '../components/NoteMarkdown';
 
@@ -102,7 +102,7 @@ export default {
     } else {
       this.roadMapId = this.$route.query.selected;
       try {
-        this.articles = (await req('/api/articles/', 'GET')).data;
+        this.articles = (await reqSingle('/api/articles/', 'GET', { page: 1 })).data.results;
         const roadmapData = (await getRoadmap(this.roadMapId)).data;
         this.nodes = this.toDisplayNodes(JSON.parse(roadmapData.text).nodes);
         this.connections = this.toDisplayConnections(JSON.parse(roadmapData.text).connections);
@@ -124,7 +124,7 @@ export default {
       let conn = [];
       let articleNodes = _.filter(this.nodes, node => (node.category === 'article'));
       articleNodes = _.map(articleNodes, (node) => {
-        const article = _.find(this.articles, atc => (atc.title === node.text));
+        const article = _.find(this.articles, atc => (atc.title === node.content));
         return { ...node, article };
       });
       _.forEach(articleNodes, (ni) => {
@@ -164,8 +164,8 @@ export default {
     },
     curNote() {
       if (!this.curNode || this.curNode.category !== 'article') return '';
-      if (this.getArticleByTitle(this.curNode.text).note) {
-        return this.getArticleByTitle(this.curNode.text).note;
+      if (this.getArticleByTitle(this.curNode.content).note) {
+        return this.getArticleByTitle(this.curNode.content).note;
       }
       return '';
     },
@@ -198,15 +198,15 @@ export default {
       let ret = [];
       _(savedNodes).forEach((node) => {
         if (node.category === 'article') {
-          const art = this.getArticleById(_.split(node.text, '$', 2)[1]);
+          const art = this.getArticleById(_.split(node.content, '$', 2)[1]);
           if (typeof art !== 'undefined') {
             // eslint-disable-next-line no-param-reassign
-            node.text = art.title;
+            node.content = art.title;
           } else {
             // eslint-disable-next-line no-param-reassign
             node.category = 'mindmap';
             // eslint-disable-next-line no-param-reassign
-            node.text += ': article not found';
+            node.content += ': article not found';
           }
         }
         ret = [...ret, node];
@@ -214,35 +214,7 @@ export default {
       return ret;
     },
     toDisplayConnections(savedConnections) {
-      let ret = [];
-      _(savedConnections).forEach((conn) => {
-        if (conn.source_category === 'article') {
-          const art = this.getArticleById(_.split(conn.source, '$', 2)[1]);
-          if (typeof art !== 'undefined') {
-            // eslint-disable-next-line no-param-reassign
-            conn.source = art.title;
-          } else {
-            // eslint-disable-next-line no-param-reassign
-            conn.source_category = 'mindmap';
-            // eslint-disable-next-line no-param-reassign
-            conn.source += ': article not found';
-          }
-        }
-        if (conn.target_category === 'article') {
-          const art = this.getArticleById(_.split(conn.target, '$', 2)[1]);
-          if (typeof art !== 'undefined') {
-            // eslint-disable-next-line no-param-reassign
-            conn.target = art.title;
-          } else {
-            // eslint-disable-next-line no-param-reassign
-            conn.target_category = 'mindmap';
-            // eslint-disable-next-line no-param-reassign
-            conn.target += ': article not found';
-          }
-        }
-        ret = [...ret, conn];
-      });
-      return ret;
+      return savedConnections;
     },
     getArticleByTitle(title) {
       return _(this.articles).find(art => art.title === title);
