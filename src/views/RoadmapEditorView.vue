@@ -600,6 +600,7 @@ export default {
           }];
         }
       });
+      this.refCurves = curves;
       // id ==
       if (this.roadMapId === -1) {
         createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections,
