@@ -205,7 +205,11 @@ export default {
           key: 'action',
           width: 140,
           align: 'center',
-          render: (h, params) => h('Dropdown', { props: { trigger: 'hover' } }, [
+          render: (h, params) => h('Dropdown', {
+            props: {
+              trigger: 'hover',
+              transfer: 'true',
+            } }, [
             h('Button', {
               props: {
                 size: 'small',
@@ -224,17 +228,38 @@ export default {
                     content: `${_.join(refNames, '<br>') || '空'}`,
                   });
                 },
-              } }, '查看引用'),
+              } }, [h('Button', {
+                props: {
+                  icon: 'md-search',
+                  size: 'small',
+                  type: 'text',
+                } },
+              '查看引用'),
+              ]),
               h('DropdownItem', { nativeOn: {
                 click: () => {
                   this.onView(params.index);
                 } },
-              }, '编辑文献'),
+              }, [h('Button', {
+                props: {
+                  icon: 'md-document',
+                  size: 'small',
+                  type: 'text',
+                } },
+              '编辑文献'),
+              ]),
               h('DropdownItem', { nativeOn: {
                 click: () => {
                   this.onDelete(params.index);
                 } },
-              }, '删除文献'),
+              }, [h('Button', {
+                props: {
+                  icon: 'md-trash',
+                  size: 'small',
+                  type: 'text',
+                } },
+              '删除文献'),
+              ]),
             ]),
           ]),
         },
