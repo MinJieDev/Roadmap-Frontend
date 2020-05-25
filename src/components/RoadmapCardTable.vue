@@ -21,6 +21,13 @@
                :data="data"
                border>
         </Table>
+        <Modal
+          v-model="addTagModal"
+          title="请输入要加入的tag"
+          @on-ok="okAddTag"
+          @on-cancel="cancelAddTag">
+          <Input v-model="TagValue" style="width: 300px" />
+        </Modal>
         <ItemEditor
           v-bind:drawer="drawer"
           @cancelDrawer="cancelDrawer">
@@ -82,7 +89,7 @@ import _ from 'lodash';
 import ItemEditor from './RoadItemEditor';
 import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
-import { delRoadmap, postRoadmapShareLink } from '../apis/RoadmapEditorApis';
+import { delRoadmap, postRoadmapShareLink, updateTag, getTags } from '../apis/RoadmapEditorApis';
 
 export default {
   name: 'RoadmapCardTable',
@@ -90,6 +97,10 @@ export default {
   data() {
     return {
       drawer: false,
+      addTagModal: false,
+      tagIndex: -1,
+      tagPos: -1,
+      TagValue: '',
       cols: 3,
       viewStyle: 'card',
       data: [],
@@ -106,32 +117,46 @@ export default {
           key: 'title',
           align: 'center',
         },
-        // {
-        //   title: '标签',
-        //   key: 'tag',
-        //   width: 300,
-        //   align: 'center',
-        //   render: (h, params) => {
-        //     const tags = this.data[params.index].tags;
-        //     return h('div', (tags || []).map(item => h('Tag', {
-        //       props: {
-        //         // type: 'border',
-        //         key: item.name,
-        //         name: item.name,
-        //         color: item.color,
-        //         closable: true,
-        //         style: 'margin-left: 3px',
-        //       },
-        //     },
-        //     item.name,
-        //     )));
-        //   },
-        // },
         {
           title: '描述',
           key: 'description',
           width: 300,
           align: 'center',
+        },
+        {
+          title: '标签',
+          key: 'tag',
+          width: 200,
+          align: 'center',
+          render: (h, params) => {
+            const tags = this.data[params.index].tags;
+            return h('div', [(tags || []).map(item => h('Tag', {
+              props: {
+                // type: 'border',
+                key: item.name,
+                name: item.name,
+                color: item.color,
+                closable: true,
+                style: 'margin-left: 3px',
+              },
+            },
+            item.name,
+            )), h('Button', {
+              props: {
+                icon: 'ios-add',
+                type: 'dashed',
+                size: 'small',
+              },
+              on: {
+                click: () => {
+                  this.addTagModal = true;
+                  this.tagIndex = this.roadmaps[params.index].id;
+                  this.tagPos = params.index;
+                },
+              },
+            })]);
+          },
+
         },
         {
           title: '操作',
@@ -203,6 +228,7 @@ export default {
         // window.console.log('roadmap card', res);
         this.roadmaps = res.data.results;
         this.data = this.getData();
+        this.refreshTags();
       })
       .catch((err) => {
         pushErr(this, err, true);
@@ -216,8 +242,52 @@ export default {
     },
   },
   methods: {
+    okAddTag() {
+      updateTag(this.TagValue, [this.tagIndex])
+        .catch((err) => {
+          pushErr(this, err, true);
+        });
+      this.data[this.tagPos].tags.push({ name: this.TagValue, color: 'success' });
+      this.TagValue = '';
+      this.tagIndex = -1;
+      this.tagPos = -1;
+      this.addTagModel = false;
+    },
+    cancelAddTag() {
+      getTags().then((res) => {
+        window.console.info(res);
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+      this.TagValue = '';
+      this.tagIndex = -1;
+      this.addTagModel = false;
+    },
     getIndex(r, c, col) {
       return (((r - 1) * col) + (c - 1)) - 1;
+    },
+    refreshTags() {
+      let tagsData = 0;
+      getTags().then((res) => {
+        if (res !== undefined) {
+          tagsData = res.data;
+          _(this.data)
+            .forEach((dataItem) => {
+              const dataId = this.roadmaps[dataItem.id - 1].id;
+              _(tagsData)
+                .forEach((tagItem) => {
+                  if (dataId === tagItem.roadmaps[0]) {
+                    this.data[dataItem.id - 1].tags.push({
+                      name: tagItem.name,
+                      color: 'success',
+                    });
+                  }
+                });
+            });
+        }
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
     },
     getData() {
       const data = [];
@@ -228,10 +298,10 @@ export default {
           data.push({
             id: index,
             title: roadmap.title,
-            // tags: [],
+            tags: [],
             description: roadmap.description,
           });
-          window.console.log(roadmap);
+          // window.console.log(roadmap);
         });
       return data;
     },
