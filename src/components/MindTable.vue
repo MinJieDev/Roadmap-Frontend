@@ -83,7 +83,7 @@
         <Page
           :total="articleTotal"
           :current="page.current"
-          :page-size="10"
+          :page-size="page.size"
           show-total
           show-elevator
           @on-change="changePage"
@@ -130,7 +130,7 @@ export default {
       },
       page: {
         current: 1,
-        // default size: 10,
+        size: 10,
       },
       columns: [
         {
@@ -155,7 +155,6 @@ export default {
         {
           title: 'First Author',
           key: 'firstAuthor',
-          width: 180,
         },
         {
           title: 'Read State',
@@ -208,7 +207,7 @@ export default {
           render: (h, params) => h('Dropdown', {
             props: {
               trigger: 'hover',
-              transfer: 'true',
+              transfer: true,
             } }, [
             h('Button', {
               props: {
@@ -286,7 +285,10 @@ export default {
       deleteMTdata(this.data[index].id)
         .then(() => {
           this.$Message.info(`${this.data[index].title} Deleted`);
-          this.$emit('reloadData');
+          // eslint-disable-next-line no-mixed-operators
+          const pageNum = _.toInteger((this.page.current - 2) / this.page.size + 1);
+          this.$emit('reloadData', pageNum);
+          this.page.current = pageNum;
         });
     },
     openDrawer(index) {
@@ -318,7 +320,7 @@ export default {
           drawerFormData.article_references)
           .then(() => {
             // this.$Message.info('MT data created');
-            this.$emit('reloadData');
+            this.$emit('reloadData', this.page.current);
           })
           .catch((err) => {
             pushErr(this, err, true);
@@ -328,7 +330,7 @@ export default {
         changeMTdata(drawerFormData)
           .then(() => {
             // this.$Message.info('MT data change');
-            this.$emit('reloadData');
+            this.$emit('reloadData', this.page.current);
           })
           .catch((err) => {
             pushErr(this, err, true);
@@ -348,6 +350,7 @@ export default {
           articleUrl = articleJson[i].entryTags.journal.split(':')[1];
           articleUrl = `https://arxiv.org/pdf/${articleUrl}.pdf`;
         }
+        window.console.log('bib data add', articleJson[i]);
         createMTdata(
           articleJson[i].entryTags.title,
           articleJson[i].entryTags.author,
@@ -358,10 +361,11 @@ export default {
           .catch((err) => {
             this.$Message.error(`第${i}条BibTex导入失败`);
             window.console.error(err);
+          }).then(() => {
+            this.$emit('reloadData', this.page.current);
           });
       }
       this.$Message.info(`${articleJson.length}条BibTex导入`);
-      this.$emit('reloadData');
       this.BibtexModal = false;
       this.BibValue = '';
     },
@@ -379,13 +383,18 @@ export default {
       this.$refs.selection.selectAll(status);
     },
     deleteSelectItem() {
+      let count = 0;
       _.forEach(this.$refs.selection.objData, (article) => {
         // eslint-disable-next-line no-underscore-dangle
         if (article._isChecked === true) {
-          window.console.log('delete article content: ', article);
+          count += 1;
+          // window.console.log('delete article content: ', article);
           deleteMTdata(article.id).then(() => {
             this.$Message.info(`${article.title} Deleted`);
-            this.$emit('reloadData');
+            // eslint-disable-next-line no-mixed-operators
+            const pageNum = _.toInteger((this.articleTotal - count - 1) / this.page.size + 1);
+            this.$emit('reloadData', pageNum);
+            this.page.current = pageNum;
           });
         }
       });
@@ -401,16 +410,16 @@ export default {
       }
       changeMTdata(this.formData)
         .then(() => {
-          this.$emit('reloadData');
+          this.$emit('reloadData', this.page.current);
         })
         .catch((err) => {
           pushErr(this, err, true);
         });
     },
     changePage(pageIndex) {
-      this.page.current = pageIndex;
-      this.$emit('reloadData', this.page.current);
+      this.$emit('reloadData', pageIndex);
       this.$Message.success(`Change to Page ${pageIndex}`);
+      this.page.current = pageIndex;
     },
     openBibTexExportModal() {
       this.BibTexExportModal = true;
