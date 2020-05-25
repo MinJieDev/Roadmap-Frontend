@@ -289,8 +289,13 @@ export default {
       deleteMTdata(this.data[index].id)
         .then(() => {
           this.$Message.info(`${this.data[index].title} Deleted`);
-          // eslint-disable-next-line no-mixed-operators
-          const pageNum = _.toInteger((this.page.current - 2) / this.page.size + 1);
+          let pageNum;
+          if (this.articleTotal === 1) {
+            pageNum = 1;
+          } else {
+            // eslint-disable-next-line no-mixed-operators
+            pageNum = _.toInteger((this.page.current - 2) / this.page.size + 1);
+          }
           this.$emit('reloadData', pageNum);
           this.page.current = pageNum;
         });
@@ -317,13 +322,17 @@ export default {
       if (this.index === -1) {
         createMTdata(
           drawerFormData.title,
+          drawerFormData.read_state,
           drawerFormData.author,
           drawerFormData.url,
-          drawerFormData.note,
           drawerFormData.journal,
+          drawerFormData.years,
+          drawerFormData.volume,
+          drawerFormData.pages,
           drawerFormData.article_references)
           .then(() => {
             // this.$Message.info('MT data created');
+            // window.console.log('page current', this.page.current);
             this.$emit('reloadData', this.page.current);
           })
           .catch((err) => {
@@ -395,8 +404,13 @@ export default {
           window.console.log('delete article content: ', article);
           deleteMTdata(article.id).then(() => {
             this.$Message.info(`${article.title} Deleted`);
-            // eslint-disable-next-line no-mixed-operators
-            const pageNum = _.toInteger((this.articleTotal - count - 1) / this.page.size + 1);
+            let pageNum;
+            if (this.articleTotal === 1) {
+              pageNum = 1;
+            } else {
+              // eslint-disable-next-line no-mixed-operators
+              pageNum = _.toInteger((this.articleTotal - count - 1) / this.page.size + 1);
+            }
             this.$emit('reloadData', pageNum);
             this.page.current = pageNum;
           });

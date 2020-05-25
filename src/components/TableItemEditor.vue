@@ -4,6 +4,7 @@
       title="查看"
       v-model="drawer"
       width="720"
+      :closable="false"
       :mask-closable="false"
       :styles="styles"
       @on-close="cancelDrawer"

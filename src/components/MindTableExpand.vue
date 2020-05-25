@@ -17,7 +17,7 @@
       </Col>
       <Col span="8">
         <span class="expand-key">Year: </span>
-        <span class="expand-value">{{ row.year }}</span>
+        <span class="expand-value">{{ row.years }}</span>
       </Col>
     </Row>
   </div>
