@@ -8,17 +8,36 @@
       :styles="styles"
       @on-close="cancelDrawer"
     >
-      <h3>题目</h3>
-      <br>
       <Row :gutter="32">
-        <Col span="24">
+        <Col span="19">
+          <br>
+          <h3>题目</h3>
+          <br>
           <Row :gutter="50" style="margin-left: 0px">
             <Col>
               <Input
-                v-model="drawerFormData.title"
+                v-model="drawerData.title"
                 clearable
                 placeholder="请输入文章标题">
               </Input>
+            </Col>
+          </Row>
+        </Col>
+
+        <Col span="4">
+          <br>
+          <h3>阅读状态</h3>
+          <br>
+          <Row :gutter="30" style="margin-left: 0px; margin-top: 2px">
+            <Col>
+              <i-switch
+                v-model="drawerData.read_state"
+                size="large"
+                true-color="#13ce66"
+                false-color="#ff4949">
+                <span slot="open">已读</span>
+                <span slot="close">未读</span>
+              </i-switch>
             </Col>
           </Row>
         </Col>
@@ -31,7 +50,7 @@
           <br>
           <Row :gutter="50" style="margin-left: 20px">
             <Input
-              v-model="drawerFormData.author"
+              v-model="drawerData.author"
               clearable
               placeholder="请输入作者">
             </Input>
@@ -44,7 +63,7 @@
           <br>
           <Row :gutter="50" style="margin-left: 20px">
             <Input
-              v-model="drawerFormData.url"
+              v-model="drawerData.url"
               clearable
               placeholder="请输入网址(URL)">
               <span slot="prepend">http://</span>
@@ -52,27 +71,61 @@
           </Row>
         </Col>
       </Row>
-      <br>
-      <h3>期刊/会议</h3>
-      <br>
-      <Row :gutter="50" style="margin-left: 20px; margin-right: 20px">
-        <Input
-          v-model="drawerFormData.journal"
-          clearable
-          placeholder="请输入文章所属的期刊/会议">
-        </Input>
+
+      <Row :gutter="32">
+        <Col span="15">
+          <br>
+          <h3>期刊/会议</h3>
+          <br>
+          <Row :gutter="50" style="margin-left: 20px">
+          <Input
+            v-model="drawerData.journal"
+            clearable
+            placeholder="请输入文章所属的期刊/会议">
+          </Input>
+          </Row>
+        </Col>
+
+        <Col span="7">
+          <br>
+          <h3>年份</h3>
+          <br>
+          <Row :gutter="50" style="margin-left: 20px">
+            <Input
+              v-model="drawerData.years"
+              clearable
+              placeholder="请输入文章所属的年份">
+            </Input>
+          </Row>
+        </Col>
       </Row>
-      <br>
-      <h3>笔记</h3>
-      <br>
-      <Row :gutter="50" style="margin-left: 20px; margin-right: 20px">
-        <Input
-          type="textarea"
-          v-model="drawerFormData.note"
-          :rows="4"
-          clearable
-          placeholder="请输入描述或笔记">
-        </Input>
+
+      <Row :gutter="32">
+        <Col span="8">
+          <br>
+          <h3>卷号</h3>
+          <br>
+          <Row :gutter="50" style="margin-left: 20px">
+          <Input
+            v-model="drawerData.volume"
+            clearable
+            placeholder="请输入文章所属的卷号">
+          </Input>
+          </Row>
+        </Col>
+
+        <Col span="8">
+          <br>
+          <h3>页面</h3>
+          <br>
+          <Row :gutter="50" style="margin-left: 20px">
+          <Input
+            v-model="drawerData.pages"
+            clearable
+            placeholder="请输入文章所属的页面">
+          </Input>
+          </Row>
+        </Col>
       </Row>
       <br>
       <br>
@@ -125,8 +178,11 @@ export default {
     };
   },
   computed: {
+    drawerData() {
+      return _.clone(this.drawerFormData);
+    },
     targetKeys() {
-      return this.drawerFormData.article_references;
+      return this.drawerData.article_references;
     },
     transferData() {
       return _.map(this.articles, atc => ({ key: atc.id, label: atc.title }));
@@ -137,10 +193,10 @@ export default {
       this.$emit('cancelDrawer');
     },
     submitDrawer() {
-      this.$emit('submitDrawer', this.drawerFormData);
+      this.$emit('submitDrawer', this.drawerData);
     },
     handleTransferChange(newTargetKeys) {
-      this.drawerFormData.article_references = newTargetKeys;
+      this.drawerData.article_references = newTargetKeys;
     },
   },
 };

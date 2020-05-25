@@ -126,7 +126,11 @@ export default {
         title: '',
         url: '',
         author: '',
+        journal: '',
+        pages: 0,
         read_state: false,
+        volume: 0,
+        years: 0,
       },
       page: {
         current: 1,
@@ -388,7 +392,7 @@ export default {
         // eslint-disable-next-line no-underscore-dangle
         if (article._isChecked === true) {
           count += 1;
-          // window.console.log('delete article content: ', article);
+          window.console.log('delete article content: ', article);
           deleteMTdata(article.id).then(() => {
             this.$Message.info(`${article.title} Deleted`);
             // eslint-disable-next-line no-mixed-operators
