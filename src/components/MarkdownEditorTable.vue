@@ -93,7 +93,7 @@ export default {
           title: 'State',
           key: 'status',
           align: 'center',
-          width: 100,
+          width: 125,
           render: (h, params) => {
             const type = params.row.state === false ? 'error' : 'primary';
             const text = params.row.state === false ? 'Unfinished' : 'Finished';
@@ -113,6 +113,7 @@ export default {
         {
           title: 'Action',
           key: 'action',
+          width: 355,
           align: 'center',
           render: (h, params) => h('div', [
             h('Button', {
@@ -176,6 +177,8 @@ export default {
         query: {
           selected: -1,
           source: 'noteCreate',
+          essay: null,
+          pageCurrent: this.page.current,
         },
       });
     },
@@ -185,6 +188,8 @@ export default {
         query: {
           selected: this.data[index].id,
           source: 'noteEdit',
+          essay: this.noteData,
+          pageCurrent: this.page.current,
         },
       });
     },

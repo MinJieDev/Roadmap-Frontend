@@ -375,6 +375,8 @@ export default {
         query: {
           selected: this.data[index].id,
           source: 'article',
+          essay: this.data.note,
+          pageCurrent: this.page.current,
         },
       });
     },

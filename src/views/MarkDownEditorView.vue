@@ -28,6 +28,7 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import Simplemde from 'simplemde';
 import 'simplemde/dist/simplemde.min.css';
 import 'github-markdown-css';
@@ -40,29 +41,20 @@ import { req } from '../apis/util';
 export default {
   name: 'MarkDownEditorView',
   components: { Simplemde, VueMarkdown },
-  props: {
-    essay: {
-      type: Object,
-      required: true,
-    },
-    pageCurrent: {
-      type: Number,
-      required: true,
-    },
-  },
   data() {
     return {
+      essay: null,
+      pageCurrent: 1,
+      newsrc: 'noteCreate',
       editor: null,
       // articleData: null,
       title: '',
       author: '',
+      // TODO: state, abstract wait for BackEnd
+      state: true,
+      abstact: '',
       refreshPreview: true,
     };
-  },
-  computed: {
-    source() { // article, noteEdit, noteCreate
-      return this.$route.query.source;
-    },
   },
   methods: {
     save() {
@@ -72,7 +64,7 @@ export default {
         note,
       };
       window.console.info(dataChange);
-      if (this.source === 'article') {
+      if (this.newSrc === 'article') {
         changeMTdata(dataChange).then(() => {
           this.$Message.success('修改成功');
           this.$emit('reloadData', this.pageCurrent);
@@ -82,21 +74,23 @@ export default {
         this.$router.push({
           path: '/articleTable',
         });
-      } else if (this.source === 'noteEdit') {
+      } else if (this.newSrc === 'noteEdit') {
         changeMDnote(dataChange).then(() => {
           this.$Message.success('修改成功');
           this.$emit('reloadData', this.pageCurrent);
         }).catch((err) => {
           pushErr(this, err, true);
         });
-      } else if (this.source === 'noteCreate') {
+      } else if (this.newSrc === 'noteCreate') {
         // TODO: add author field when backEnd added
         createMDnote(this.title, note).then(() => {
           this.$Message.success('创建成功');
+          this.newSrc = 'noteEdit';
           this.$emit('reloadData', this.pageCurrent);
         }).catch((err) => {
           pushErr(this, err, true);
         });
+        this.cancel();
       }
     },
     cancel() {
@@ -111,27 +105,13 @@ export default {
       }
     },
     getData() {
-      if (this.source === 'article') {
-        req(`/api/articles/${this.$route.query.selected}/`, 'GET')
-          .then((res) => {
-            // this.articleData = res.data;
-            window.console.log(res.data);
-            this.editor.value(res.data.note);
-            this.title = res.data.title;
-            this.author = res.data.author;
-          })
-          .catch((err) => {
-            pushErr(this, err, true);
-          });
-      } else if (this.source === 'noteEdit') {
-        req(`api/essays/${this.$route.query.selected}/`, 'GET')
-          .then((res) => {
-            this.title = res.data.title;
-            this.author = res.data.author;
-            this.editor.value(res.data.note);
-          }).catch((err) => {
-            pushErr(this, err, true);
-          });
+      this.newSrc = _.clone(this.source);
+      this.essay = this.$route.query.esssay;
+      this.pageCurrent = this.$route.query.pageCurrent;
+      if (this.source === 'article' || this.source === 'noteEdit') {
+        this.title = this.essay.title;
+        this.author = this.essay.author;
+        this.editor.value(this.essay.note);
       } else if (this.source === 'noteCreate') {
         this.title = 'New Note';
         this.author = '';
@@ -150,6 +130,9 @@ export default {
     this.getData();
   },
   computed: {
+    source() { // article, noteEdit, noteCreate
+      return this.$route.query.source;
+    },
     inputData() {
       if (this.editor === null) {
         return '';
