@@ -58,7 +58,7 @@ const routes = [
     name: 'Editor',
     component: () => import(/* webpackChunkName: "about" */ '../views/RoadmapEditorView.vue'),
     meta: {
-      nickName: '路书编辑页',
+      nickName: '路书编辑',
       name: ['路书目录', '路书编辑页'],
       path: ['/RoadmapTable', '/editor'],
       level: 5,
@@ -94,12 +94,16 @@ const routes = [
       nickName: '随笔阅览',
       name: ['随笔目录', '随笔阅览'],
       path: ['/essayTable', '/essayReader'],
+      level: 5,
+    },
+  },
+  {
     path: '/essayEditor',
     name: 'EssayEditor',
     component: () => import(/* webpackChunkName: "about" */ '../views/EssayEditor.vue'),
     meta: {
-      nickName: '随笔编辑页',
-      name: ['路书目录', '路书编辑页'],
+      nickName: '随笔编辑',
+      name: ['随笔目录', '路书编辑'],
       path: ['/RoadmapTable', '/editor'],
       level: 5,
     },
