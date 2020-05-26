@@ -40,7 +40,7 @@
 
 <script>
 import _ from 'lodash';
-import MDeditorTableExpand from './MDeditorTableExpand';
+import MDeditorTableExpand from './EssayTableExpand';
 import ItemEditor from './TableItemEditor';
 import { pushErr } from '../components/ErrPush';
 import { changeMDnote } from '../apis/MarkdownEditorApis';

@@ -40,7 +40,7 @@ const routes = [
     meta: {
       nickName: '文献笔记',
       name: ['文献目录', '文献笔记'],
-      path: ['/articleTable', '/articleMde', '/MDeditorTable'],
+      path: ['/articleTable', '/articleMde'],
       level: 10,
     },
   },
@@ -65,13 +65,13 @@ const routes = [
     },
   },
   {
-    path: '/MDeditorTable',
-    name: 'MDeditorTable',
-    component: () => import(/* webpackChunkName: "about" */ '../views/MDeditorTableView.vue'),
+    path: '/essayTable',
+    name: 'EssayTable',
+    component: () => import(/* webpackChunkName: "about" */ '../views/EssayTableView.vue'),
     meta: {
-      nickName: '笔记目录',
-      name: ['笔记目录'],
-      path: ['/MDeditorTable'],
+      nickName: '随笔目录',
+      name: ['随笔目录'],
+      path: ['/essayTable'],
       level: 2,
     },
   },

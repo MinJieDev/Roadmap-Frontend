@@ -1,6 +1,6 @@
 <template>
   <div>
-    <MarkdownEditorTable
+    <EssayTable
       :tableData="notes"
       :noteTotal="noteTotal"
       @reloadData="reloadData"
@@ -9,13 +9,13 @@
 </template>
 
 <script>
-import MarkdownEditorTable from '../components/MarkdownEditorTable';
+import EssayTable from '../components/EssayTable';
 import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
 
 export default {
   name: 'MDeditorTableView',
-  components: { MarkdownEditorTable },
+  components: { EssayTable },
   data() {
     return {
       notes: [],
