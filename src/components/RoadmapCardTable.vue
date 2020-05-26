@@ -1,79 +1,86 @@
 <template>
   <div>
-    <div style="margin-right: 10px; float: right;">
-      切换布局
-      <i-switch
-        @on-change="onChangeViewStyle"
-        size="large">
-        <span slot="open">Card</span>
-        <span slot="close">Table</span>
-      </i-switch>
+    <div style="float: right; width: 100%;">
+      <div style="margin-right: 10px; float: right;">
+        切换布局
+        <i-switch
+          @on-change="onChangeViewStyle"
+          size="large">
+          <span slot="open">Card</span>
+          <span slot="close">Table</span>
+        </i-switch>
+      </div>
     </div>
     <div v-if="this.viewStyle==='table'">
-        <Button
-          @click="onClickNewRoadmap(0)"
-          type="primary"
-          style="margin-left: 10px; margin-bottom: 10px ">
-          新建路书
-        </Button>
-        <Table row-key="id"
-               :columns="columns"
-               :data="data"
-               border>
-        </Table>
-        <ItemEditor
-          v-bind:drawer="drawer"
-          @cancelDrawer="cancelDrawer">
-        </ItemEditor>
+      <Button
+        @click="onClickNewRoadmap(0)"
+        type="primary"
+        style="margin-left: 10px; margin-bottom: 10px ">
+        新建路书
+      </Button>
+      <Table row-key="id"
+             :columns="columns"
+             :data="data"
+             border>
+      </Table>
+      <ItemEditor
+        v-bind:drawer="drawer"
+        @cancelDrawer="cancelDrawer">
+      </ItemEditor>
     </div>
     <div v-else-if="this.viewStyle==='card'">
-    <Row v-for="r in rows" v-bind:key="r" type="flex" justify="center" :gutter="20">
-      <i-col v-for="c in cols" v-bind:key="c" span="6" align="center" >
-        <!-- getIndex函数用于获取指定r和c后，路书在index中的索引。对于新建路书，getIndex会返回-1 -->
-        <Card v-show="getIndex(r, c, cols) + 1 < data.length + 1"
-              style="margin-bottom: 20px">
-          <!--新建路书部件-->
-          <div class="card_content" v-if="r === 1 && c === 1">
-            <p class="single_line">
-              新建路书
-            </p>
-            <Icon class="card_img" type="ios-book" size="250" @click="onClickNewRoadmap(0)"></Icon>
-            <Button type="primary" size="small" @click="onClickNewRoadmap(0)">
-              创建新的路书
-            </Button>
-          </div>
-          <!--已有路书卡片-->
-          <div class="card_content" v-else>
-            <p class=single_line v-if="getIndex(r, c, cols) < data.length">
-              {{data[getIndex(r, c, cols)].title}}
-            </p>
-            <img class="card_img" src="../assets/RoadmapDefault.png" height="250"
-                 @click="onEdit(roadmaps[getIndex(r, c, cols)].id)">
-            <br>
-            <Button type="primary" size="small" @click="onView(roadmaps[getIndex(r, c, cols)].id)">
-              查看
-            </Button>
-            <Button type="warning" size="small" @click="onEdit(roadmaps[getIndex(r, c, cols)].id)">
-              修改
-            </Button>
-            <Button type="success" size="small" @click="onShare(roadmaps[getIndex(r, c, cols)].id)">
-              分享
-            </Button>
-            <Button type="error" size="small" @click="onDelete(roadmaps[getIndex(r, c, cols)].id)">
-              删除
-            </Button>
-          </div>
-        </Card>
-      </i-col>
-      <br>
-      <br>
+      <Row v-for="r in rows" v-bind:key="r" type="flex" justify="center" :gutter="20">
+        <i-col v-for="c in cols" v-bind:key="c" span="6" align="center" >
+          <!-- getIndex函数用于获取指定r和c后，路书在index中的索引。对于新建路书，getIndex会返回-1 -->
+          <Card v-show="getIndex(r, c, cols) + 1 < data.length + 1"
+                style="margin-bottom: 20px">
+            <!--新建路书部件-->
+            <div class="card_content" v-if="r === 1 && c === 1">
+              <p class="single_line">
+                新建路书
+              </p>
+              <Icon class="card_img" type="ios-book" size="250"
+                    @click="onClickNewRoadmap(0)"></Icon>
+              <Button type="primary" size="small" @click="onClickNewRoadmap(0)">
+                创建新的路书
+              </Button>
+            </div>
+            <!--已有路书卡片-->
+            <div class="card_content" v-else>
+              <p class=single_line v-if="getIndex(r, c, cols) < data.length">
+                {{data[getIndex(r, c, cols)].title}}
+              </p>
+              <img class="card_img" src="../assets/RoadmapDefault.png" height="250"
+                   @click="onEdit(roadmaps[getIndex(r, c, cols)].id)">
+              <br>
+              <Button type="primary" size="small"
+                      @click="onView(roadmaps[getIndex(r, c, cols)].id)">
+                查看
+              </Button>
+              <Button type="warning" size="small"
+                      @click="onEdit(roadmaps[getIndex(r, c, cols)].id)">
+                修改
+              </Button>
+              <Button type="success" size="small"
+                      @click="onShare(roadmaps[getIndex(r, c, cols)].id)">
+                分享
+              </Button>
+              <Button type="error" size="small"
+                      @click="onDelete(roadmaps[getIndex(r, c, cols)].id)">
+                删除
+              </Button>
+            </div>
+          </Card>
+        </i-col>
+        <br>
+        <br>
       </Row>
+    </div>
     <!-- 抽屉暂未使用，用于创建自动生成的路书 -->
     <ItemEditor
       v-bind:drawer="drawer"
       @cancelDrawer="cancelDrawer">
     </ItemEditor>
-    </div>
   </div>
 </template>
 
