@@ -1,7 +1,7 @@
 <template>
   <div>
     <Button
-      @click="createNote"
+      @click="createEssay"
       type="primary"
       style="margin-left: 10px; margin-bottom: 10px ">
       创建笔记
@@ -40,14 +40,13 @@
 
 <script>
 import _ from 'lodash';
-import MDeditorTableExpand from './EssayTableExpand';
+import EssayTableExpand from './EssayTableExpand';
 import ItemEditor from './TableItemEditor';
 import { pushErr } from '../components/ErrPush';
-import { changeMDnote } from '../apis/MarkdownEditorApis';
-// createMDnote, deleleMDnote,
+import { changeEssay, deleteEssay } from '../apis/EssayEditorApis';
 
 export default {
-  name: 'MarkdownEditorTable',
+  name: 'EssayTable',
   props: {
     tableData: {
       type: Array,
@@ -58,7 +57,7 @@ export default {
       required: true,
     },
   },
-  components: { ItemEditor, MDeditorTableExpand },
+  components: { ItemEditor, EssayTableExpand },
   data() {
     return {
       noteData: {
@@ -73,7 +72,7 @@ export default {
         {
           type: 'expand',
           width: 50,
-          render: (h, params) => h(MDeditorTableExpand, {
+          render: (h, params) => h(EssayTableExpand, {
             props: {
               row: params.row,
             },
@@ -127,11 +126,11 @@ export default {
               },
               on: {
                 click: () => {
-                  this.onView(params.index);
+                  this.viewEssay(params.index);
                 },
               },
             },
-            '查看笔记'),
+            '查看随笔'),
             h('Button', {
               props: {
                 type: 'text',
@@ -143,11 +142,11 @@ export default {
               },
               on: {
                 click: () => {
-                  this.editNote(params.index);
+                  this.editEssay(params.index);
                 },
               },
             },
-            '编辑笔记'),
+            '编辑随笔'),
             h('Button', {
               props: {
                 icon: 'md-trash',
@@ -159,38 +158,47 @@ export default {
               },
               on: {
                 click: () => {
-                  this.onDelete(params.index);
+                  this.deleteEssay(params.index);
                 },
               },
             },
-            '删除文献'),
+            '删除随笔'),
           ]),
         },
       ],
     };
   },
   methods: {
-    createNote() {
+    createEssay() {
       this.$Message.success('Create note');
       this.$router.push({
-        path: '/articleMde',
+        path: '/essayEditor',
         query: {
           selected: -1,
-          source: 'noteCreate',
-          essay: null,
-          pageCurrent: this.page.current,
         },
       });
     },
-    editNote(index) {
+    viewEssay(index) {
       this.$router.push({
-        path: '/articleMde',
+        path: '/essayReader',
         query: {
           selected: this.data[index].id,
-          source: 'noteEdit',
-          essay: this.noteData,
-          pageCurrent: this.page.current,
         },
+      });
+    },
+    editEssay(index) {
+      this.$router.push({
+        path: '/essayEditor',
+        query: {
+          selected: this.tableData[index].id,
+        },
+      });
+    },
+    deleteEssay(index) {
+      deleteEssay(this.tableData[index].id).then(() => {
+        this.$emit('reloadData', this.page.current);
+      }).catch((err) => {
+        pushErr(this, err, true);
       });
     },
     handleSelectAll(status) {
@@ -206,7 +214,7 @@ export default {
         this.noteData.state = false;
         this.$Message.info(`${this.noteData.title} Unfinished`);
       }
-      changeMDnote(this.noteData)
+      changeEssay(this.noteData)
         .then(() => {
           this.$emit('reloadData', this.page.current);
         })

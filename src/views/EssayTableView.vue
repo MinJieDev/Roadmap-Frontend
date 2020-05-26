@@ -14,7 +14,7 @@ import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
 
 export default {
-  name: 'MDeditorTableView',
+  name: 'EssayTableView',
   components: { EssayTable },
   data() {
     return {

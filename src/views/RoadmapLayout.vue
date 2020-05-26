@@ -20,9 +20,9 @@
               <Icon type="md-map"></Icon>
               路书管理
             </MenuItem>
-            <MenuItem name="3" :to="{name: 'MDeditorTable'}">
+            <MenuItem name="3" :to="{name: 'EssayTable'}">
               <Icon type="ios-create" />
-              笔记管理
+              随笔管理
             </MenuItem>
                 <div v-if="isLoginStatus() !== true">
                   <MenuItem
