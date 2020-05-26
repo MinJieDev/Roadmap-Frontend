@@ -94,6 +94,13 @@ const routes = [
       nickName: '随笔阅览',
       name: ['随笔目录', '随笔阅览'],
       path: ['/essayTable', '/essayReader'],
+    path: '/essayEditor',
+    name: 'EssayEditor',
+    component: () => import(/* webpackChunkName: "about" */ '../views/EssayEditor.vue'),
+    meta: {
+      nickName: '随笔编辑页',
+      name: ['路书目录', '路书编辑页'],
+      path: ['/RoadmapTable', '/editor'],
       level: 5,
     },
   },
