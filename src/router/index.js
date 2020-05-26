@@ -87,6 +87,13 @@ const routes = [
     },
   },
   {
+    path: '/essayReader',
+    name: 'EssayReader',
+    component: () => import(/* webpackChunkName: "about" */ '../views/EssayReaderView.vue'),
+    meta: {
+      nickName: '随笔阅览',
+      name: ['随笔目录', '随笔阅览'],
+      path: ['/essayTable', '/essayReader'],
     path: '/essayEditor',
     name: 'EssayEditor',
     component: () => import(/* webpackChunkName: "about" */ '../views/EssayEditor.vue'),
