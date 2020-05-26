@@ -86,6 +86,17 @@ const routes = [
       level: 5,
     },
   },
+  {
+    path: '/essayEditor',
+    name: 'EssayEditor',
+    component: () => import(/* webpackChunkName: "about" */ '../views/EssayEditor.vue'),
+    meta: {
+      nickName: '随笔编辑页',
+      name: ['路书目录', '路书编辑页'],
+      path: ['/RoadmapTable', '/editor'],
+      level: 5,
+    },
+  },
 ];
 
 const router = new VueRouter({
