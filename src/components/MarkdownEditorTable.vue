@@ -171,11 +171,21 @@ export default {
   methods: {
     createNote() {
       this.$Message.success('Create note');
+      this.$router.push({
+        path: '/articleMde',
+        query: {
+          selected: -1,
+          source: 'noteCreate',
+        },
+      });
     },
     editNote(index) {
       this.$router.push({
         path: '/articleMde',
-        query: { selected: this.data[index].id },
+        query: {
+          selected: this.data[index].id,
+          source: 'noteEdit',
+        },
       });
     },
     handleSelectAll(status) {

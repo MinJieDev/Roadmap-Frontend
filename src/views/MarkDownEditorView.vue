@@ -45,10 +45,6 @@ export default {
       type: Object,
       required: true,
     },
-    source: { // article, noteEdit, noteCreate
-      type: String,
-      required: true,
-    },
     pageCurrent: {
       type: Number,
       required: true,
@@ -62,6 +58,11 @@ export default {
       author: '',
       refreshPreview: true,
     };
+  },
+  computed: {
+    source() { // article, noteEdit, noteCreate
+      return this.$route.query.source;
+    },
   },
   methods: {
     save() {

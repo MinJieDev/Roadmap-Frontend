@@ -372,7 +372,10 @@ export default {
     editNote(index) {
       this.$router.push({
         path: '/articleMde',
-        query: { selected: this.data[index].id },
+        query: {
+          selected: this.data[index].id,
+          source: 'article',
+        },
       });
     },
     handleSelectAll(status) {
