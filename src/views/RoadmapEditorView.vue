@@ -482,6 +482,20 @@ export default {
         fy: (yMin + yMax) / 2,
       };
     },
+    getCurves() {
+      let ret = [];
+      const allConns = this.$refs.road_map.getConn();
+      _.forEach(allConns, (conn) => {
+        if (conn.type === 'ref') {
+          ret = [...ret, {
+            source: conn.source,
+            target: conn.target,
+            curve: conn.curve,
+          }];
+        }
+      });
+      return ret;
+    },
     handleNodeAdded(nodeInfo, category) {
       const pos = this.getMidPos();
       this.nodes = [...this.nodes,
@@ -495,6 +509,7 @@ export default {
           category: category || 'mindmap',
         }];
       this.nextNodeId += 1;
+      this.refCurves = this.getCurves();
       this.repaintMindMap();
       return `#${this.nextNodeId - 1}`;
     },
@@ -507,6 +522,7 @@ export default {
           node.URI = nodeInfo.nodeUrl;
         }
       });
+      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleArticleNodeAdded(nodeInfo) {
@@ -521,6 +537,7 @@ export default {
         (connection.source.text !== articleTitle
           && connection.target.text !== articleTitle));
       this.$Notice.success({ title: 'node deleted' });
+      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleNodeDeleted() {
@@ -530,6 +547,7 @@ export default {
           && connection.target.text !== this.curNode.text));
       this.curNode = null;
       this.$Notice.success({ title: 'node deleted' });
+      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleConnectionAdded(connectionInfo) {
@@ -537,6 +555,7 @@ export default {
         source: connectionInfo.sourceNode,
         target: connectionInfo.targetNode,
       }];
+      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleConnectionDeleted() {
@@ -545,6 +564,7 @@ export default {
                   && connection.target.text === this.curConn.target.text)));
       this.curConn = null;
       this.$Notice.success({ title: 'connection deleted' });
+      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleClkAddConnection() {
@@ -561,6 +581,7 @@ export default {
           }];
         }
       });
+      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleCommentDeleted() {
@@ -570,6 +591,7 @@ export default {
           node.nodes = [];
         }
       });
+      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     // @deprecated
@@ -589,21 +611,11 @@ export default {
       this.SideMenuActiveItem = itemName;
     },
     handleClkSaveRoadmap() {
-      let curves = [];
-      const allConns = this.$refs.road_map.getConn();
-      _.forEach(allConns, (conn) => {
-        if (conn.type === 'ref') {
-          curves = [...curves, {
-            source: conn.source,
-            target: conn.target,
-            curve: conn.curve,
-          }];
-        }
-      });
+      this.refCurves = this.getCurves();
       // id ==
       if (this.roadMapId === -1) {
         createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections,
-          curves, this.description, this.nextNodeId)
+          this.refCurves, this.description, this.nextNodeId)
           .then((res) => {
             this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
             this.roadMapId = res.data.id;
@@ -616,7 +628,7 @@ export default {
           });
       } else {
         updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
-          curves, this.description, this.nextNodeId)
+          this.refCurves, this.description, this.nextNodeId)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
           }).catch((err) => {
