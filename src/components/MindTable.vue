@@ -208,7 +208,7 @@ export default {
           render: (h, params) => h('Dropdown', {
             props: {
               trigger: 'hover',
-              transfer: 'true',
+              transfer: true,
             } }, [
             h('Button', {
               props: {

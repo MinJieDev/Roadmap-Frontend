@@ -65,6 +65,17 @@ const routes = [
     },
   },
   {
+    path: '/MDeditorTable',
+    name: 'MDeditorTable',
+    component: () => import(/* webpackChunkName: "about" */ '../views/MDeditorTableView.vue'),
+    meta: {
+      nickName: '笔记目录',
+      name: ['笔记目录'],
+      path: ['/MDeditorTable'],
+      level: 2,
+    },
+  },
+  {
     path: '/RoadMapTable',
     name: 'RoadmapTable',
     component: () => import(/* webpackChunkName: "about" */ '../views/RoadmapTableView'),
