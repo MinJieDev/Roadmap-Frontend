@@ -6,6 +6,8 @@
     </div>
     <div class="markdown-body">
       <VueMarkdown v-if="repaint" style="margin: 20px">{{content}}</VueMarkdown>
+      <Likes></Likes>
+      <Comment :comments="comments" @comment-committed="handleCommentCommitted"></Comment>
     </div>
   </div>
 </template>
@@ -17,10 +19,12 @@ import 'github-markdown-css';
 import VueMarkdown from 'vue-markdown';
 import { pushErr } from '../components/ErrPush';
 import { req } from '../apis/util';
+import Likes from '../components/Likes';
+import Comment from '../components/comment/Comment';
 
 export default {
   name: 'EssayEditorView',
-  components: { Simplemde, VueMarkdown },
+  components: { Simplemde, VueMarkdown, Likes, Comment },
   props: {},
   data() {
     return {
@@ -32,6 +36,7 @@ export default {
       titleEditable: false,
       refreshPreview: true,
       repaint: false,
+      comments: [],
     };
   },
   methods: {
@@ -49,6 +54,10 @@ export default {
         .catch((err) => {
           pushErr(this, err, true);
         });
+    },
+    handleCommentCommitted(com) {
+      window.console.log('com', com);
+      this.comments = [...this.comments, com];
     },
   },
   mounted() {
