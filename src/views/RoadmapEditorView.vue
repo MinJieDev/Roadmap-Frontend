@@ -423,7 +423,7 @@ export default {
             this.roadMapTitle = res.data.title;
             this.description = res.data.description;
             this.nextNodeId = JSON.parse(res.data.text).nextNodeId;
-            this.repaintMindMap();
+            this.initMindMap();
             this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
           })
           .catch((err) => {
@@ -528,7 +528,6 @@ export default {
           category: category || 'mindmap',
         }];
       this.nextNodeId += 1;
-      this.refCurves = this.getCurves();
       this.repaintMindMap();
       return `#${this.nextNodeId - 1}`;
     },
@@ -541,7 +540,6 @@ export default {
           node.URI = nodeInfo.nodeUrl;
         }
       });
-      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleArticleNodeAdded(nodeInfo) {
@@ -556,7 +554,6 @@ export default {
         (connection.source.text !== articleTitle
           && connection.target.text !== articleTitle));
       this.$Notice.success({ title: 'node deleted' });
-      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleNodeDeleted() {
@@ -566,7 +563,6 @@ export default {
           && connection.target.text !== this.curNode.text));
       this.curNode = null;
       this.$Notice.success({ title: 'node deleted' });
-      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleConnectionAdded(connectionInfo) {
@@ -574,7 +570,6 @@ export default {
         source: connectionInfo.sourceNode,
         target: connectionInfo.targetNode,
       }];
-      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleConnectionDeleted() {
@@ -583,7 +578,6 @@ export default {
                   && connection.target.text === this.curConn.target.text)));
       this.curConn = null;
       this.$Notice.success({ title: 'connection deleted' });
-      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleClkAddConnection() {
@@ -600,7 +594,6 @@ export default {
           }];
         }
       });
-      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleColorModified(colorInfo) {
@@ -610,7 +603,6 @@ export default {
           node.color = colorInfo;
         }
       });
-      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleCommentDeleted() {
@@ -620,7 +612,6 @@ export default {
           node.nodes = [];
         }
       });
-      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     // @deprecated
@@ -633,7 +624,11 @@ export default {
         });
       });
     },
+    initMindMap() {
+      this.repaint += 1;
+    },
     repaintMindMap() {
+      this.refCurves = this.getCurves();
       this.repaint += 1;
     },
     handleSideMenuSelect(itemName) {
