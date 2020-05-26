@@ -161,6 +161,11 @@
             删除注释
             <Icon type="ios-trash-outline" />
           </MenuItem>
+          <ModifyColor
+            @color-modified="handleColorModified"
+            :color="curColor"
+            ref="modifyColor">
+          </ModifyColor>
         </Submenu>
       </Menu>
       <Menu active-name="1-2" theme="light" width="auto" :open-names="['1']"
@@ -193,6 +198,7 @@ import DelCommentForm from '../components/DelCommentForm';
 import LoadRoadmapForm from '../components/LoadRoadmapForm';
 import EditRoadmapDescriptionForm from '../components/EditRoadmapDescriptionForm';
 import ModifyCommentForm from '../components/ModifyCommentForm';
+import ModifyColor from '../components/ModifyColor';
 import ModifyNodeForm from '../components/ModifyNodeForm';
 import FileItem from '../components/FileItem';
 import NoteMarkdown from '../components/NoteMarkdown';
@@ -224,6 +230,7 @@ export default {
     LoadRoadmapForm,
     EditRoadmapDescriptionForm,
     ModifyCommentForm,
+    ModifyColor,
     ModifyNodeForm,
     NoteMarkdown,
     draggable,
@@ -278,6 +285,7 @@ export default {
           text: node.text,
           content: saveTxt,
           URI: node.URI,
+          color: node.color,
           fx: node.fx,
           fy: node.fy,
           nodes: node.nodes,
@@ -345,6 +353,12 @@ export default {
       }
       return this.curNode.nodes[0].text;
     },
+    curColor() {
+      if (!(this.curNode) || !(this.curNode.color)) {
+        return null;
+      }
+      return this.curNode.color;
+    },
     commentExist() {
       if (!(this.curNode) || this.curNode.nodes.length === 0) {
         return false;
@@ -409,7 +423,7 @@ export default {
             this.roadMapTitle = res.data.title;
             this.description = res.data.description;
             this.nextNodeId = JSON.parse(res.data.text).nextNodeId;
-            this.repaintMindMap();
+            this.initMindMap();
             this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
           })
           .catch((err) => {
@@ -498,18 +512,22 @@ export default {
     },
     handleNodeAdded(nodeInfo, category) {
       const pos = this.getMidPos();
+      let defaultColor = '#f5f5f5';
+      if (category === 'article') {
+        defaultColor = '#f5d72b';
+      }
       this.nodes = [...this.nodes,
         {
           text: `#${this.nextNodeId}`, // 为#nodeId，保证不重名
           content: nodeInfo.nodeName,
           URI: nodeInfo.nodeUrl,
+          color: nodeInfo.color || defaultColor,
           fx: pos.fx,
           fy: pos.fy,
           nodes: [],
           category: category || 'mindmap',
         }];
       this.nextNodeId += 1;
-      this.refCurves = this.getCurves();
       this.repaintMindMap();
       return `#${this.nextNodeId - 1}`;
     },
@@ -522,7 +540,6 @@ export default {
           node.URI = nodeInfo.nodeUrl;
         }
       });
-      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleArticleNodeAdded(nodeInfo) {
@@ -537,7 +554,6 @@ export default {
         (connection.source.text !== articleTitle
           && connection.target.text !== articleTitle));
       this.$Notice.success({ title: 'node deleted' });
-      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleNodeDeleted() {
@@ -547,7 +563,6 @@ export default {
           && connection.target.text !== this.curNode.text));
       this.curNode = null;
       this.$Notice.success({ title: 'node deleted' });
-      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleConnectionAdded(connectionInfo) {
@@ -555,7 +570,6 @@ export default {
         source: connectionInfo.sourceNode,
         target: connectionInfo.targetNode,
       }];
-      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleConnectionDeleted() {
@@ -564,7 +578,6 @@ export default {
                   && connection.target.text === this.curConn.target.text)));
       this.curConn = null;
       this.$Notice.success({ title: 'connection deleted' });
-      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     handleClkAddConnection() {
@@ -581,7 +594,15 @@ export default {
           }];
         }
       });
-      this.refCurves = this.getCurves();
+      this.repaintMindMap();
+    },
+    handleColorModified(colorInfo) {
+      _.forEach(this.nodes, (node) => {
+        if (node.text === this.curNode.text) {
+          // eslint-disable-next-line no-param-reassign
+          node.color = colorInfo;
+        }
+      });
       this.repaintMindMap();
     },
     handleCommentDeleted() {
@@ -591,7 +612,6 @@ export default {
           node.nodes = [];
         }
       });
-      this.refCurves = this.getCurves();
       this.repaintMindMap();
     },
     // @deprecated
@@ -604,7 +624,11 @@ export default {
         });
       });
     },
+    initMindMap() {
+      this.repaint += 1;
+    },
     repaintMindMap() {
+      this.refCurves = this.getCurves();
       this.repaint += 1;
     },
     handleSideMenuSelect(itemName) {
