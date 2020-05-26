@@ -40,7 +40,7 @@ const routes = [
     meta: {
       nickName: '文献笔记',
       name: ['文献目录', '文献笔记'],
-      path: ['/articleTable', '/articleMde'],
+      path: ['/articleTable', '/articleMde', '/MDeditorTable'],
       level: 10,
     },
   },

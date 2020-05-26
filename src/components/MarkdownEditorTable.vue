@@ -8,7 +8,7 @@
     </Button>
     <Table row-key="id"
            :columns="columns"
-           :data="data"
+           :data="tableData"
            border
            ref="selection">
     </Table>
@@ -170,7 +170,7 @@ export default {
   },
   methods: {
     createNote() {
-      this.$Message('Create note');
+      this.$Message.success('Create note');
     },
     editNote(index) {
       this.$router.push({

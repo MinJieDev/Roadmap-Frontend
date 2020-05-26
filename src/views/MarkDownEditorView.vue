@@ -8,7 +8,7 @@
       {{ author }}
     </div>
     <Divider/>
-    <Button type="primary" @click="save" style="margin-left: 40px">保存</Button>
+    <Button type="primary" @click="save(source)" style="margin-left: 40px">保存</Button>
     <Button type="warning" @click="cancel" style="margin-left: 10px">取消</Button>
     <Row :gutter="50"
          style="margin-left: 20px; margin-right: 20px; margin-top: 10px; margin-bottom: 20px">
@@ -33,18 +33,31 @@ import 'simplemde/dist/simplemde.min.css';
 import 'github-markdown-css';
 import VueMarkdown from 'vue-markdown';
 import { changeMTdata } from '../apis/MindTableEditorApis';
+import { createMDnote, changeMDnote } from '../apis/MarkdownEditorApis';
 import { pushErr } from '../components/ErrPush';
 import { req } from '../apis/util';
-// import { req } from '../apis/util';
 
 export default {
   name: 'MarkDownEditorView',
   components: { Simplemde, VueMarkdown },
-  props: {},
+  props: {
+    essay: {
+      type: Object,
+      required: true,
+    },
+    source: { // article, noteEdit, noteCreate
+      type: String,
+      required: true,
+    },
+    pageCurrent: {
+      type: Number,
+      required: true,
+    },
+  },
   data() {
     return {
       editor: null,
-      articleData: null,
+      // articleData: null,
       title: '',
       author: '',
       refreshPreview: true,
@@ -52,40 +65,77 @@ export default {
   },
   methods: {
     save() {
+      const note = this.editor.value();
       const dataChange = {
         id: this.$route.query.selected,
-        note: this.editor.value(),
+        note,
       };
       window.console.info(dataChange);
-      changeMTdata(dataChange)
-        .then(() => {
-          this.$Message.info('修改成功!');
-          this.$emit('reloadData');
-        })
-        .catch((err) => {
+      if (this.source === 'article') {
+        changeMTdata(dataChange).then(() => {
+          this.$Message.success('修改成功');
+          this.$emit('reloadData', this.pageCurrent);
+        }).catch((err) => {
           pushErr(this, err, true);
         });
-      this.$router.push({
-        path: '/articleTable',
-      });
+        this.$router.push({
+          path: '/articleTable',
+        });
+      } else if (this.source === 'noteEdit') {
+        changeMDnote(dataChange).then(() => {
+          this.$Message.success('修改成功');
+          this.$emit('reloadData', this.pageCurrent);
+        }).catch((err) => {
+          pushErr(this, err, true);
+        });
+      } else if (this.source === 'noteCreate') {
+        // TODO: add author field when backEnd added
+        createMDnote(this.title, note).then(() => {
+          this.$Message.success('创建成功');
+          this.$emit('reloadData', this.pageCurrent);
+        }).catch((err) => {
+          pushErr(this, err, true);
+        });
+      }
     },
     cancel() {
-      this.$router.push({
-        path: '/articleTable',
-      });
+      if (this.source === 'article') {
+        this.$router.push({
+          path: '/articleTable',
+        });
+      } else if (this.source === 'noteEdit' || this.source === 'noteCreate') {
+        this.$router.push({
+          path: '/MDeditorTable',
+        });
+      }
     },
     getData() {
-      req(`/api/articles/${this.$route.query.selected}/`, 'GET')
-        .then((res) => {
-          this.articleData = res.data;
-          window.console.log(res.data);
-          this.editor.value(res.data.note);
-          this.title = res.data.title;
-          this.author = res.data.author;
-        })
-        .catch((err) => {
-          pushErr(this, err, true);
-        });
+      if (this.source === 'article') {
+        req(`/api/articles/${this.$route.query.selected}/`, 'GET')
+          .then((res) => {
+            // this.articleData = res.data;
+            window.console.log(res.data);
+            this.editor.value(res.data.note);
+            this.title = res.data.title;
+            this.author = res.data.author;
+          })
+          .catch((err) => {
+            pushErr(this, err, true);
+          });
+      } else if (this.source === 'noteEdit') {
+        req(`api/essays/${this.$route.query.selected}/`, 'GET')
+          .then((res) => {
+            this.title = res.data.title;
+            this.author = res.data.author;
+            this.editor.value(res.data.note);
+          }).catch((err) => {
+            pushErr(this, err, true);
+          });
+      } else if (this.source === 'noteCreate') {
+        this.title = 'New Note';
+        this.author = '';
+        this.editor.value('');
+      }
     },
   },
   mounted() {

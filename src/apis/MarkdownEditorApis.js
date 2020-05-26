@@ -1,6 +1,7 @@
 import { req } from '../apis/util';
 
-export const createMDnote = title => req('/api/essays/', 'POST', {}, { title });
+export const createMDnote = (title, note) => req('/api/essays/',
+  'POST', {}, { title, text: note });
 
 export const deleteMDnote = id => req(`api/essays/${id}/`, 'DELETE');
 
