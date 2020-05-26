@@ -14,7 +14,8 @@ import _ from 'lodash';
 import MDeditorTableExpand from './MDeditorTableExpand';
 import ItemEditor from './TableItemEditor';
 import { pushErr } from '../components/ErrPush';
-import { createMDnote, deleleMDnote, changeMDnote } from '../apis/MarkdownEditorApis';
+import { changeMDnote } from '../apis/MarkdownEditorApis';
+// createMDnote, deleleMDnote,
 
 export default {
   name: 'MarkdownEditorTable',
@@ -140,7 +141,22 @@ export default {
   },
   methods: {
     changeNoteStatus(index) {
-
+      window.console.log(this.tableData);
+      this.noteData = _.clone(this.tableData[index]);
+      if (this.noteData.state === false) {
+        this.noteData.state = true;
+        this.$Message.info(`${this.noteData.title} Finished`);
+      } else {
+        this.noteData.state = false;
+        this.$Message.info(`${this.noteData.title} Unfinished`);
+      }
+      changeMDnote(this.noteData)
+        .then(() => {
+          this.$emit('reloadData', this.page.current);
+        })
+        .catch((err) => {
+          pushErr(this, err, true);
+        });
     },
   },
 };
