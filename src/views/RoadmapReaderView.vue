@@ -21,6 +21,7 @@
         @svg-click="handleSvgClick"
         @conn-click="handleConnClick"
       />
+      <Likes></Likes>
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}" v-if="sharedId===-1">
       <Button  @click="handleClkHelp"
@@ -58,6 +59,7 @@ import { getRoadmap, getRoadmapShareLink, postRoadmapShareLink } from '../apis/R
 import { reqSingle } from '../apis/util';
 import Roadmap from '../components/roadmap/Roadmap';
 import NoteMarkdown from '../components/NoteMarkdown';
+import Likes from '../components/Likes';
 
 Vue.prototype._ = _;
 
@@ -66,6 +68,7 @@ export default {
   components: {
     Roadmap,
     NoteMarkdown,
+    Likes,
   },
   data() {
     return {
