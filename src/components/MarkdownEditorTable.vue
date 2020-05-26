@@ -1,11 +1,40 @@
 <template>
   <div>
+    <Button
+      @click="createNote"
+      type="primary"
+      style="margin-left: 10px; margin-bottom: 10px ">
+      创建笔记
+    </Button>
     <Table row-key="id"
            :columns="columns"
            :data="data"
            border
            ref="selection">
     </Table>
+    <div style="margin: 10px;overflow: hidden">
+      <Button
+        @click="handleSelectAll(true)"
+        style="margin-left: 10px; margin-top: 8px;">
+        设置全选
+      </Button>
+      <Button
+        @click="handleSelectAll(false)"
+        style="margin-left: 10px; margin-top: 8px;">
+        取消全选
+      </Button>
+      <div style="float: right; margin-top: 18px;">
+        <Page
+          :total="noteTotal"
+          :current="page.current"
+          :page-size="10"
+          show-total
+          show-elevator
+          @on-change="changePage"
+        >
+        </Page>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -140,6 +169,18 @@ export default {
     };
   },
   methods: {
+    createNote() {
+      this.$Message('Create note');
+    },
+    editNote(index) {
+      this.$router.push({
+        path: '/articleMde',
+        query: { selected: this.data[index].id },
+      });
+    },
+    handleSelectAll(status) {
+      this.$refs.selection.selectAll(status);
+    },
     changeNoteStatus(index) {
       window.console.log(this.tableData);
       this.noteData = _.clone(this.tableData[index]);
@@ -157,6 +198,11 @@ export default {
         .catch((err) => {
           pushErr(this, err, true);
         });
+    },
+    changePage(pageIndex) {
+      this.page.current = pageIndex;
+      this.$emit('reloadData', this.page.current);
+      this.$Message.success(`Change to Page ${pageIndex}`);
     },
   },
 };
