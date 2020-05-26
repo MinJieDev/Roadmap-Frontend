@@ -36,7 +36,6 @@ import VueMarkdown from 'vue-markdown';
 import { changeMTdata } from '../apis/MindTableEditorApis';
 import { createMDnote, changeMDnote } from '../apis/MarkdownEditorApis';
 import { pushErr } from '../components/ErrPush';
-import { req } from '../apis/util';
 
 export default {
   name: 'MarkDownEditorView',
@@ -85,11 +84,12 @@ export default {
         // TODO: add author field when backEnd added
         createMDnote(this.title, note).then(() => {
           this.$Message.success('创建成功');
-          this.newSrc = 'noteEdit';
+          this.newSrc = _.clone('noteEdit');
           this.$emit('reloadData', this.pageCurrent);
         }).catch((err) => {
           pushErr(this, err, true);
         });
+        // TODO: 创建之后能继续本页面编辑，需要得到文献参数
         this.cancel();
       }
     },
