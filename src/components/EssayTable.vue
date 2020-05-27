@@ -216,7 +216,6 @@ export default {
         // eslint-disable-next-line no-underscore-dangle
         if (essay._isChecked === true) {
           count += 1;
-          window.console.log('delete essay content: ', essay);
           deleteEssay(essay.id).then(() => {
             this.$Message.info(`${essay.title} Deleted`);
             // eslint-disable-next-line no-mixed-operators
