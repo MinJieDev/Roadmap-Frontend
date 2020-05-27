@@ -620,29 +620,14 @@ export default {
     },
     handleClkSaveRoadmap() {
       this.refCurves = this.getCurves();
-      // id ==
-      if (this.roadMapId === -1) {
-        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.refCurves, this.description, this.nextNodeId)
-          .then((res) => {
-            this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
-            this.roadMapId = res.data.id;
-            this.$router.push({
-              path: '/editor',
-              query: { selected: res.data.id },
-            });
-          }).catch((err) => {
-            pushErr(this, err, true);
-          });
-      } else {
-        updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.refCurves, this.description, this.nextNodeId)
-          .then(() => {
-            this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
-          }).catch((err) => {
-            pushErr(this, err, true);
-          });
-      }
+      // generate thumbnail image formatted as base 64.
+      this.getRoadmapThumbnail().then((data) => {
+        window.console.info(data);
+        this.createOrUpdate(data);
+      }).catch(() => {
+        this.createOrUpdate(undefined);
+        pushErr(this, '获取缩略图失败');
+      });
     },
     // @deprecated
     handleClkLoadRoadmap(roadmapInfo) {
@@ -712,15 +697,16 @@ export default {
       });
     },
     handleClkExport() {
-      domtoimage.toPng(document.getElementById('target')).then((dataurl) => {
-        const dataUrl = dataurl;
+      this.getRoadmapThumbnail().then((pngUrl) => {
         const name = `${this.roadMapTitle}.png`;
         const a = document.createElement('a');
-        a.href = dataUrl;
-        a.download = name;
-        a.click();
-      }).catch((err) => {
-        pushErr(this, err, true);
+        if (pngUrl) {
+          a.href = pngUrl;
+          a.download = name;
+          a.click();
+        }
+      }).catch(() => {
+        pushErr(this, '生成缩略图失败', true);
       });
     },
     getArticleByTitle(title) {
@@ -848,6 +834,36 @@ export default {
         nodeUrl: evt.added.element.url,
       }, 'article');
       window.console.log(evt);
+    },
+    getRoadmapThumbnail() {
+      return domtoimage.toPng(document.getElementById('target'));
+    },
+    createOrUpdate(thumbnail64) {
+      // id ==
+      if (this.roadMapId === -1) {
+        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections,
+          this.refCurves, this.description, this.nextNodeId, thumbnail64)
+          .then((res) => {
+            this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
+            this.roadMapId = res.data.id;
+            this.$router.push({
+              path: '/editor',
+              query: { selected: res.data.id },
+            });
+          })
+          .catch((err) => {
+            pushErr(this, err, true);
+          });
+      } else {
+        updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
+          this.refCurves, this.description, this.nextNodeId, thumbnail64)
+          .then(() => {
+            this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
+          })
+          .catch((err) => {
+            pushErr(this, err, true);
+          });
+      }
     },
   },
 };
