@@ -46,6 +46,11 @@
         查看笔记
         <Icon type="ios-book" />
       </Button>
+      <Button type="success" @click="handleClkBindEssay"
+              class="b-ed" v-if="hasBindEssay">
+          查看随笔
+          <Icon type="md-cloud-upload" />
+      </Button>
       <NoteMarkdown :note="curNote" ref="notemdReader"
                     @article-note-edit="jumpArticleNoteEdit"></NoteMarkdown>
     </Sider>
@@ -75,6 +80,7 @@ export default {
   },
   data() {
     return {
+      text: null,
       roadMapId: -1,
       sharedId: -1,
       roadMapTitle: 'roadMapTitleDefalt',
@@ -114,6 +120,7 @@ export default {
       try {
         this.articles = (await reqSingle('/api/articles/', 'GET', { page: 1 })).data.results;
         const roadmapData = (await getRoadmap(this.roadMapId)).data;
+        this.text = JSON.parse(roadmapData.text);
         this.nodes = this.toDisplayNodes(JSON.parse(roadmapData.text).nodes);
         this.connections = this.toDisplayConnections(JSON.parse(roadmapData.text).connections);
         this.refCurves = JSON.parse(roadmapData.text).refConnections;
@@ -186,6 +193,9 @@ export default {
         return this.getArticleByTitle(this.curNode.content).note;
       }
       return '';
+    },
+    hasBindEssay() {
+      return this.text && this.text.bindEssay && this.text.bindEssay !== -1;
     },
   },
   methods: {
@@ -318,6 +328,12 @@ export default {
     handleCommentCommitted(com) {
       window.console.log('com', com);
       this.comments = [...this.comments, com];
+    },
+    handleClkBindEssay() {
+      this.$router.push({
+        path: '/essayReader',
+        query: { selected: this.text.bindEssay },
+      });
     },
   },
 };
