@@ -29,51 +29,62 @@
       </ItemEditor>
     </div>
     <div v-else-if="this.viewStyle==='card'">
-      <Row v-for="r in rows" v-bind:key="r" type="flex" justify="center" :gutter="20">
-        <i-col v-for="c in cols" v-bind:key="c" span="6" align="center" >
-          <!-- getIndex函数用于获取指定r和c后，路书在index中的索引。对于新建路书，getIndex会返回-1 -->
-          <Card v-show="getIndex(r, c, cols) + 1 < data.length + 1"
-                style="margin-bottom: 20px">
-            <!--新建路书部件-->
-            <div class="card_content" v-if="r === 1 && c === 1">
-              <p class="single_line">
-                新建路书
-              </p>
-              <Icon class="card_img" type="ios-book" size="250"
-                    @click="onClickNewRoadmap(0)"></Icon>
-              <Button type="primary" size="small" @click="onClickNewRoadmap(0)">
-                创建新的路书
-              </Button>
+    <Row v-for="r in rows" v-bind:key="r" type="flex" justify="center" :gutter="20">
+      <i-col v-for="c in cols" v-bind:key="c" span="6" align="center" >
+        <!-- getIndex函数用于获取指定r和c后，路书在index中的索引。对于新建路书，getIndex会返回-1 -->
+        <Card v-show="getIndex(r, c, cols) + 1 < data.length + 1"
+              style="margin-bottom: 20px">
+          <!--新建路书部件-->
+          <div class="card_content" v-if="r === 1 && c === 1">
+            <p class="single_line">
+              新建路书
+            </p>
+            <Icon class="card_img" type="ios-book" size="250" @click="onClickNewRoadmap(0)"></Icon>
+            <Button type="primary" size="small" @click="onClickNewRoadmap(0)">
+              创建新的路书
+            </Button>
+          </div>
+          <!--已有路书卡片-->
+          <div class="card_content" v-else>
+            <!-- 标题 -->
+            <h4 class=single_line v-if="getIndex(r, c, cols) < data.length">
+              {{data[getIndex(r, c, cols)].title}}
+            </h4>
+
+            <!-- 缩略图或默认图加载 -->
+            <div class="card_img"
+                 @mouseenter="mouseOnThumbnail"
+                 @mouseleave="mouseLeaveThumbnail">
+              <img v-if="showThumbnail(r, c)"
+                   :src="data[getIndex(r,c,cols)].thumbnail"
+                   class="card_img"
+                   @click="onEdit(roadmaps[getIndex(r, c, cols)].id)"
+              >
+              <img v-else
+                   src="../assets/RoadmapDefault.png"
+                   class="card_img"
+                   @click="onEdit(roadmaps[getIndex(r, c, cols)].id)"
+              >
             </div>
-            <!--已有路书卡片-->
-            <div class="card_content" v-else>
-              <p class=single_line v-if="getIndex(r, c, cols) < data.length">
-                {{data[getIndex(r, c, cols)].title}}
-              </p>
-              <img class="card_img" src="../assets/RoadmapDefault.png" height="250"
-                   @click="onEdit(roadmaps[getIndex(r, c, cols)].id)">
-              <br>
-              <Button type="primary" size="small"
-                      @click="onView(roadmaps[getIndex(r, c, cols)].id)">
-                查看
-              </Button>
-              <Button type="warning" size="small"
-                      @click="onEdit(roadmaps[getIndex(r, c, cols)].id)">
-                修改
-              </Button>
-              <Button type="success" size="small"
-                      @click="onShare(roadmaps[getIndex(r, c, cols)].id)">
-                分享
-              </Button>
-              <Button type="error" size="small"
-                      @click="onDelete(roadmaps[getIndex(r, c, cols)].id)">
-                删除
-              </Button>
-            </div>
-          </Card>
-        </i-col>
-        <br>
-        <br>
+
+            <!-- 按钮 -->
+            <Button type="primary" size="small" @click="onView(roadmaps[getIndex(r, c, cols)].id)">
+              查看
+            </Button>
+            <Button type="warning" size="small" @click="onEdit(roadmaps[getIndex(r, c, cols)].id)">
+              修改
+            </Button>
+            <Button type="success" size="small" @click="onShare(roadmaps[getIndex(r, c, cols)].id)">
+              分享
+            </Button>
+            <Button type="error" size="small" @click="onDelete(roadmaps[getIndex(r, c, cols)].id)">
+              删除
+            </Button>
+          </div>
+        </Card>
+      </i-col>
+      <br>
+      <br>
       </Row>
     </div>
     <!-- 抽屉暂未使用，用于创建自动生成的路书 -->
@@ -221,6 +232,11 @@ export default {
       window.console.info('Card Rows Change', newRows);
       return newRows;
     },
+    showThumbnail() {
+      return (r, c) => this.getIndex(r, c, this.cols) < this.data.length
+          && this.data[this.getIndex(r, c, this.cols)].thumbnail !== -1
+          && !this.data[this.getIndex(r, c, this.cols)].isEmpty;
+    },
   },
   methods: {
     getIndex(r, c, col) {
@@ -237,9 +253,13 @@ export default {
             title: roadmap.title,
             // tags: [],
             description: roadmap.description,
+            isEmpty: JSON.parse(roadmap.text).nodes.length === 0,
+            thumbnail: JSON.parse(roadmap.text).thumbnail !== undefined ?
+              JSON.parse(roadmap.text).thumbnail : -1,
           });
           window.console.log(roadmap);
         });
+      window.console.log(data);
       return data;
     },
     onView(index) {
@@ -308,6 +328,12 @@ export default {
         this.viewStyle = 'card';
       }
     },
+    mouseOnThumbnail() {
+      window.console.info('Mouse enter.');
+    },
+    mouseLeaveThumbnail() {
+      window.console.info('Mouse left.');
+    },
   },
 };
 </script>
@@ -315,7 +341,8 @@ export default {
 <style scoped>
   /*单行文本的溢出显示省略号*/
   .single_line{
-    height: 25px;
+    height: 20px;
+    width: 250px;
     vertical-align: middle;
     overflow:hidden;
     text-overflow:ellipsis;
@@ -328,5 +355,8 @@ export default {
   }
   .card_img{
     cursor: pointer;  /*鼠标悬停变小手*/
+    overflow: hidden;
+    width:250px;
+    height:250px;
   }
 </style>

@@ -79,19 +79,21 @@
         ghostClass="ghost"
         @change="handleArticleDraggedIn"
       >
-        <roadmap
-          ref="road_map"
-          :nodes="nodes"
-          :connections="mergedConnections"
-          :editable="true"
-          :key="repaint"
-          :live-node="curNode"
-          @node-click="handleNodeClick"
-          @node-dblclick="handleNodeDblClick"
-          @subnode-dblclick="handleSubnodeDblClick"
-          @svg-click="handleSvgClick"
-          @conn-click="handleConnClick"
-        />
+        <div id="target">
+          <roadmap
+            ref="road_map"
+            :nodes="nodes"
+            :connections="mergedConnections"
+            :editable="true"
+            :key="repaint"
+            :live-node="curNode"
+            @node-click="handleNodeClick"
+            @node-dblclick="handleNodeDblClick"
+            @subnode-dblclick="handleSubnodeDblClick"
+            @svg-click="handleSvgClick"
+            @conn-click="handleConnClick"
+          />
+        </div>
       </draggable>
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}">
@@ -108,6 +110,11 @@
       <Button type="success" @click="handleClkShare"
               :disabled="roadMapId===-1" class="b-ro">
         分&emsp;&emsp;享
+        <Icon type="ios-share" />
+      </Button>
+      <Button type="success" @click="handleClkExport"
+              :disabled="roadMapId===-1" class="b-ro">
+        导出为图片
         <Icon type="ios-share" />
       </Button>
       <Button type="warning" @click="handleClkSaveRoadmap"
@@ -188,6 +195,7 @@
 <script>
 import _ from 'lodash';
 import Vue from 'vue';
+import domtoimage from 'dom-to-image';
 import draggable from 'vuedraggable';
 import AddNodeForm from '../components/AddNodeForm';
 import AddConnectionForm from '../components/AddConnectionForm';
@@ -636,29 +644,14 @@ export default {
     },
     handleClkSaveRoadmap() {
       this.refCurves = this.getCurves();
-      // id ==
-      if (this.roadMapId === -1) {
-        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.refCurves, this.description, this.nextNodeId)
-          .then((res) => {
-            this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
-            this.roadMapId = res.data.id;
-            this.$router.push({
-              path: '/editor',
-              query: { selected: res.data.id },
-            });
-          }).catch((err) => {
-            pushErr(this, err, true);
-          });
-      } else {
-        updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.refCurves, this.description, this.nextNodeId)
-          .then(() => {
-            this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
-          }).catch((err) => {
-            pushErr(this, err, true);
-          });
-      }
+      // generate thumbnail image formatted as base 64.
+      this.getRoadmapThumbnail().then((data) => {
+        window.console.info(data);
+        this.createOrUpdate(data);
+      }).catch(() => {
+        this.createOrUpdate(undefined);
+        pushErr(this, '获取缩略图失败');
+      });
     },
     // @deprecated
     handleClkLoadRoadmap(roadmapInfo) {
@@ -725,6 +718,19 @@ export default {
         });
       }).catch((err) => {
         pushErr(this, err, true);
+      });
+    },
+    handleClkExport() {
+      this.getRoadmapThumbnail().then((pngUrl) => {
+        const name = `${this.roadMapTitle}.png`;
+        const a = document.createElement('a');
+        if (pngUrl) {
+          a.href = pngUrl;
+          a.download = name;
+          a.click();
+        }
+      }).catch(() => {
+        pushErr(this, '生成缩略图失败', true);
       });
     },
     getArticleByTitle(title) {
@@ -852,6 +858,36 @@ export default {
         nodeUrl: evt.added.element.url,
       }, 'article');
       window.console.log(evt);
+    },
+    getRoadmapThumbnail() {
+      return domtoimage.toPng(document.getElementById('target'));
+    },
+    createOrUpdate(thumbnail64) {
+      // id ==
+      if (this.roadMapId === -1) {
+        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections,
+          this.refCurves, this.description, this.nextNodeId, thumbnail64)
+          .then((res) => {
+            this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
+            this.roadMapId = res.data.id;
+            this.$router.push({
+              path: '/editor',
+              query: { selected: res.data.id },
+            });
+          })
+          .catch((err) => {
+            pushErr(this, err, true);
+          });
+      } else {
+        updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
+          this.refCurves, this.description, this.nextNodeId, thumbnail64)
+          .then(() => {
+            this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
+          })
+          .catch((err) => {
+            pushErr(this, err, true);
+          });
+      }
     },
   },
 };
