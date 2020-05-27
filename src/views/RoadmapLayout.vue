@@ -20,22 +20,40 @@
               <Icon type="md-map"></Icon>
               路书管理
             </MenuItem>
-                <div v-if="isLoginStatus() !== true">
-                  <MenuItem
-                    name="3"
-                    @click.native="goToLogin()">
-                    <Icon type="md-person"></Icon>
-                    登录
-                  </MenuItem>
-                </div>
-                <div v-if="isLoginStatus() === true">
-                  <MenuItem
-                    name="3"
-                    @click.native="logOut()">
-                    <Icon type="md-person"></Icon>
-                    退出账号
-                  </MenuItem>
-                </div>
+            <div v-if="isLoginStatus() !== true">
+              <MenuItem
+                name="3"
+                @click.native="goToLogin()">
+                <Icon type="md-person-add"></Icon>
+                登录账户
+              </MenuItem>
+            </div>
+            <div v-if="isLoginStatus() === true">
+              <Submenu name="3" theme="dark">
+                <template slot="title">
+                  <Icon type="md-person" />
+                  个人中心
+                </template>
+                <MenuItem
+                  name="3-1"
+                  @click.native="goToDash()">
+                  <Icon type="md-apps" />
+                  Dashboard
+                </MenuItem>
+                <MenuItem
+                  name="3-2"
+                  @click.native="goToProfile()">
+                  <Icon type="md-list" />
+                  个人档案
+                </MenuItem>
+                <MenuItem
+                  name="3-3"
+                  @click.native="logOut()">
+                  <Icon type="md-log-out" />
+                  登出账户
+                </MenuItem>
+              </Submenu>
+            </div>
           </div>
         </Menu>
       </Header>
@@ -110,6 +128,12 @@ export default {
     logOut() {
       logout();
       this.goToLogin();
+    },
+    goToDash() {
+
+    },
+    goToProfile() {
+
     },
   },
   created() {

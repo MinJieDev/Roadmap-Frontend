@@ -54,6 +54,15 @@ const routes = [
     },
   },
   {
+    path: '/userProfile',
+    name: 'UserProfile',
+    component: () => import('../views/UserProfileView'),
+    meta: {
+      nickName: '用户档案',
+      level: 2,
+    },
+  },
+  {
     path: '/editor',
     name: 'Editor',
     component: () => import(/* webpackChunkName: "about" */ '../views/RoadmapEditorView.vue'),
