@@ -35,7 +35,6 @@ import VueMarkdown from 'vue-markdown';
 import { changeMTdata } from '../apis/MindTableEditorApis';
 import { pushErr } from '../components/ErrPush';
 import { req } from '../apis/util';
-// import { req } from '../apis/util';
 
 export default {
   name: 'MarkDownEditorView',
