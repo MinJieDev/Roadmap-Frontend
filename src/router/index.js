@@ -74,6 +74,17 @@ const routes = [
     },
   },
   {
+    path: '/essayTable',
+    name: 'EssayTable',
+    component: () => import(/* webpackChunkName: "about" */ '../views/EssayTableView.vue'),
+    meta: {
+      nickName: '随笔目录',
+      name: ['随笔目录'],
+      path: ['/essayTable'],
+      level: 2,
+    },
+  },
+  {
     path: '/RoadMapTable',
     name: 'RoadmapTable',
     component: () => import(/* webpackChunkName: "about" */ '../views/RoadmapTableView'),

@@ -20,34 +20,38 @@
               <Icon type="md-map"></Icon>
               路书管理
             </MenuItem>
+            <MenuItem name="3" :to="{name: 'EssayTable'}">
+              <Icon type="ios-create" />
+              随笔管理
+            </MenuItem>
             <div v-if="isLoginStatus() !== true">
               <MenuItem
-                name="3"
+                name="4"
                 @click.native="goToLogin()">
                 <Icon type="md-person-add"></Icon>
                 登录账户
               </MenuItem>
             </div>
             <div v-if="isLoginStatus() === true">
-              <Submenu name="3" theme="dark">
+              <Submenu name="4" theme="dark">
                 <template slot="title">
                   <Icon type="md-person" />
                   个人中心
                 </template>
                 <MenuItem
-                  name="3-1"
+                  name="4-1"
                   @click.native="goToDash()">
                   <Icon type="md-apps" />
                   Dashboard
                 </MenuItem>
                 <MenuItem
-                  name="3-2"
+                  name="4-2"
                   @click.native="goToProfile()">
                   <Icon type="md-list" />
                   个人档案
                 </MenuItem>
                 <MenuItem
-                  name="3-3"
+                  name="4-3"
                   @click.native="logOut()">
                   <Icon type="md-log-out" />
                   登出账户
@@ -163,7 +167,7 @@ export default {
   }
 
   .layout-nav {
-    width: 420px;
+    width: 480px;
     margin: 0 auto;
     margin-right: 20px;
   }
