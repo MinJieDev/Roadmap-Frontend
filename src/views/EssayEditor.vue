@@ -92,9 +92,8 @@ export default {
       }
     },
     cancel() {
-      // 实际应该回到上一个路由
       this.$router.push({
-        path: '/articleTable',
+        path: '/essayTable',
       });
     },
     handleClkEditTitle() {

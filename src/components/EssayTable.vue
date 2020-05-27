@@ -6,6 +6,12 @@
       style="margin-left: 10px; margin-bottom: 10px ">
       创建笔记
     </Button>
+    <Button
+      @click="deleteSelectEssay"
+      type="error"
+      style="margin-left : 10px; margin-bottom: 10px; float: right; margin-right: 20px">
+      删除勾选项
+    </Button>
     <Table row-key="id"
            :columns="columns"
            :data="tableData"
@@ -25,9 +31,9 @@
       </Button>
       <div style="float: right; margin-top: 18px;">
         <Page
-          :total="noteTotal"
+          :total="essayTotal"
           :current="page.current"
-          :page-size="10"
+          :page-size="page.size"
           show-total
           show-elevator
           @on-change="changePage"
@@ -52,7 +58,7 @@ export default {
       type: Array,
       required: true,
     },
-    noteTotal: {
+    essayTotal: {
       type: Number,
       required: true,
     },
@@ -67,6 +73,7 @@ export default {
       },
       page: {
         current: 1,
+        size: 10,
       },
       columns: [
         {
@@ -196,9 +203,27 @@ export default {
     },
     deleteEssay(index) {
       deleteEssay(this.tableData[index].id).then(() => {
+        // eslint-disable-next-line no-mixed-operators
+        this.page.current = _.toInteger((this.essayTotal - 2) / this.page.size + 1);
         this.$emit('reloadData', this.page.current);
       }).catch((err) => {
         pushErr(this, err, true);
+      });
+    },
+    deleteSelectEssay() {
+      let count = 0;
+      _.forEach(this.$refs.selection.objData, (essay) => {
+        // eslint-disable-next-line no-underscore-dangle
+        if (essay._isChecked === true) {
+          count += 1;
+          window.console.log('delete essay content: ', essay);
+          deleteEssay(essay.id).then(() => {
+            this.$Message.info(`${essay.title} Deleted`);
+            // eslint-disable-next-line no-mixed-operators
+            this.page.current = _.toInteger((this.essayTotal - count - 1) / this.page.size + 1);
+            this.$emit('reloadData', this.page.current);
+          });
+        }
       });
     },
     handleSelectAll(status) {

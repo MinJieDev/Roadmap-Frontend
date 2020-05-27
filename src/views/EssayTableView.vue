@@ -1,8 +1,8 @@
 <template>
   <div>
     <EssayTable
-      :tableData="notes"
-      :noteTotal="noteTotal"
+      :tableData="essays"
+      :essayTotal="essayTotal"
       @reloadData="reloadData"
     />
   </div>
@@ -18,8 +18,8 @@ export default {
   components: { EssayTable },
   data() {
     return {
-      notes: [],
-      noteTotal: 50,
+      essays: [],
+      essayTotal: 0,
     };
   },
   methods: {
@@ -31,8 +31,8 @@ export default {
       // window.console.log('current page', page);
       reqSingle('/api/essays/', 'GET', { page }).then((res) => {
         // window.console.log('get page data', res);
-        this.notes = res.data.results;
-        this.noteTotal = res.data.count;
+        this.essays = res.data.results;
+        this.essayTotal = res.data.count;
         // window.console.log('article total:', this.articleTotal);
       }).catch((err) => {
         pushErr(this, err, true);
