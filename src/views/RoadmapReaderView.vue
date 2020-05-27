@@ -21,6 +21,8 @@
         @svg-click="handleSvgClick"
         @conn-click="handleConnClick"
       />
+      <Likes></Likes>
+      <Comment :comments="comments" @comment-committed="handleCommentCommitted"></Comment>
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}" v-if="sharedId===-1">
       <Button  @click="handleClkHelp"
@@ -58,6 +60,8 @@ import { getRoadmap, getRoadmapShareLink, postRoadmapShareLink } from '../apis/R
 import { reqSingle } from '../apis/util';
 import Roadmap from '../components/roadmap/Roadmap';
 import NoteMarkdown from '../components/NoteMarkdown';
+import Likes from '../components/Likes';
+import Comment from '../components/comment/Comment';
 
 Vue.prototype._ = _;
 
@@ -66,6 +70,8 @@ export default {
   components: {
     Roadmap,
     NoteMarkdown,
+    Likes,
+    Comment,
   },
   data() {
     return {
@@ -82,6 +88,7 @@ export default {
       curNode: null,
       refCurves: [
       ],
+      comments: [],
     };
   },
   async mounted() {
@@ -283,6 +290,10 @@ export default {
         path: '/articleMde',
         query: { selected: this.getArticleIdByTitle(this.curNode.content) },
       });
+    },
+    handleCommentCommitted(com) {
+      window.console.log('com', com);
+      this.comments = [...this.comments, com];
     },
   },
 };
