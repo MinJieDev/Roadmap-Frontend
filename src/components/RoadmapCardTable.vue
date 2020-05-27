@@ -50,8 +50,10 @@
             </p>
 
             <!-- 缩略图或默认图加载 -->
-            <div class="card_img">
-              <img v-if="getIndex(r,c,cols)<data.length && data[getIndex(r,c,cols)].thumbnail!==-1"
+            <div class="card_img"
+                 @mouseenter="mouseOnThumbnail"
+                 @mouseleave="mouseLeaveThumbnail">
+              <img v-if="showThumbnail(r, c)"
                    :src="data[getIndex(r,c,cols)].thumbnail"
                    class="card_img"
                    @click="onEdit(roadmaps[getIndex(r, c, cols)].id)"
@@ -228,6 +230,11 @@ export default {
       window.console.info('Card Rows Change', newRows);
       return newRows;
     },
+    showThumbnail() {
+      return (r, c) => this.getIndex(r, c, this.cols) < this.data.length
+          && this.data[this.getIndex(r, c, this.cols)].thumbnail !== -1
+          && !this.data[this.getIndex(r, c, this.cols)].isEmpty;
+    },
   },
   methods: {
     getIndex(r, c, col) {
@@ -244,6 +251,7 @@ export default {
             title: roadmap.title,
             // tags: [],
             description: roadmap.description,
+            isEmpty: JSON.parse(roadmap.text).nodes.length === 0,
             thumbnail: JSON.parse(roadmap.text).thumbnail !== undefined ?
               JSON.parse(roadmap.text).thumbnail : -1,
           });
@@ -317,6 +325,12 @@ export default {
       } else {
         this.viewStyle = 'card';
       }
+    },
+    mouseOnThumbnail() {
+      window.console.info('Mouse enter.');
+    },
+    mouseLeaveThumbnail() {
+      window.console.info('Mouse left.');
     },
   },
 };
