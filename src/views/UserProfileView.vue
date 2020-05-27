@@ -39,10 +39,10 @@
     </Sider>
     <Content
       :style="{padding: '60px', minHeight: '280px', background: '#fff'}">
-      <div v-if="this.content==='profile'">
+      <div v-if="content==='profile'">
         userProfile
       </div>
-      <div v-else-if="this.content==='interest'">
+      <div v-else-if="content==='interest'">
         userInterest
       </div>
       <div v-else-if="content==='artcSt'">
@@ -59,6 +59,10 @@
 </template>
 
 <script>
+// import _ from 'lodash';
+import { reqSingle } from '../apis/util';
+import { pushErr } from '../components/ErrPush';
+
 export default {
   name: 'UserProfileView',
   data() {
@@ -66,7 +70,11 @@ export default {
       content: 'profile',
       // profile, interest, artcSt, roadmapSt, essaySt
       userData: {
-
+        userName: '',
+        email: '',
+        bio: '',
+        city: '',
+        organization: '',
       },
       interestData: {
 
@@ -82,18 +90,61 @@ export default {
   methods: {
     openUserProfile() {
       this.content = 'profile';
+      this.getUserProfileData();
     },
     openUserInterest() {
       this.content = 'interest';
+      this.getUserInterestData();
     },
     openArticleStatcs() {
       this.content = 'artcSt';
+      this.getArticleData();
     },
     openRoadmapStatcs() {
       this.content = 'roadmapSt';
+      this.getRoadmapData();
     },
     openEssayStatcs() {
       this.content = 'essaySt';
+      this.getEssayData();
+    },
+    getUserProfileData() {
+      // reqSingle('api/users', 'GET').then((res) => {
+      //   window.console.log('user data', res);
+      //   // this.userData.userName =
+      // }).catch((err) => {
+      //   pushErr(this, err, true);
+      // });
+    },
+    getUserInterestData() {
+      // TODO: wait for BackEnd
+    },
+    getArticleData() {
+      reqSingle('api/articles/', 'GET').then((res) => {
+        // window.console.log('show article res:', res);
+        this.articles = res.data;
+        this.articleTotal = this.articles.length;
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+    },
+    getRoadmapData() {
+      reqSingle('api/road_maps/', 'GET').then((res) => {
+        // window.console.log('show road_maps res:', res);
+        this.roadmaps = res.data;
+        this.roadmapTotal = this.roadmaps.length;
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+    },
+    getEssayData() {
+      reqSingle('api/essays/', 'GET').then((res) => {
+        // window.console.log('show essay res:', res);
+        this.essays = res.data;
+        this.essayTotal = this.essays.length;
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
     },
   },
 };

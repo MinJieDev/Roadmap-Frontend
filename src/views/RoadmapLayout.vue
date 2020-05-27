@@ -42,7 +42,7 @@
                   name="4-1"
                   @click.native="goToDash()">
                   <Icon type="md-apps" />
-                  Dashboard
+                  活动中心
                 </MenuItem>
                 <MenuItem
                   name="4-2"
