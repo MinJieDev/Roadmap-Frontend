@@ -45,9 +45,9 @@
           <!--已有路书卡片-->
           <div class="card_content" v-else>
             <!-- 标题 -->
-            <p class=single_line v-if="getIndex(r, c, cols) < data.length">
+            <h4 class=single_line v-if="getIndex(r, c, cols) < data.length">
               {{data[getIndex(r, c, cols)].title}}
-            </p>
+            </h4>
 
             <!-- 缩略图或默认图加载 -->
             <div class="card_img"
@@ -339,7 +339,8 @@ export default {
 <style scoped>
   /*单行文本的溢出显示省略号*/
   .single_line{
-    height: 25px;
+    height: 20px;
+    width: 250px;
     vertical-align: middle;
     overflow:hidden;
     text-overflow:ellipsis;
