@@ -79,19 +79,21 @@
         ghostClass="ghost"
         @change="handleArticleDraggedIn"
       >
-        <roadmap
-          ref="road_map"
-          :nodes="nodes"
-          :connections="mergedConnections"
-          :editable="true"
-          :key="repaint"
-          :live-node="curNode"
-          @node-click="handleNodeClick"
-          @node-dblclick="handleNodeDblClick"
-          @subnode-dblclick="handleSubnodeDblClick"
-          @svg-click="handleSvgClick"
-          @conn-click="handleConnClick"
-        />
+        <div id="target">
+          <roadmap
+            ref="road_map"
+            :nodes="nodes"
+            :connections="mergedConnections"
+            :editable="true"
+            :key="repaint"
+            :live-node="curNode"
+            @node-click="handleNodeClick"
+            @node-dblclick="handleNodeDblClick"
+            @subnode-dblclick="handleSubnodeDblClick"
+            @svg-click="handleSvgClick"
+            @conn-click="handleConnClick"
+          />
+        </div>
       </draggable>
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}">
@@ -108,6 +110,11 @@
       <Button type="success" @click="handleClkShare"
               :disabled="roadMapId===-1" class="b-ro">
         分&emsp;&emsp;享
+        <Icon type="ios-share" />
+      </Button>
+      <Button type="success" @click="handleClkExport"
+              :disabled="roadMapId===-1" class="b-ro">
+        导出为图片
         <Icon type="ios-share" />
       </Button>
       <Button type="warning" @click="handleClkSaveRoadmap"
@@ -183,6 +190,7 @@
 <script>
 import _ from 'lodash';
 import Vue from 'vue';
+import domtoimage from 'dom-to-image';
 import draggable from 'vuedraggable';
 import AddNodeForm from '../components/AddNodeForm';
 import AddConnectionForm from '../components/AddConnectionForm';
@@ -699,6 +707,18 @@ export default {
           content: `http://47.94.141.56/reader?sharedId=${res.data.share_id}/`,
           width: '700',
         });
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+    },
+    handleClkExport() {
+      domtoimage.toPng(document.getElementById('target')).then((dataurl) => {
+        const dataUrl = dataurl;
+        const name = `${this.roadMapTitle}.png`;
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = name;
+        a.click();
       }).catch((err) => {
         pushErr(this, err, true);
       });
