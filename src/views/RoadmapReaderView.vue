@@ -212,19 +212,43 @@ export default {
     getArticleById(id) {
       return _(this.articles).find(art => String(art.id) === String(id));
     },
+    getEssayById(id) {
+      return _(this.essays).find(ess => String(ess.id) === String(id));
+    },
     toDisplayNodes(savedNodes) {
       let ret = [];
       _(savedNodes).forEach((node) => {
         if (node.category === 'article') {
-          const art = this.getArticleById(_.split(node.content, '$', 2)[1]);
+          const articleId = _.split(node.content, '$', 2)[1];
+          const art = this.getArticleById(articleId);
           if (typeof art !== 'undefined') {
             // eslint-disable-next-line no-param-reassign
             node.content = art.title;
+            // eslint-disable-next-line no-param-reassign
+            node.URI = art.url;
+            // eslint-disable-next-line no-param-reassign
+            node.category_id = articleId;
           } else {
             // eslint-disable-next-line no-param-reassign
             node.category = 'mindmap';
             // eslint-disable-next-line no-param-reassign
             node.content += ': article not found';
+          }
+        } else if (node.category === 'essay') {
+          const essayId = _.split(node.content, '$', 2)[1];
+          const ess = this.getEssayById(essayId);
+          if (typeof ess !== 'undefined') {
+            // eslint-disable-next-line no-param-reassign
+            node.content = ess.title;
+            // eslint-disable-next-line no-param-reassign
+            node.URI = '';
+            // eslint-disable-next-line no-param-reassign
+            node.category_id = essayId;
+          } else {
+            // eslint-disable-next-line no-param-reassign
+            node.category = 'mindmap';
+            // eslint-disable-next-line no-param-reassign
+            node.content += ': essay not found';
           }
         }
         ret = [...ret, node];
