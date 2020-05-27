@@ -1,30 +1,32 @@
 <template>
   <div>
-    <div style="margin-right: 10px; float: right;">
-      切换布局
-      <i-switch
-        @on-change="onChangeViewStyle"
-        size="large">
-        <span slot="open">Card</span>
-        <span slot="close">Table</span>
-      </i-switch>
+    <div style="float: right; width: 100%;">
+      <div style="margin-right: 10px; float: right;">
+        切换布局
+        <i-switch
+          @on-change="onChangeViewStyle"
+          size="large">
+          <span slot="open">Card</span>
+          <span slot="close">Table</span>
+        </i-switch>
+      </div>
     </div>
     <div v-if="this.viewStyle==='table'">
-        <Button
-          @click="onClickNewRoadmap(0)"
-          type="primary"
-          style="margin-left: 10px; margin-bottom: 10px ">
-          新建路书
-        </Button>
-        <Table row-key="id"
-               :columns="columns"
-               :data="data"
-               border>
-        </Table>
-        <ItemEditor
-          v-bind:drawer="drawer"
-          @cancelDrawer="cancelDrawer">
-        </ItemEditor>
+      <Button
+        @click="onClickNewRoadmap(0)"
+        type="primary"
+        style="margin-left: 10px; margin-bottom: 10px ">
+        新建路书
+      </Button>
+      <Table row-key="id"
+             :columns="columns"
+             :data="data"
+             border>
+      </Table>
+      <ItemEditor
+        v-bind:drawer="drawer"
+        @cancelDrawer="cancelDrawer">
+      </ItemEditor>
     </div>
     <div v-else-if="this.viewStyle==='card'">
     <Row v-for="r in rows" v-bind:key="r" type="flex" justify="center" :gutter="20">
@@ -84,12 +86,12 @@
       <br>
       <br>
       </Row>
+    </div>
     <!-- 抽屉暂未使用，用于创建自动生成的路书 -->
     <ItemEditor
       v-bind:drawer="drawer"
       @cancelDrawer="cancelDrawer">
     </ItemEditor>
-    </div>
   </div>
 </template>
 

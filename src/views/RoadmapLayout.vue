@@ -20,9 +20,13 @@
               <Icon type="md-map"></Icon>
               路书管理
             </MenuItem>
+            <MenuItem name="3" :to="{name: 'EssayTable'}">
+              <Icon type="ios-create" />
+              随笔管理
+            </MenuItem>
                 <div v-if="isLoginStatus() !== true">
                   <MenuItem
-                    name="3"
+                    name="4"
                     @click.native="goToLogin()">
                     <Icon type="md-person"></Icon>
                     登录
@@ -30,7 +34,7 @@
                 </div>
                 <div v-if="isLoginStatus() === true">
                   <MenuItem
-                    name="3"
+                    name="4"
                     @click.native="logOut()">
                     <Icon type="md-person"></Icon>
                     退出账号
@@ -139,7 +143,7 @@ export default {
   }
 
   .layout-nav {
-    width: 420px;
+    width: 480px;
     margin: 0 auto;
     margin-right: 20px;
   }

@@ -208,7 +208,7 @@ export default {
           render: (h, params) => h('Dropdown', {
             props: {
               trigger: 'hover',
-              transfer: 'true',
+              transfer: true,
             } }, [
             h('Button', {
               props: {
@@ -372,7 +372,10 @@ export default {
     editNote(index) {
       this.$router.push({
         path: '/articleMde',
-        query: { selected: this.data[index].id },
+        query: {
+          selected: this.data[index].id,
+          pageCurrent: this.page.current,
+        },
       });
     },
     handleSelectAll(status) {
