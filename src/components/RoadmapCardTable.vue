@@ -44,12 +44,26 @@
           </div>
           <!--已有路书卡片-->
           <div class="card_content" v-else>
+            <!-- 标题 -->
             <p class=single_line v-if="getIndex(r, c, cols) < data.length">
               {{data[getIndex(r, c, cols)].title}}
             </p>
-            <img class="card_img" src="../assets/RoadmapDefault.png" height="250"
-                 @click="onEdit(roadmaps[getIndex(r, c, cols)].id)">
-            <br>
+
+            <!-- 缩略图或默认图加载 -->
+            <div class="card_img">
+              <img v-if="getIndex(r,c,cols)<data.length && data[getIndex(r,c,cols)].thumbnail!==-1"
+                   :src="data[getIndex(r,c,cols)].thumbnail"
+                   class="card_img"
+                   @click="onEdit(roadmaps[getIndex(r, c, cols)].id)"
+              >
+              <img v-else
+                   src="../assets/RoadmapDefault.png"
+                   class="card_img"
+                   @click="onEdit(roadmaps[getIndex(r, c, cols)].id)"
+              >
+            </div>
+
+            <!-- 按钮 -->
             <Button type="primary" size="small" @click="onView(roadmaps[getIndex(r, c, cols)].id)">
               查看
             </Button>
@@ -230,9 +244,12 @@ export default {
             title: roadmap.title,
             // tags: [],
             description: roadmap.description,
+            thumbnail: JSON.parse(roadmap.text).thumbnail !== undefined ?
+              JSON.parse(roadmap.text).thumbnail : -1,
           });
           window.console.log(roadmap);
         });
+      window.console.log(data);
       return data;
     },
     onView(index) {
@@ -321,5 +338,8 @@ export default {
   }
   .card_img{
     cursor: pointer;  /*鼠标悬停变小手*/
+    overflow: hidden;
+    width:250px;
+    height:250px;
   }
 </style>
