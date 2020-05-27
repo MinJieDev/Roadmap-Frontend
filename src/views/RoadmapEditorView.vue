@@ -9,11 +9,11 @@
         <Submenu name="1">
           <template slot="title">
             <Icon type="ios-navigate"></Icon>
-            文献栏
+            文献列表
           </template>
           <draggable
             class="dragArea list-group"
-            :list="articles"
+            :list="articleDragList"
             :group="{ name: 'article', pull: 'clone', put: false }"
             :sort="false"
           >
@@ -24,6 +24,29 @@
                 :display="isFileItemDisplay('1-'+article.id)"
                 :articleId="article.id"
                 @node-added="handleArticleNodeAdded"
+              >
+              </FileItem>
+            </MenuItem>
+          </draggable>
+        </Submenu>
+        <Submenu name="2">
+          <template slot="title">
+            <Icon type="ios-navigate"></Icon>
+            随笔列表
+          </template>
+          <draggable
+            class="dragArea list-group"
+            :list="essayDragList"
+            :group="{ name: 'article', pull: 'clone', put: false }"
+            :sort="false"
+          >
+            <MenuItem v-for="(essay, index) in essays" :key="index" :name="'2-'+essay.id" >
+              <FileItem
+                :fileName="essay.title"
+                :articleUrl="''"
+                :display="isFileItemDisplay('2-'+essay.id)"
+                :articleId="essay.id"
+                @node-added="handleEssayNodeAdded"
               >
               </FileItem>
             </MenuItem>
@@ -77,7 +100,7 @@
         :list="roadmapDragArticleList"
         :group="{ name: 'article', put: true }"
         ghostClass="ghost"
-        @change="handleArticleDraggedIn"
+        @change="handleDraggedIn"
       >
         <roadmap
           ref="road_map"
@@ -240,6 +263,7 @@ export default {
       roadMapId: -1,
       roadMapTitle: 'New RoadMap',
       articles: [],
+      essays: [],
       display: false,
       SideMenuActiveItem: '',
       repaint: 1,
@@ -279,7 +303,9 @@ export default {
       _(this.nodes).forEach((node) => {
         let saveTxt = node.content;
         if (node.category === 'article') {
-          saveTxt = `$${this.getArticleIdByTitle(node.content)}`;
+          saveTxt = node.category_id ? `$${node.category_id}` : `$${this.getArticleIdByTitle(node.content)}`;
+        } else if (node.category === 'essay') {
+          saveTxt = `$${node.category_id}`;
         }
         ret = [...ret, {
           text: node.text,
@@ -406,30 +432,50 @@ export default {
       }
       return '';
     },
+    articleDragList() {
+      let ret = [];
+      _(this.articles).forEach((art) => {
+        ret = [...ret, { ...art, category: 'article' }];
+      });
+      return ret;
+    },
+    essayDragList() {
+      let ret = [];
+      _(this.essays).forEach((ess) => {
+        ret = [...ret, { ...ess, category: 'essay' }];
+      });
+      return ret;
+    },
   },
   mounted() {
     // GET articles for l-sider
     reqSingle('/api/articles/', 'GET', { page: 1 }).then((res1) => {
+      window.console.log('article', res1);
       this.articles = res1.data.results;
-      // load roadMap if has query
-      if ((typeof (this.$route.query.selected) !== 'undefined') &&
-        (String(this.$route.query.selected) !== '-1')) {
-        this.roadMapId = this.$route.query.selected;
-        getRoadmap(this.roadMapId)
-          .then((res) => {
-            this.nodes = this.toDisplayNodes(JSON.parse(res.data.text).nodes);
-            this.connections = this.toDisplayConnections(JSON.parse(res.data.text).connections);
-            this.refCurves = JSON.parse(res.data.text).refConnections;
-            this.roadMapTitle = res.data.title;
-            this.description = res.data.description;
-            this.nextNodeId = JSON.parse(res.data.text).nextNodeId;
-            this.initMindMap();
-            this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
-          })
-          .catch((err) => {
-            pushErr(this, err, true);
-          });
-      }
+      reqSingle('/api/essays/', 'GET').then((res2) => {
+        this.essays = res2.data;
+        // load roadMap if has query
+        if ((typeof (this.$route.query.selected) !== 'undefined') &&
+          (String(this.$route.query.selected) !== '-1')) {
+          this.roadMapId = this.$route.query.selected;
+          getRoadmap(this.roadMapId)
+            .then((res) => {
+              this.nodes = this.toDisplayNodes(JSON.parse(res.data.text).nodes);
+              this.connections = this.toDisplayConnections(JSON.parse(res.data.text).connections);
+              this.refCurves = JSON.parse(res.data.text).refConnections;
+              this.roadMapTitle = res.data.title;
+              this.description = res.data.description;
+              this.nextNodeId = JSON.parse(res.data.text).nextNodeId;
+              this.initMindMap();
+              this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
+            })
+            .catch((err) => {
+              pushErr(this, err, true);
+            });
+        }
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
     }).catch((err) => {
       pushErr(this, err, true);
     });
@@ -516,6 +562,9 @@ export default {
       if (category === 'article') {
         defaultColor = '#f5d72b';
       }
+      if (category === 'essay') {
+        defaultColor = '#f5b5d7';
+      }
       this.nodes = [...this.nodes,
         {
           text: `#${this.nextNodeId}`, // 为#nodeId，保证不重名
@@ -526,6 +575,7 @@ export default {
           fy: pos.fy,
           nodes: [],
           category: category || 'mindmap',
+          category_id: nodeInfo.articleId || -1,
         }];
       this.nextNodeId += 1;
       this.repaintMindMap();
@@ -544,6 +594,9 @@ export default {
     },
     handleArticleNodeAdded(nodeInfo) {
       this.handleNodeAdded(nodeInfo, 'article');
+    },
+    handleEssayNodeAdded(nodeInfo) {
+      this.handleNodeAdded(nodeInfo, 'essay');
     },
     // 删除文献结点
     // @deprecated method
@@ -736,21 +789,43 @@ export default {
     getArticleById(id) {
       return _(this.articles).find(art => String(art.id) === String(id));
     },
+    getEssayById(id) {
+      return _(this.essays).find(ess => String(ess.id) === String(id));
+    },
     toDisplayNodes(savedNodes) {
       let ret = [];
       _(savedNodes).forEach((node) => {
         if (node.category === 'article') {
-          const art = this.getArticleById(_.split(node.content, '$', 2)[1]);
+          const articleId = _.split(node.content, '$', 2)[1];
+          const art = this.getArticleById(articleId);
           if (typeof art !== 'undefined') {
             // eslint-disable-next-line no-param-reassign
             node.content = art.title;
             // eslint-disable-next-line no-param-reassign
             node.URI = art.url;
+            // eslint-disable-next-line no-param-reassign
+            node.category_id = articleId;
           } else {
             // eslint-disable-next-line no-param-reassign
             node.category = 'mindmap';
             // eslint-disable-next-line no-param-reassign
             node.content += ': article not found';
+          }
+        } else if (node.category === 'essay') {
+          const essayId = _.split(node.content, '$', 2)[1];
+          const ess = this.getEssayById(essayId);
+          if (typeof ess !== 'undefined') {
+            // eslint-disable-next-line no-param-reassign
+            node.content = ess.title;
+            // eslint-disable-next-line no-param-reassign
+            node.URI = '';
+            // eslint-disable-next-line no-param-reassign
+            node.category_id = essayId;
+          } else {
+            // eslint-disable-next-line no-param-reassign
+            node.category = 'mindmap';
+            // eslint-disable-next-line no-param-reassign
+            node.content += ': essay not found';
           }
         }
         ret = [...ret, node];
@@ -851,7 +926,21 @@ export default {
         articleId: evt.added.element.id,
         nodeUrl: evt.added.element.url,
       }, 'article');
+    },
+    handleEssayDraggedIn(evt) {
+      this.handleNodeAdded({
+        nodeName: evt.added.element.title,
+        articleId: evt.added.element.id,
+        nodeUrl: '',
+      }, 'essay');
+    },
+    handleDraggedIn(evt) {
       window.console.log(evt);
+      if (evt.added.element.category === 'article') {
+        this.handleArticleDraggedIn(evt);
+      } else if (evt.added.element.category === 'essay') {
+        this.handleEssayDraggedIn(evt);
+      }
     },
   },
 };
