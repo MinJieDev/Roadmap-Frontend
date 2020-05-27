@@ -86,7 +86,6 @@
   </div>
 </template>
 <script>
-
 import UserReportButton from '../components/UserReportButton';
 import router from '../router';
 import { isLogin, logout } from '../apis/User';
@@ -134,10 +133,10 @@ export default {
       this.goToLogin();
     },
     goToDash() {
-
+      router.push({ name: 'Welcome' });
     },
     goToProfile() {
-
+      router.push({ name: 'UserProfile' });
     },
   },
   created() {
@@ -167,7 +166,7 @@ export default {
   }
 
   .layout-nav {
-    width: 480px;
+    width: 530px;
     margin: 0 auto;
     margin-right: 20px;
   }
