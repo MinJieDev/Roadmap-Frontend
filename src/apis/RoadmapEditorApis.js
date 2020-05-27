@@ -7,8 +7,8 @@ export const createRoadmap = (roadmapTitle, nodes, connections, refConnections, 
     description,
   });
 
-export const updateRoadmap = (id, roadmapTitle, nodes, connections, refConnections, description, nextNodeId, thumbnail) => req(`/api/road_maps/${id}/`, 'PUT', {},
-  { text: JSON.stringify({ nodes, connections, refConnections, nextNodeId, thumbnail }),
+export const updateRoadmap = (id, roadmapTitle, nodes, connections, refConnections, description, nextNodeId, thumbnail, bindEssay) => req(`/api/road_maps/${id}/`, 'PUT', {},
+  { text: JSON.stringify({ nodes, connections, refConnections, nextNodeId, thumbnail, bindEssay }),
     title: roadmapTitle,
     description,
   });

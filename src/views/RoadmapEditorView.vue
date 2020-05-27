@@ -114,13 +114,24 @@
       </Button>
       <Button type="success" @click="handleClkExport"
               :disabled="roadMapId===-1" class="b-ro">
-        导出为图片
+        导出图片
         <Icon type="ios-share" />
       </Button>
       <Button type="warning" @click="handleClkSaveRoadmap"
               class="b-ro">
         保存路书
         <Icon type="md-cloud-upload" />
+      </Button>
+      <Button type="success" @click="handleClkBindEssay"
+              class="b-ro" :disabled="roadMapId===-1">
+        <div v-if="hasBindEssay">
+          修改随笔
+          <Icon type="md-cloud-upload" />
+        </div>
+        <div v-else>
+          新建随笔
+          <Icon type="md-cloud-upload" />
+        </div>
       </Button>
       <Button type="info" @click="handleClkSaveRoadmap"
               class="b-ro">
@@ -245,6 +256,7 @@ export default {
   },
   data() {
     return {
+      text: null,
       roadMapId: -1,
       roadMapTitle: 'New RoadMap',
       articles: [],
@@ -414,6 +426,9 @@ export default {
       }
       return '';
     },
+    hasBindEssay() {
+      return this.text && this.text.bindEssay && this.text.bindEssay !== -1;
+    },
   },
   mounted() {
     // GET articles for l-sider
@@ -425,6 +440,7 @@ export default {
         this.roadMapId = this.$route.query.selected;
         getRoadmap(this.roadMapId)
           .then((res) => {
+            this.text = JSON.parse(res.data.text);
             this.nodes = this.toDisplayNodes(JSON.parse(res.data.text).nodes);
             this.connections = this.toDisplayConnections(JSON.parse(res.data.text).connections);
             this.refCurves = JSON.parse(res.data.text).refConnections;
@@ -880,13 +896,46 @@ export default {
           });
       } else {
         updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.refCurves, this.description, this.nextNodeId, thumbnail64)
+          this.refCurves, this.description, this.nextNodeId, thumbnail64, this.text.bindEssay || -1)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
           })
           .catch((err) => {
             pushErr(this, err, true);
           });
+      }
+    },
+    handleClkBindEssay() {
+      if (!this.hasBindEssay) {
+        // 新建随笔
+        reqSingle('/api/essays/', 'POST',
+          {
+            title: `随笔：${this.title}`,
+            text: JSON.stringify({
+              bindRoadmap: this.roadMapId,
+              refRoadmap: this.roadMapId,
+              content: '',
+            }),
+          },
+        ).then((res) => {
+          // 先保存路书
+          this.text.bindEssay = res.data.id;
+          this.handleClkSaveRoadmap();
+          this.$Message.info('创建成功! id=', res.data.id);
+          this.$router.push({
+            path: '/essayEditor',
+            query: { selected: res.data.id },
+          });
+        }).catch((err) => {
+          pushErr(this, err, true);
+        });
+      } else {
+        // 先保存路书
+        this.handleClkSaveRoadmap();
+        this.$router.push({
+          path: '/essayEditor',
+          query: { selected: this.text.bindEssay },
+        });
       }
     },
   },
