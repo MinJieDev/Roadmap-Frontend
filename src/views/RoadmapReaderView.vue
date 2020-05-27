@@ -112,7 +112,7 @@ export default {
     } else {
       this.roadMapId = this.$route.query.selected;
       try {
-        this.articles = (await reqSingle('/api/articles/', 'GET', { page: 1 })).data.results;
+        this.articles = (await reqSingle('/api/articles/', 'GET')).data;
         const roadmapData = (await getRoadmap(this.roadMapId)).data;
         this.nodes = this.toDisplayNodes(JSON.parse(roadmapData.text).nodes);
         this.connections = this.toDisplayConnections(JSON.parse(roadmapData.text).connections);

@@ -205,10 +205,10 @@ export default {
     };
   },
   mounted() {
-    reqSingle('/api/road_maps/', 'GET', { page: 1 })
+    reqSingle('/api/road_maps/', 'GET')
       .then((res) => {
         // window.console.log('roadmap card', res);
-        this.roadmaps = res.data.results;
+        this.roadmaps = res.data;
         this.data = this.getData();
       })
       .catch((err) => {
