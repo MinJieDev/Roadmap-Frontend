@@ -246,6 +246,7 @@ import FileItem from '../components/FileItem';
 import NoteMarkdown from '../components/NoteMarkdown';
 import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
+import { getEssay } from '../apis/EssayEditorApis';
 import {
   createRoadmap,
   updateRoadmap,
@@ -718,6 +719,7 @@ export default {
         window.console.info(data);
         this.createOrUpdate(data);
       }).catch(() => {
+        window.console.log('获取缩略图失败');
         this.createOrUpdate(undefined);
         pushErr(this, '获取缩略图失败');
       });
@@ -984,8 +986,10 @@ export default {
             pushErr(this, err, true);
           });
       } else {
+        let bindess = -1;
+        if (this.text && this.text.bindEssay) bindess = this.text.bindEssay;
         updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.refCurves, this.description, this.nextNodeId, thumbnail64, this.text.bindEssay || -1)
+          this.refCurves, this.description, this.nextNodeId, thumbnail64, bindess)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
           })
@@ -999,7 +1003,7 @@ export default {
         // 新建随笔
         reqSingle('/api/essays/', 'POST',
           {
-            title: `随笔：${this.title}`,
+            title: `随笔：${this.roadMapTitle}`,
             text: JSON.stringify({
               bindRoadmap: this.roadMapId,
               refRoadmap: this.roadMapId,
@@ -1009,7 +1013,7 @@ export default {
         ).then((res) => {
           // 先保存路书
           this.text.bindEssay = res.data.id;
-          this.handleClkSaveRoadmap();
+          this.createOrUpdate(this.text.thumbnail);
           this.$Message.info('创建成功! id=', res.data.id);
           this.$router.push({
             path: '/essayEditor',
@@ -1019,11 +1023,16 @@ export default {
           pushErr(this, err, true);
         });
       } else {
-        // 先保存路书
-        this.handleClkSaveRoadmap();
-        this.$router.push({
-          path: '/essayEditor',
-          query: { selected: this.text.bindEssay },
+        getEssay(this.text.bindEssay).then(() => {
+          // 先保存路书
+          this.createOrUpdate(this.text.thumbnail);
+          this.$router.push({
+            path: '/essayEditor',
+            query: { selected: this.text.bindEssay },
+          });
+        }).catch(() => {
+          this.$Notice.error({ title: `Essay ${this.text.bindEssay} loss` });
+          this.text.bindEssay = -1;
         });
       }
     },

@@ -5,4 +5,6 @@ import { reqSingle } from '../apis/util';
 
 export const deleteEssay = id => reqSingle(`api/essays/${id}/`, 'DELETE');
 
+export const getEssay = id => reqSingle(`api/essays/${id}/`, 'GET');
+
 export const changeEssay = data => reqSingle(`api/essays/${data.id}/`, 'PATCH', data);
