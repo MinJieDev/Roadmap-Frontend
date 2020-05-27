@@ -189,7 +189,7 @@ export default {
       this.$router.push({
         path: '/essayReader',
         query: {
-          selected: this.data[index].id,
+          selected: this.tableData[index].id,
         },
       });
     },
