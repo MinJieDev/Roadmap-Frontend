@@ -24,22 +24,40 @@
               <Icon type="ios-create" />
               随笔管理
             </MenuItem>
-                <div v-if="isLoginStatus() !== true">
-                  <MenuItem
-                    name="4"
-                    @click.native="goToLogin()">
-                    <Icon type="md-person"></Icon>
-                    登录
-                  </MenuItem>
-                </div>
-                <div v-if="isLoginStatus() === true">
-                  <MenuItem
-                    name="4"
-                    @click.native="logOut()">
-                    <Icon type="md-person"></Icon>
-                    退出账号
-                  </MenuItem>
-                </div>
+            <div v-if="isLoginStatus() !== true">
+              <MenuItem
+                name="4"
+                @click.native="goToLogin()">
+                <Icon type="md-person-add"></Icon>
+                登录账户
+              </MenuItem>
+            </div>
+            <div v-if="isLoginStatus() === true">
+              <Submenu name="4" theme="dark">
+                <template slot="title">
+                  <Icon type="md-person" />
+                  个人中心
+                </template>
+                <MenuItem
+                  name="4-1"
+                  @click.native="goToDash()">
+                  <Icon type="md-apps" />
+                  活动中心
+                </MenuItem>
+                <MenuItem
+                  name="4-2"
+                  @click.native="goToProfile()">
+                  <Icon type="md-list" />
+                  个人档案
+                </MenuItem>
+                <MenuItem
+                  name="4-3"
+                  @click.native="logOut()">
+                  <Icon type="md-log-out" />
+                  登出账户
+                </MenuItem>
+              </Submenu>
+            </div>
           </div>
         </Menu>
       </Header>
@@ -68,7 +86,6 @@
   </div>
 </template>
 <script>
-
 import UserReportButton from '../components/UserReportButton';
 import router from '../router';
 import { isLogin, logout } from '../apis/User';
@@ -115,6 +132,12 @@ export default {
       logout();
       this.goToLogin();
     },
+    goToDash() {
+      router.push({ name: 'Welcome' });
+    },
+    goToProfile() {
+      router.push({ name: 'UserProfile' });
+    },
   },
   created() {
 
@@ -143,7 +166,7 @@ export default {
   }
 
   .layout-nav {
-    width: 480px;
+    width: 530px;
     margin: 0 auto;
     margin-right: 20px;
   }
