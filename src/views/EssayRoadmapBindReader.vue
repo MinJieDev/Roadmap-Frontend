@@ -4,11 +4,18 @@
     <div class="article-title" style="padding: 10px">
       {{ title }}
     </div>
-    <div class="markdown-body">
-      <VueMarkdown v-if="repaint" style="margin: 20px">{{content}}</VueMarkdown>
-      <Likes></Likes>
-      <Comment :comments="comments" @comment-committed="handleCommentCommitted"></Comment>
-    </div>
+    <Row>
+      <Col span="12" style="border-right:thick double #000000;" >
+        <div class="markdown-body" >
+          <VueMarkdown v-if="repaint" id="md">{{content}}</VueMarkdown>
+        </div>
+          <Likes></Likes>
+          <Comment :comments="comments" @comment-committed="handleCommentCommitted"></Comment>
+      </Col>
+      <Col span="11" id="roadmap">
+        <RoadmapWindow :road-map-id="refRoadmap"></RoadmapWindow>
+      </Col>
+    </Row>
   </div>
 </template>
 
@@ -21,10 +28,11 @@ import { pushErr } from '../components/ErrPush';
 import { req } from '../apis/util';
 import Likes from '../components/Likes';
 import Comment from '../components/comment/Comment';
+import RoadmapWindow from '../components/RoadmapWindow';
 
 export default {
   name: 'EssayEditorView',
-  components: { Simplemde, VueMarkdown, Likes, Comment },
+  components: { Simplemde, VueMarkdown, Likes, Comment, RoadmapWindow },
   props: {},
   data() {
     return {
@@ -50,15 +58,6 @@ export default {
           this.bindRoadmap = this.text.bindRoadmap;
           this.title = res.data.title;
           this.repaint = true;
-          if (this.refRoadmap !== -1) {
-            window.console.log('fuck');
-            this.$router.push({
-              path: '/essayRoadmapReader/',
-              query: {
-                selected: this.$route.query.selected,
-              },
-            });
-          }
         })
         .catch((err) => {
           pushErr(this, err, true);
@@ -83,5 +82,14 @@ export default {
     text-align: left;
     font-size: 24px;
     margin-left: 20px;
+  }
+  #md {
+    min-height: 280px;
+    margin: 20px;
+  }
+  #roadmap {
+    position: fixed;
+    right: 50px;
+    top: 120px;
   }
 </style>

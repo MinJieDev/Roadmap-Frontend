@@ -119,6 +119,17 @@ const routes = [
       level: 5,
     },
   },
+  {
+    path: '/essayRoadmapReader',
+    name: 'EssayRoadmapReader',
+    component: () => import(/* webpackChunkName: "about" */ '../views/EssayRoadmapBindReader.vue'),
+    meta: {
+      nickName: '随笔阅览',
+      name: ['随笔目录', '随笔阅览'],
+      path: ['/essayTable', '/essayReader'],
+      level: 5,
+    },
+  },
 ];
 
 const router = new VueRouter({

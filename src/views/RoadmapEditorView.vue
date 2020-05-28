@@ -137,13 +137,24 @@
       </Button>
       <Button type="success" @click="handleClkExport"
               :disabled="roadMapId===-1" class="b-ro">
-        导出为图片
+        导出图片
         <Icon type="ios-share" />
       </Button>
       <Button type="warning" @click="handleClkSaveRoadmap"
               class="b-ro">
         保存路书
         <Icon type="md-cloud-upload" />
+      </Button>
+      <Button type="success" @click="handleClkBindEssay"
+              class="b-ro" :disabled="roadMapId===-1">
+        <div v-if="hasBindEssay">
+          修改随笔
+          <Icon type="md-cloud-upload" />
+        </div>
+        <div v-else>
+          新建随笔
+          <Icon type="md-cloud-upload" />
+        </div>
       </Button>
       <Button type="info" @click="handleClkSaveRoadmap"
               class="b-ro">
@@ -235,6 +246,7 @@ import FileItem from '../components/FileItem';
 import NoteMarkdown from '../components/NoteMarkdown';
 import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
+import { getEssay } from '../apis/EssayEditorApis';
 import {
   createRoadmap,
   updateRoadmap,
@@ -268,6 +280,7 @@ export default {
   },
   data() {
     return {
+      text: null,
       roadMapId: -1,
       roadMapTitle: 'New RoadMap',
       articles: [],
@@ -454,12 +467,15 @@ export default {
       });
       return ret;
     },
+    hasBindEssay() {
+      return this.text && this.text.bindEssay && this.text.bindEssay !== -1;
+    },
   },
   mounted() {
     // GET articles for l-sider
-    reqSingle('/api/articles/', 'GET', { page: 1 }).then((res1) => {
+    reqSingle('/api/articles/', 'GET').then((res1) => {
       window.console.log('article', res1);
-      this.articles = res1.data.results;
+      this.articles = res1.data;
       reqSingle('/api/essays/', 'GET').then((res2) => {
         this.essays = res2.data;
         // load roadMap if has query
@@ -468,6 +484,7 @@ export default {
           this.roadMapId = this.$route.query.selected;
           getRoadmap(this.roadMapId)
             .then((res) => {
+              this.text = JSON.parse(res.data.text);
               this.nodes = this.toDisplayNodes(JSON.parse(res.data.text).nodes);
               this.connections = this.toDisplayConnections(JSON.parse(res.data.text).connections);
               this.refCurves = JSON.parse(res.data.text).refConnections;
@@ -702,6 +719,7 @@ export default {
         window.console.info(data);
         this.createOrUpdate(data);
       }).catch(() => {
+        window.console.log('获取缩略图失败');
         this.createOrUpdate(undefined);
         pushErr(this, '获取缩略图失败');
       });
@@ -968,14 +986,54 @@ export default {
             pushErr(this, err, true);
           });
       } else {
+        let bindess = -1;
+        if (this.text && this.text.bindEssay) bindess = this.text.bindEssay;
         updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.refCurves, this.description, this.nextNodeId, thumbnail64)
+          this.refCurves, this.description, this.nextNodeId, thumbnail64, bindess)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
           })
           .catch((err) => {
             pushErr(this, err, true);
           });
+      }
+    },
+    handleClkBindEssay() {
+      if (!this.hasBindEssay) {
+        // 新建随笔
+        reqSingle('/api/essays/', 'POST',
+          {
+            title: `随笔：${this.roadMapTitle}`,
+            text: JSON.stringify({
+              bindRoadmap: this.roadMapId,
+              refRoadmap: this.roadMapId,
+              content: '',
+            }),
+          },
+        ).then((res) => {
+          // 先保存路书
+          this.text.bindEssay = res.data.id;
+          this.createOrUpdate(this.text.thumbnail);
+          this.$Message.info('创建成功! id=', res.data.id);
+          this.$router.push({
+            path: '/essayEditor',
+            query: { selected: res.data.id },
+          });
+        }).catch((err) => {
+          pushErr(this, err, true);
+        });
+      } else {
+        getEssay(this.text.bindEssay).then(() => {
+          // 先保存路书
+          this.createOrUpdate(this.text.thumbnail);
+          this.$router.push({
+            path: '/essayEditor',
+            query: { selected: this.text.bindEssay },
+          });
+        }).catch(() => {
+          this.$Modal.error({ title: `Essay ${this.text.bindEssay} not found` });
+          this.text.bindEssay = -1;
+        });
       }
     },
   },
