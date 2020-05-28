@@ -211,7 +211,12 @@
         <h2>添加兴趣</h2>
         <br>
         <row>
-
+          <Transfer style="margin-left: 50px;"
+            :data="transfer.transData"
+            :target-keys="transfer.targetKeys"
+            :list-style="transfer.tranStyle"
+            @on-change="handleTransChange">
+          </Transfer>
         </row>
       </div>
       <div v-else-if="content==='artcSt'"
@@ -295,6 +300,14 @@ export default {
           label: 'cs.RO',
         },
       ],
+      transfer: {
+        tranStyle: {
+          width: '250px',
+          height: '300px',
+        },
+        transData: [],
+        targetKeys: [],
+      },
       articleTotal: 0,
       articles: [],
       roadmapTotal: 0,
@@ -350,7 +363,9 @@ export default {
             }
           });
         });
-        window.console.log('interest DB', this.userData.interestDB, '\ninterest', this.userData.interest);
+        this.transfer.targetKeys = _.clone(this.userData.interestDB);
+        // window.console.log('interest DB', this.userData.interestDB,
+        // '\ninterest', this.userData.interest);
       }).catch((err) => {
         pushErr(this, err, true);
       });
@@ -460,9 +475,31 @@ export default {
         pushErr(this, err, true);
       });
     },
+    handleTransChange(newTargetKeys) {
+      this.transfer.targetKeys = newTargetKeys;
+      this.userData.interestDB = newTargetKeys;
+      const interestStr = _.toString(this.userData.interestDB);
+      window.console.log('interestDB array', this.userData.interestDB,
+        '\ninterest str', interestStr);
+      updateInterest(this.userData.id, interestStr).then(() => {
+        this.$Notice.success({ title: 'interest updated' });
+        this.getUserInterest();
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+    },
   },
   mounted() {
     this.getUserProfileData();
+    _.forEach(this.fieldList, (item) => {
+      this.transfer.transData = _.concat(this.transfer.transData,
+        {
+          key: item.label,
+          label: item.value,
+          disable: false,
+        });
+    });
+    // window.console.log('transData', this.transfer.transData);
   },
 };
 </script>
