@@ -184,7 +184,34 @@
       </div>
       <div v-else-if="content==='interest'"
            style="margin-left: 60px">
-        article
+        <h1>兴趣管理</h1>
+        <Divider />
+
+        <br>
+        <h2>兴趣领域</h2>
+        <br>
+        <Row :gutter="32">
+          <Col style="margin-left: 35px">
+            <div v-if="interestReveal">
+              <Tag v-if="interestReveal"
+                v-for="(item) in userData.interest" :key="item"
+                type="border" closable color="primary" size="large"
+                @on-close="deleteInterestItem(item)">
+                {{item}}
+              </Tag>
+            </div>
+            <div v-else id="interestNotice">
+              还没有兴趣呢~请添加您的兴趣领域
+            </div>
+          </Col>
+        </Row>
+        <br>
+        <br>
+        <h2>添加兴趣</h2>
+        <br>
+        <row>
+
+        </row>
       </div>
       <div v-else-if="content==='artcSt'"
            style="margin-left: 60px">
@@ -231,6 +258,7 @@ export default {
         cityEditable: false,
         organEditable: false,
       },
+      interestReveal: true,
       articleTotal: 0,
       articles: [],
       roadmapTotal: 0,
@@ -246,6 +274,9 @@ export default {
     },
     openUserInterest() {
       this.content = 'interest';
+      this.getUserInterest();
+      window.console.log('interest length', this.userData.interest.length,
+        'interest', this.userData.interest);
     },
     openArticleStatcs() {
       this.content = 'artcSt';
@@ -265,7 +296,15 @@ export default {
         this.userData.id = _.clone(res.data[0].id);
         this.userData.name = _.clone(res.data[0].username);
         this.userData.email = _.clone(res.data[0].email);
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+    },
+    getUserInterest() {
+      reqSingle('api/users', 'GET').then((res) => {
         this.userData.interest = _.split(res.data[0].interest, ',');
+        window.console.log('interest', this.userData.interest, 'interest res', res.data[0].interest);
+        this.interestReveal = (this.userData.interest.length > 0 && res.data[0].interest !== '');
       }).catch((err) => {
         pushErr(this, err, true);
       });
@@ -357,9 +396,16 @@ export default {
         pushErr(this, err, true);
       });
     },
-    handleUpdateInterest() {
-      updateInterest(this.userData.id, this.userData.interest).then(() => {
+    deleteInterestItem(item) {
+      // TODO: test: delete to zero
+      // this.userData.interest = _.slice(this.userData.interest, index, index + 1);
+      this.userData.interest = _.pull(this.userData.interest, item);
+      const interestStr = _.toString(this.userData.interest);
+      // window.console.log('interest array', this.userData.interest,
+      //   '\ninterest str', interestStr);
+      updateInterest(this.userData.id, interestStr).then(() => {
         this.$Notice.success({ title: 'interest updated' });
+        this.getUserInterest();
       }).catch((err) => {
         pushErr(this, err, true);
       });
@@ -391,6 +437,10 @@ export default {
   #bioField{
     text-align: left;
     font-size: 18px;
+  }
+  #interestNotice{
+    text-align: left;
+    font-size: 16.5px;
   }
 </style>
 
