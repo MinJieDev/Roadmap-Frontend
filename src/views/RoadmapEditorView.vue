@@ -1031,7 +1031,7 @@ export default {
             query: { selected: this.text.bindEssay },
           });
         }).catch(() => {
-          this.$Notice.error({ title: `Essay ${this.text.bindEssay} loss` });
+          this.$Modal.error({ title: `Essay ${this.text.bindEssay} not found` });
           this.text.bindEssay = -1;
         });
       }

@@ -5,14 +5,14 @@
       {{ title }}
     </div>
     <Row>
-      <Col span="12">
+      <Col span="12" style="border-right:thick double #000000;" >
         <div class="markdown-body" >
           <VueMarkdown v-if="repaint" id="md">{{content}}</VueMarkdown>
         </div>
           <Likes></Likes>
           <Comment :comments="comments" @comment-committed="handleCommentCommitted"></Comment>
       </Col>
-      <Col span="12" id="roadmap">
+      <Col span="11" id="roadmap">
         <RoadmapWindow :road-map-id="refRoadmap"></RoadmapWindow>
       </Col>
     </Row>

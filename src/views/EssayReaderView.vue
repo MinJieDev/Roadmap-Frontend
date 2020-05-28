@@ -50,6 +50,15 @@ export default {
           this.bindRoadmap = this.text.bindRoadmap;
           this.title = res.data.title;
           this.repaint = true;
+          if (this.refRoadmap !== -1) {
+            window.console.log('fuck');
+            this.$router.push({
+              path: '/essayRoadmapReader/',
+              query: {
+                selected: this.$route.query.selected,
+              },
+            });
+          }
         })
         .catch((err) => {
           pushErr(this, err, true);

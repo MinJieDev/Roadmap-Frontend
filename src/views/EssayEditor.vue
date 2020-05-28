@@ -1,17 +1,33 @@
 <template>
   <div>
     <link rel="stylesheet" href="github-markdown.css">
-
-    <div v-if="!titleEditable" class="article-title" style="padding: 12px">
-      {{ title }}
-      <Icon type="ios-create-outline" @click="handleClkEditTitle" />
-    </div>
-    <Input ref="titleInput"
-           v-model="title"
-           v-if="titleEditable"
-           @on-blur="handleUpdateTitle"
-           size="large" style="padding: 12px">
-    </Input>
+    <Row>
+      <Col span="20">
+        <div v-if="!titleEditable" class="article-title" style="padding: 12px">
+          {{ title }}
+          <Icon type="ios-create-outline" @click="handleClkEditTitle" />
+        </div>
+        <Input ref="titleInput"
+               v-model="title"
+               v-if="titleEditable"
+               @on-blur="handleUpdateTitle"
+               size="large" style="padding: 12px">
+        </Input>
+      </Col>
+      <Col span="4">
+        <div v-if="bindRoadmap!==-1">
+          <h4 style="text-align: left; margin-bottom: 5px">路书已绑定：{{ bindRoadmapName }}</h4>
+        </div>
+        <div v-else>
+          <h4 style="text-align: left; margin-bottom: 5px">选择引用的路书</h4>
+        </div>
+        <Select v-model="refRoadmap" style="width:200px" :disabled="bindRoadmap!==-1"
+                @on-select="sel">
+          <Option v-for="item in roadmaps" :value="item.id" :key="item.id">{{ item.title }}
+          </Option>
+        </Select>
+      </Col>
+    </Row>
     <Divider/>
     <Button type="primary" @click="save" style="margin-left: 40px">保存</Button>
     <Button type="warning" @click="cancel" style="margin-left: 10px">取消</Button>
@@ -34,6 +50,7 @@
 
 <script>
 import Simplemde from 'simplemde';
+import _ from 'lodash';
 import 'simplemde/dist/simplemde.min.css';
 import 'github-markdown-css';
 import VueMarkdown from 'vue-markdown';
@@ -54,6 +71,7 @@ export default {
       title: '新随笔',
       titleEditable: false,
       refreshPreview: true,
+      roadmaps: [],
     };
   },
   methods: {
@@ -117,6 +135,15 @@ export default {
         .catch((err) => {
           pushErr(this, err, true);
         });
+      req('/api/road_maps/', 'GET').then((res) => {
+        // window.console.log(res.data);
+        this.roadmaps = res.data;
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+    },
+    sel() {
+      window.console.log('ref', this.refRoadmap);
     },
   },
   mounted() {
@@ -137,6 +164,13 @@ export default {
         return '';
       }
       return this.editor.value();
+    },
+    bindRoadmapName() {
+      if (this.bindRoadmap !== -1) {
+        const r = _.find((this.roadmaps), rdm => String(rdm.id) === String(this.bindRoadmap));
+        return r ? r.title : '';
+      }
+      return '';
     },
   },
   watch: {

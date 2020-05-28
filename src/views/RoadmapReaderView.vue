@@ -67,6 +67,7 @@ import Roadmap from '../components/roadmap/Roadmap';
 import NoteMarkdown from '../components/NoteMarkdown';
 import Likes from '../components/Likes';
 import Comment from '../components/comment/Comment';
+import { getEssay } from '../apis/EssayEditorApis';
 
 Vue.prototype._ = _;
 
@@ -332,9 +333,14 @@ export default {
       this.comments = [...this.comments, com];
     },
     handleClkBindEssay() {
-      this.$router.push({
-        path: '/essayRoadmapReader',
-        query: { selected: this.text.bindEssay },
+      getEssay(this.text.bindEssay).then(() => {
+        this.$router.push({
+          path: '/essayRoadmapReader',
+          query: { selected: this.text.bindEssay },
+        });
+      }).catch(() => {
+        this.$Modal.error({ title: `Essay ${this.text.bindEssay} not found` });
+        this.text.bindEssay = -1;
       });
     },
   },
