@@ -403,6 +403,7 @@ export default {
         this.roadMapId = this.$route.query.selected;
         getRoadmap(this.roadMapId)
           .then((res) => {
+            window.console.info(res);
             this.nodes = this.toDisplayNodes(JSON.parse(res.data.text).nodes);
             this.connections = this.toDisplayConnections(JSON.parse(res.data.text).connections);
             this.refCurves = JSON.parse(res.data.text).refConnections;

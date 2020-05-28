@@ -89,7 +89,8 @@ import _ from 'lodash';
 import ItemEditor from './RoadItemEditor';
 import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
-import { delRoadmap, postRoadmapShareLink, updateTag, getTags } from '../apis/RoadmapEditorApis';
+import { delRoadmap, postRoadmapShareLink,
+  getTags, getTagsByRoadmaps, delTag, updateTag } from '../apis/RoadmapEditorApis';
 
 export default {
   name: 'RoadmapCardTable',
@@ -135,9 +136,15 @@ export default {
                 // type: 'border',
                 key: item.name,
                 name: item.name,
-                color: item.color,
+                color: 'primary',
                 closable: true,
                 style: 'margin-left: 3px',
+              },
+              on: {
+                'on-close': () => {
+                  window.console.info('click me');
+                  delTag(item.id);
+                },
               },
             },
             item.name,
@@ -225,7 +232,7 @@ export default {
   mounted() {
     reqSingle('/api/road_maps/', 'GET', { page: 1 })
       .then((res) => {
-        // window.console.log('roadmap card', res);
+        window.console.log('roadmap card', res);
         this.roadmaps = res.data.results;
         this.data = this.getData();
         this.refreshTags();
@@ -243,11 +250,17 @@ export default {
   },
   methods: {
     okAddTag() {
+      // updateRoadmapTag(this.tagIndex)
+      //   .catch((err) => {
+      //     pushErr(this, err, true);
+      //   });
+
+
       updateTag(this.TagValue, [this.tagIndex])
         .catch((err) => {
           pushErr(this, err, true);
         });
-      this.data[this.tagPos].tags.push({ name: this.TagValue, color: 'success' });
+      this.data[this.tagPos].tags.push({ name: this.TagValue });
       this.TagValue = '';
       this.tagIndex = -1;
       this.tagPos = -1;
@@ -268,26 +281,18 @@ export default {
     },
     refreshTags() {
       let tagsData = 0;
-      getTags().then((res) => {
-        if (res !== undefined) {
-          tagsData = res.data;
-          _(this.data)
-            .forEach((dataItem) => {
-              const dataId = this.roadmaps[dataItem.id - 1].id;
-              _(tagsData)
-                .forEach((tagItem) => {
-                  if (dataId === tagItem.roadmaps[0]) {
-                    this.data[dataItem.id - 1].tags.push({
-                      name: tagItem.name,
-                      color: 'success',
-                    });
-                  }
-                });
+      _(this.data)
+        .forEach((dataItem) => {
+          const dataId = this.roadmaps[dataItem.id - 1].id;
+          getTagsByRoadmaps(dataId).then((res) => {
+            tagsData = res.data;
+            _(tagsData).forEach((tagItem) => {
+              this.data[dataItem.id - 1].tags.push(tagItem);
             });
-        }
-      }).catch((err) => {
-        pushErr(this, err, true);
-      });
+          }).catch((err) => {
+            pushErr(this, err, true);
+          });
+        });
     },
     getData() {
       const data = [];
