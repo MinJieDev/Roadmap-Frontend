@@ -171,6 +171,10 @@
             打开链接
             <Icon type="ios-link" />
           </MenuItem>
+          <MenuItem name="open-essay" @click.native="handleOpenEssay" v-if="curNodeType==='essay'">
+            打开随笔
+            <Icon type="ios-book" />
+          </MenuItem>
           <MenuItem name="open-note" @click.native="handleOpenNote" v-if="curNodeType==='article'">
             打开笔记
             <Icon type="ios-book" />
@@ -1021,6 +1025,12 @@ export default {
             pushErr(this, err, true);
           });
       }
+    },
+    handleOpenEssay() {
+      this.$router.push({
+        path: '/essayReader',
+        query: { selected: this.curNode.category_id },
+      });
     },
     handleClkBindEssay() {
       if (!this.hasBindEssay) {
