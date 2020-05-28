@@ -38,20 +38,67 @@
       </Menu>
     </Sider>
     <Content
-      :style="{padding: '60px', minHeight: '280px', background: '#fff'}">
-      <div v-if="content==='profile'">
-        userProfile
+      :style="{padding: '20px', minHeight: '280px', background: '#fff'}">
+      <div v-if="content==='profile'"
+           style="margin-left: 60px">
+        <h1>个人档案</h1>
+        <Divider />
+
+        <Col span="14" style="margin-right: 30px">
+          <h2>用户名</h2>
+          <br>
+          <Row :gutter="32">
+            <Col span="24">
+              <Row :gutter="50" style="margin-left: 0px">
+                <div
+                  v-if="!userLayout.nameEditable"
+                  style="padding: 12px">
+                  {{userData.name}}
+                  <Icon type="ios-create-outline" @click="handleEditName" />
+                </div>
+                <Input
+                  ref="nameInput"
+                  v-model="userData.name"
+                  v-if="userLayout.nameEditable"
+                  @on-blur="handleUpdateName"
+                  style="padding: 12px; margin-right: 50px"
+                  @keydown.native.stop>
+                </Input>
+              </Row>
+            </Col>
+          </Row>
+
+          <br>
+          <h2>邮箱</h2>
+          <br>
+          <Row :gutter="32">
+            <Col span="24">
+              <Row :gutter="50" style="margin-left: 0px">
+
+              </Row>
+            </Col>
+          </Row>
+        </Col>
+
+        <Col span="8" style="margin-left: 10px">
+          <h2>头像</h2>
+          <br>
+        </Col>
       </div>
-      <div v-else-if="content==='interest'">
+      <div v-else-if="content==='interest'"
+           style="margin-left: 60px">
         userInterest
       </div>
-      <div v-else-if="content==='artcSt'">
+      <div v-else-if="content==='artcSt'"
+           style="margin-left: 60px">
         article
       </div>
-      <div v-else-if="content==='roadmapSt'">
+      <div v-else-if="content==='roadmapSt'"
+           style="margin-left: 60px">
         roadmap
       </div>
-      <div v-else-if="content==='essaySt'">
+      <div v-else-if="content==='essaySt'"
+           style="margin-left: 60px">
         essay
       </div>
     </Content>
@@ -59,9 +106,10 @@
 </template>
 
 <script>
-// import _ from 'lodash';
+import _ from 'lodash';
 import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
+// import { changeUserData } from '../apis/UserProfileApis';
 
 export default {
   name: 'UserProfileView',
@@ -70,14 +118,20 @@ export default {
       content: 'profile',
       // profile, interest, artcSt, roadmapSt, essaySt
       userData: {
-        userName: '',
+        id: '',
+        name: '',
         email: '',
+        interest: [],
         bio: '',
         city: '',
         organization: '',
       },
-      interestData: {
-
+      userLayout: {
+        nameEditable: false,
+        emailEditable: false,
+        bioEditable: false,
+        cityEditable: false,
+        organEditable: false,
       },
       articleTotal: 0,
       articles: [],
@@ -109,15 +163,15 @@ export default {
       this.getEssayData();
     },
     getUserProfileData() {
-      // reqSingle('api/users', 'GET').then((res) => {
-      //   window.console.log('user data', res);
-      //   // this.userData.userName =
-      // }).catch((err) => {
-      //   pushErr(this, err, true);
-      // });
-    },
-    getUserInterestData() {
-      // TODO: wait for BackEnd
+      reqSingle('api/users', 'GET').then((res) => {
+        window.console.log('user data', res);
+        this.userData.id = res.data.id;
+        this.userData.userName = res.data.userName;
+        this.userData.email = res.data.email;
+        this.userData.interest = res.data.interest;
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
     },
     getArticleData() {
       reqSingle('api/articles/', 'GET').then((res) => {
@@ -146,6 +200,16 @@ export default {
         pushErr(this, err, true);
       });
     },
+    handleEditName() {
+      this.userLayout.nameEditable = true;
+      this.$nextTick(() => this.$refs.nameInput.focus());
+    },
+    handleUpdateName() {
+
+    },
+  },
+  mounted() {
+    this.getUserProfileData();
   },
 };
 </script>
