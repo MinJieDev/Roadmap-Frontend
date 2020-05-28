@@ -1,4 +1,9 @@
 import { reqSingle } from './util';
 
-// eslint-disable-next-line import/prefer-default-export
-export const changeUserData = data => reqSingle(`api/users/${data.id}/`, 'PUT', data);
+export const updateUserName = (id, username) => reqSingle(`/api/users/${id}.json`, 'PATCH', { username });
+
+export const updateUserEmail = (id, email) => reqSingle(`/api/users/${id}.json`, 'PUT', { email });
+
+export const updateUserPsw = (id, username) => reqSingle(`/api/users/${id}.json`, 'PUT', { username });
+
+export const updateInterest = (id, interest) => reqSingle(`api/users/${id}.json`, 'PUT', { interest });

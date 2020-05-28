@@ -44,7 +44,7 @@
         <h1>个人档案</h1>
         <Divider />
 
-        <Col span="14" style="margin-right: 30px">
+        <Col span="11" style="margin-right: 30px">
           <h2>用户名</h2>
           <br>
           <Row :gutter="32">
@@ -52,6 +52,7 @@
               <Row :gutter="50" style="margin-left: 0px">
                 <div
                   v-if="!userLayout.nameEditable"
+                  id="nameField"
                   style="padding: 12px">
                   {{userData.name}}
                   <Icon type="ios-create-outline" @click="handleEditName" />
@@ -61,7 +62,7 @@
                   v-model="userData.name"
                   v-if="userLayout.nameEditable"
                   @on-blur="handleUpdateName"
-                  style="padding: 12px; margin-right: 50px"
+                  style="padding: 12px; margin-right: 40px"
                   @keydown.native.stop>
                 </Input>
               </Row>
@@ -74,20 +75,116 @@
           <Row :gutter="32">
             <Col span="24">
               <Row :gutter="50" style="margin-left: 0px">
-
+                <div
+                  v-if="!userLayout.emailEditable"
+                  id="emailField"
+                  style="padding: 12px">
+                  {{userData.email}}
+                  <Icon type="ios-create-outline" @click="handleEditEmail" />
+                </div>
+                <Input
+                  ref="emailInput"
+                  v-model="userData.email"
+                  v-if="userLayout.emailEditable"
+                  @on-blur="handleUpdateEmail"
+                  style="padding: 12px; margin-right: 40px"
+                  @keydown.native.stop>
+                </Input>
               </Row>
             </Col>
           </Row>
+
+          <br>
+          <h2>城市</h2>
+          <br>
+          <Row :gutter="32">
+            <Col span="24">
+              <Row :gutter="50" style="margin-left: 0px">
+                <div
+                  v-if="!userLayout.cityEditable"
+                  id="cityField"
+                  style="padding: 12px">
+                  {{userData.city}}
+                  <Icon type="ios-create-outline" @click="handleEditCity" />
+                </div>
+                <Input
+                  ref="cityInput"
+                  v-model="userData.city"
+                  v-if="userLayout.cityEditable"
+                  @on-blur="handleUpdateCity"
+                  style="padding: 12px; margin-right: 40px"
+                  @keydown.native.stop>
+                </Input>
+              </Row>
+            </Col>
+          </Row>
+
+          <br>
+          <h2>机构</h2>
+          <br>
+          <Row :gutter="32">
+            <Col span="24">
+              <Row :gutter="50" style="margin-left: 0px">
+                <div
+                  v-if="!userLayout.organEditable"
+                  id="organField"
+                  style="padding: 12px">
+                  {{userData.organization}}
+                  <Icon type="ios-create-outline" @click="handleEditOrgan" />
+                </div>
+                <Input
+                  ref="emailInput"
+                  v-model="userData.organization"
+                  v-if="userLayout.organEditable"
+                  @on-blur="handleUpdateOrgan"
+                  style="padding: 12px; margin-right: 40px"
+                  @keydown.native.stop>
+                </Input>
+              </Row>
+            </Col>
+          </Row>
+
+          <br>
+          <h2>个性签名</h2>
+          <br>
+          <Row :gutter="32">
+            <Col span="24">
+              <Row :gutter="50" style="margin-left: 0px">
+                <div
+                  v-if="!userLayout.bioEditable"
+                  id="bioField"
+                  style="padding: 12px">
+                  {{userData.bio}}
+                  <Icon type="ios-create-outline" @click="handleEditBio" />
+                </div>
+                <Input
+                  ref="bioInput"
+                  v-model="userData.bio"
+                  v-if="userLayout.bioEditable"
+                  type="textarea"
+                  @on-blur="handleUpdateBio"
+                  style="padding: 12px; margin-right: 40px"
+                  @keydown.native.stop>
+                </Input>
+              </Row>
+            </Col>
+          </Row>
+
         </Col>
 
         <Col span="8" style="margin-left: 10px">
           <h2>头像</h2>
           <br>
+          <div class="demo-avatar">
+            <Avatar icon="md-person" :size="200"
+                    shape="square"
+                    style="background-color: #5cadff"/>
+          </div>
         </Col>
       </div>
       <div v-else-if="content==='interest'"
            style="margin-left: 60px">
-        userInterest
+        article
       </div>
       <div v-else-if="content==='artcSt'"
            style="margin-left: 60px">
@@ -109,7 +206,7 @@
 import _ from 'lodash';
 import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
-// import { changeUserData } from '../apis/UserProfileApis';
+import { updateUserName, updateUserEmail, updateInterest } from '../apis/UserProfileApis';
 
 export default {
   name: 'UserProfileView',
@@ -122,9 +219,9 @@ export default {
         name: '',
         email: '',
         interest: [],
-        bio: '',
-        city: '',
-        organization: '',
+        bio: 'Coding everyday',
+        city: 'Beijing',
+        organization: 'BUAA',
       },
       userLayout: {
         nameEditable: false,
@@ -148,7 +245,6 @@ export default {
     },
     openUserInterest() {
       this.content = 'interest';
-      this.getUserInterestData();
     },
     openArticleStatcs() {
       this.content = 'artcSt';
@@ -164,11 +260,11 @@ export default {
     },
     getUserProfileData() {
       reqSingle('api/users', 'GET').then((res) => {
-        window.console.log('user data', res);
-        this.userData.id = res.data.id;
-        this.userData.userName = res.data.userName;
-        this.userData.email = res.data.email;
-        this.userData.interest = res.data.interest;
+        // window.console.log('user data', res);
+        this.userData.id = _.clone(res.data[0].id);
+        this.userData.name = _.clone(res.data[0].username);
+        this.userData.email = _.clone(res.data[0].email);
+        this.userData.interest = _.split(res.data[0].interest, ',');
       }).catch((err) => {
         pushErr(this, err, true);
       });
@@ -205,7 +301,31 @@ export default {
       this.$nextTick(() => this.$refs.nameInput.focus());
     },
     handleUpdateName() {
-
+      this.userLayout.nameEditable = false;
+      updateUserName(this.userData.id, this.userData.name).then(() => {
+        this.$Notice.success({ title: 'username updated' });
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+    },
+    handleEditEmail() {
+      this.userLayout.emailEditable = true;
+      this.$nextTick(() => this.$refs.emailInput.focus());
+    },
+    handleUpdateEmail() {
+      this.userLayout.emailEditable = false;
+      updateUserEmail(this.userData.id, this.userData.email).then(() => {
+        this.$Notice.success({ title: 'email updated' });
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+    },
+    handleUpdateInterest() {
+      updateInterest(this.userData.id, this.userData.interest).then(() => {
+        this.$Notice.success({ title: 'interest updated' });
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
     },
   },
   mounted() {
@@ -215,6 +335,25 @@ export default {
 </script>
 
 <style scoped>
-
+  #nameField{
+    text-align:left;
+    font-size: 19px;
+  }
+  #emailField{
+    text-align:left;
+    font-size: 19px;
+  }
+  #cityField{
+    text-align: left;
+    font-size: 19px;
+  }
+  #organField{
+    text-align: left;
+    font-size: 19px;
+  }
+  #bioField{
+    text-align: left;
+    font-size: 18px;
+  }
 </style>
 
