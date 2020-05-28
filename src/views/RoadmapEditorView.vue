@@ -473,9 +473,9 @@ export default {
   },
   mounted() {
     // GET articles for l-sider
-    reqSingle('/api/articles/', 'GET', { page: 1 }).then((res1) => {
+    reqSingle('/api/articles/', 'GET').then((res1) => {
       window.console.log('article', res1);
-      this.articles = res1.data.results;
+      this.articles = res1.data;
       reqSingle('/api/essays/', 'GET').then((res2) => {
         this.essays = res2.data;
         // load roadMap if has query
