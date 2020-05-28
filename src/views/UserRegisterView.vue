@@ -14,7 +14,17 @@
                style="width: 300px "/>
       <br>
       <i-input v-model="email" placeholder="注册邮箱"
-               style="width: 300px "/>
+                   style="width: 300px "/>
+      <br>
+      <Select v-model="interest" multiple :max-tag-count="2" style="width: 300px">
+        <Option
+          v-for="item in fieldList"
+          :value="item.label"
+          :tag ="item.label"
+          :key="item.label">
+          {{ item.value }}
+        </Option>
+      </Select>
       <br>
       <i-input disabled v-model="check_mes" style="width: 200px "/>
       <i-input v-model="check_code" style="width: 100px "/>
@@ -33,7 +43,7 @@
       <i-button
         type="success"
         @click.native="jump_login">
-        返回登陆
+        返回登录
       </i-button>
     </div>
   </div>
@@ -57,6 +67,42 @@ export default {
       check_code: '',
       add_a: '',
       add_b: '',
+      fieldList: [
+        {
+          value: 'Artificial Intelligence 人工智能',
+          label: 'cs.AI',
+          slot: 'cs.AI',
+        },
+        {
+          value: 'Computational Geometry 计算几何学',
+          label: 'cs.CG',
+        },
+        {
+          value: 'Computation and Language 计算语言学',
+          label: 'cs.CL',
+        },
+        {
+          value: 'Computer Vision 计算视觉与模式识别',
+          label: 'cs.CV',
+        },
+        {
+          value: 'Databases 数据库',
+          label: 'cs.DB',
+        },
+        {
+          value: 'Multimedia 多媒体',
+          label: 'cs.MM',
+        },
+        {
+          value: 'Neural and Evolutionary Computing 神经与进化计算',
+          label: 'cs.NE',
+        },
+        {
+          value: 'Robotics 机器人',
+          label: 'cs.RO',
+        },
+      ],
+      interest: [],
     };
   },
   mounted() {
@@ -69,6 +115,7 @@ export default {
       router.push({ name: 'Login' });
     },
     register() {
+      // window.console.info(this.interest);
       // eslint-disable-next-line max-len
       if (!this.userName.trim() || !this.password.trim() || !this.email.trim() || !this.password_twice.trim()) {
         pushErr(this, '5010');
@@ -84,6 +131,7 @@ export default {
           username: this.userName.trim(),
           password: this.password.trim(),
           email: this.email.trim(),
+          interest: this.interest.join(','),
         };
         reqNoAuth('/api/users/', 'post', tempData)
           .then(() => {
