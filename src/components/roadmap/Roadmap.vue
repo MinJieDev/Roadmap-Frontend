@@ -105,8 +105,8 @@ export default {
       });
       nodes
         .attr('class', (node) => {
-          if (node.category === 'article') {
-            return 'article-node article-node--editable';
+          if (node.category === 'article' || node.category === 'essay') {
+            return `${node.category}-node ${node.category}-node--editable`;
           }
           return 'mindmap-node mindmap-node--editable';
         })
