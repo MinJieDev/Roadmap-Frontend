@@ -201,8 +201,9 @@
                 {{item}}
               </Tag>
             </div>
-            <div v-else id="interestNotice">
-              还没有兴趣呢~请添加您的兴趣领域
+            <div v-else
+              id="interestNotice">
+              还没有兴趣呢~<br>请添加您的兴趣领域
             </div>
           </Col>
         </Row>
@@ -215,6 +216,7 @@
             :data="transfer.transData"
             :target-keys="transfer.targetKeys"
             :list-style="transfer.tranStyle"
+            :titles="transfer.transTitle"
             @on-change="handleTransChange">
           </Transfer>
         </row>
@@ -305,6 +307,7 @@ export default {
           width: '250px',
           height: '300px',
         },
+        transTitle: ['兴趣领域', '我的兴趣'],
         transData: [],
         targetKeys: [],
       },
@@ -477,10 +480,9 @@ export default {
     },
     handleTransChange(newTargetKeys) {
       this.transfer.targetKeys = newTargetKeys;
-      this.userData.interestDB = newTargetKeys;
-      const interestStr = _.toString(this.userData.interestDB);
-      window.console.log('interestDB array', this.userData.interestDB,
-        '\ninterest str', interestStr);
+      const interestStr = _.toString(newTargetKeys);
+      // window.console.log('interestDB array', this.userData.interestDB,
+      //   '\ninterest str', interestStr);
       updateInterest(this.userData.id, interestStr).then(() => {
         this.$Notice.success({ title: 'interest updated' });
         this.getUserInterest();
@@ -527,7 +529,10 @@ export default {
   }
   #interestNotice{
     text-align: left;
-    font-size: 16.5px;
+    font-size: large;
+    /*font-size: 16.5px;*/
+    font-family: "PingFang SC";
+    line-height: 1.8;
   }
 </style>
 
