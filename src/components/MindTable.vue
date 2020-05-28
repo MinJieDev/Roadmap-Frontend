@@ -322,13 +322,13 @@ export default {
       if (this.index === -1) {
         createMTdata(
           drawerFormData.title,
-          drawerFormData.read_state,
           drawerFormData.author,
           drawerFormData.url,
           drawerFormData.journal,
           drawerFormData.years,
           drawerFormData.volume,
           drawerFormData.pages,
+          drawerFormData.read_state,
           drawerFormData.article_references)
           .then(() => {
             // this.$Message.info('MT data created');

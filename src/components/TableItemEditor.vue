@@ -166,6 +166,7 @@ export default {
     },
     drawerFormData: {
       type: Object,
+      required: true,
     },
   },
   data() {
