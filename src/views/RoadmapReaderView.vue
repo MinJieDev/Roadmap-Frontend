@@ -121,7 +121,7 @@ export default {
       this.roadMapId = this.$route.query.selected;
       try {
         this.articles = (await reqSingle('/api/articles/', 'GET')).data;
-        this.essays = (await reqSingle('/api/articles/', 'GET')).data;
+        this.essays = (await reqSingle('/api/essays/', 'GET')).data;
         const roadmapData = (await getRoadmap(this.roadMapId)).data;
         this.text = JSON.parse(roadmapData.text);
         this.nodes = this.toDisplayNodes(JSON.parse(roadmapData.text).nodes);
@@ -287,6 +287,8 @@ export default {
           window.open(`http://${node.URI}`, '_blank');
         }
         window.open(node.URI, '_blank');
+      } else if (node.category === 'essay') {
+        this.handleOpenEssay();
       } else {
         window.console.log('pass');
       }
@@ -341,6 +343,12 @@ export default {
       }).catch(() => {
         this.$Modal.error({ title: `Essay ${this.text.bindEssay} not found` });
         this.text.bindEssay = -1;
+      });
+    },
+    handleOpenEssay() {
+      this.$router.push({
+        path: '/essayReader',
+        query: { selected: this.curNode.category_id },
       });
     },
   },
