@@ -304,6 +304,10 @@ export default {
       ],
       roadmapDragArticleList: [
       ],
+      roadmapArticles: [
+      ],
+      roadmapEssays: [
+      ],
     };
   },
   computed: {
@@ -491,8 +495,11 @@ export default {
               this.roadMapTitle = res.data.title;
               this.description = res.data.description;
               this.nextNodeId = JSON.parse(res.data.text).nextNodeId;
+              this.roadmapArticles = res.data.articles;
+              this.roadmapEssays = res.data.essays;
               this.initMindMap();
               this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
+              window.console.log('data', res.data);
             })
             .catch((err) => {
               pushErr(this, err, true);
@@ -618,9 +625,11 @@ export default {
       this.repaintMindMap();
     },
     handleArticleNodeAdded(nodeInfo) {
+      this.roadmapArticles = _.uniq([...this.roadmapArticles, nodeInfo.articleId]);
       this.handleNodeAdded(nodeInfo, 'article');
     },
     handleEssayNodeAdded(nodeInfo) {
+      this.roadmapEssays = _.uniq([...this.roadmapEssays, nodeInfo.articleId]);
       this.handleNodeAdded(nodeInfo, 'essay');
     },
     // 删除文献结点
@@ -636,6 +645,19 @@ export default {
     },
     handleNodeDeleted() {
       this.nodes = _.filter(this.nodes, node => node.text !== this.curNode.text);
+      if (this.curNode.category === 'article') {
+        if (!_(this.nodes).find(node => (node.category === 'article' && node.category_id === this.curNode.category_id))) {
+          _.remove(this.roadmapArticles,
+            artid => String(artid) === String(this.curNode.category_id));
+        }
+      }
+      if (this.curNode.category === 'essay') {
+        if (!_(this.nodes).find(node => (node.category === 'essay' && node.category_id === this.curNode.category_id))) {
+          window.console.log('fuck', this.roadmapEssays);
+          _.remove(this.roadmapEssays, essid => String(essid) === String(this.curNode.category_id));
+          window.console.log('fuck2', this.roadmapEssays);
+        }
+      }
       this.connections = _.filter(this.connections, connection =>
         (connection.source.text !== this.curNode.text
           && connection.target.text !== this.curNode.text));
@@ -945,18 +967,18 @@ export default {
       });
     },
     handleArticleDraggedIn(evt) {
-      this.handleNodeAdded({
+      this.handleArticleNodeAdded({
         nodeName: evt.added.element.title,
         articleId: evt.added.element.id,
         nodeUrl: evt.added.element.url,
-      }, 'article');
+      });
     },
     handleEssayDraggedIn(evt) {
-      this.handleNodeAdded({
+      this.handleEssayNodeAdded({
         nodeName: evt.added.element.title,
         articleId: evt.added.element.id,
         nodeUrl: '',
-      }, 'essay');
+      });
     },
     handleDraggedIn(evt) {
       window.console.log(evt);
@@ -973,7 +995,8 @@ export default {
       // id ==
       if (this.roadMapId === -1) {
         createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.refCurves, this.description, this.nextNodeId, thumbnail64)
+          this.refCurves, this.description, this.nextNodeId, thumbnail64,
+          this.roadmapArticles, this.roadmapEssays)
           .then((res) => {
             this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
             this.roadMapId = res.data.id;
@@ -989,7 +1012,8 @@ export default {
         let bindess = -1;
         if (this.text && this.text.bindEssay) bindess = this.text.bindEssay;
         updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.refCurves, this.description, this.nextNodeId, thumbnail64, bindess)
+          this.refCurves, this.description, this.nextNodeId, thumbnail64, bindess,
+          this.roadmapArticles, this.roadmapEssays)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
           })

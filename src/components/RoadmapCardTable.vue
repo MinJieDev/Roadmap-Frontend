@@ -1,7 +1,12 @@
 <template>
   <div>
-    <div style="float: right; width: 100%;">
+    <div style="float: right; width: 100%; margin-bottom: 10px">
       <div style="margin-right: 10px; float: right;">
+        包含文献
+        <Select v-model="filtArticle" style="width:200px" @on-select="handleFiltArticle">
+          <Option v-for="item in filtArticleList" :value="item.id" :key="item.id">{{ item.title }}
+          </Option>
+        </Select>
         切换布局
         <i-switch
           @on-change="onChangeViewStyle"
@@ -28,7 +33,7 @@
         @cancelDrawer="cancelDrawer">
       </ItemEditor>
     </div>
-    <div v-else-if="this.viewStyle==='card'">
+    <div v-else-if="this.viewStyle==='card'" style="margin-top: 20px;">
     <Row v-for="r in rows" v-bind:key="r" type="flex" justify="center" :gutter="20">
       <i-col v-for="c in cols" v-bind:key="c" span="6" align="center" >
         <!-- getIndex函数用于获取指定r和c后，路书在index中的索引。对于新建路书，getIndex会返回-1 -->
@@ -110,8 +115,11 @@ export default {
       drawer: false,
       cols: 3,
       viewStyle: 'card',
-      data: [],
-      roadmaps: [],
+      filtArticle: -1,
+      // data: [],
+      rawroadmaps: [],
+      articleFilter: null,
+      articles: [],
       columns: [
         {
           title: '序号',
@@ -219,12 +227,17 @@ export default {
     reqSingle('/api/road_maps/', 'GET')
       .then((res) => {
         // window.console.log('roadmap card', res);
-        this.roadmaps = res.data;
-        this.data = this.getData();
+        this.rawroadmaps = res.data;
+        // this.data = this.getData();
       })
       .catch((err) => {
         pushErr(this, err, true);
       });
+    reqSingle('/api/articles/', 'GET').then((res) => {
+      this.articles = res.data;
+    }).catch((err) => {
+      pushErr(this, err, true);
+    });
   },
   computed: {
     rows() {
@@ -237,12 +250,19 @@ export default {
           && this.data[this.getIndex(r, c, this.cols)].thumbnail !== -1
           && !this.data[this.getIndex(r, c, this.cols)].isEmpty;
     },
-  },
-  methods: {
-    getIndex(r, c, col) {
-      return (((r - 1) * col) + (c - 1)) - 1;
+    filtArticleList() {
+      return [{ id: -1, title: '取消选择' }, ...this.articles];
     },
-    getData() {
+    roadmaps() {
+      if (this.articleFilter === null) {
+        return this.rawroadmaps;
+      }
+      return _.filter(this.rawroadmaps, (roadmap) => {
+        const tmp = _.find(this.articleFilter, rmId => String(rmId) === String(roadmap.id));
+        return typeof tmp !== 'undefined';
+      });
+    },
+    data() {
       const data = [];
       let index = 0;
       _(this.roadmaps)
@@ -257,10 +277,15 @@ export default {
             thumbnail: JSON.parse(roadmap.text).thumbnail !== undefined ?
               JSON.parse(roadmap.text).thumbnail : -1,
           });
-          window.console.log(roadmap);
+          // window.console.log(roadmap);
         });
-      window.console.log(data);
+      // window.console.log(data);
       return data;
+    },
+  },
+  methods: {
+    getIndex(r, c, col) {
+      return (((r - 1) * col) + (c - 1)) - 1;
     },
     onView(index) {
       window.console.log('onView', index);
@@ -333,6 +358,21 @@ export default {
     },
     mouseLeaveThumbnail() {
       window.console.info('Mouse left.');
+    },
+    getArticleById(id) {
+      return _(this.articles).find(art => String(art.id) === String(id));
+    },
+    handleFiltArticle(art) {
+      if (art.value === -1) {
+        this.articleFilter = null;
+      } else {
+        const article = this.getArticleById(art.value);
+        if (article) {
+          this.articleFilter = article.road_maps;
+        } else {
+          this.articleFilter = null;
+        }
+      }
     },
   },
 };
