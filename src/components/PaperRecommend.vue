@@ -16,7 +16,7 @@
           <p style="color: #7f7f7f">中文</p>
           <p style="color: #880000"> {{ item.authors.join(', ') }}</p>
           <div style="color: #008800">{{ item.updatedTime.slice(0,10) }}
-            <a href="tag.scheme" v-for="(tag, tagIndex) in item.tags"
+            <a href='https://arxiv.org/' v-for="(tag, tagIndex) in item.tags"
                  v-bind:key="tagIndex">{{ tag.term }} </a>
           </div>
         </div>
@@ -51,6 +51,7 @@ export default {
         .catch((err) => {
           window.console.error(err);
         });
+      this.$Message.success(`成功导入文章: ${title}`);
     },
   },
   mounted() {
