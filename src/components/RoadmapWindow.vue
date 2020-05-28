@@ -242,9 +242,17 @@ export default {
           window.open(`http://${node.URI}`, '_blank');
         }
         window.open(node.URI, '_blank');
+      } else if (node.category === 'essay') {
+        this.handleOpenEssay();
       } else {
         window.console.log('pass');
       }
+    },
+    handleOpenEssay() {
+      this.$router.push({
+        path: '/essayReader',
+        query: { selected: this.curNode.category_id },
+      });
     },
     handleSvgClick() {
       this.curNode = null;
