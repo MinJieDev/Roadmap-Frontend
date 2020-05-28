@@ -44,7 +44,7 @@
         <h1>个人档案</h1>
         <Divider />
 
-        <Col span="11" style="margin-right: 30px">
+        <Col span="11" style="margin-right: 60px">
           <h2>用户名</h2>
           <br>
           <Row :gutter="32">
@@ -62,7 +62,7 @@
                   v-model="userData.name"
                   v-if="userLayout.nameEditable"
                   @on-blur="handleUpdateName"
-                  style="padding: 12px; margin-right: 40px"
+                  style="padding: 12px;"
                   @keydown.native.stop>
                 </Input>
               </Row>
@@ -133,7 +133,7 @@
                   <Icon type="ios-create-outline" @click="handleEditOrgan" />
                 </div>
                 <Input
-                  ref="emailInput"
+                  ref="organInput"
                   v-model="userData.organization"
                   v-if="userLayout.organEditable"
                   @on-blur="handleUpdateOrgan"
@@ -175,7 +175,7 @@
         <Col span="8" style="margin-left: 10px">
           <h2>头像</h2>
           <br>
-          <div class="demo-avatar">
+          <div class="demo-avatar" style="margin-left: 40px">
             <Avatar icon="md-person" :size="200"
                     shape="square"
                     style="background-color: #5cadff"/>
@@ -206,7 +206,8 @@
 import _ from 'lodash';
 import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
-import { updateUserName, updateUserEmail, updateInterest } from '../apis/UserProfileApis';
+import { updateUserName, updateUserEmail, updateInterest, updateUserCity,
+  updateUserBio, updateUserOrgan } from '../apis/UserProfileApis';
 
 export default {
   name: 'UserProfileView',
@@ -316,6 +317,42 @@ export default {
       this.userLayout.emailEditable = false;
       updateUserEmail(this.userData.id, this.userData.email).then(() => {
         this.$Notice.success({ title: 'email updated' });
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+    },
+    handleEditCity() {
+      this.userLayout.cityEditable = true;
+      this.$nextTick(() => this.$refs.cityInput.focus());
+    },
+    handleUpdateCity() {
+      this.userLayout.cityEditable = false;
+      updateUserCity(this.userData.id, this.userData.city).then(() => {
+        this.$Notice.success({ title: 'city updated' });
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+    },
+    handleEditOrgan() {
+      this.userLayout.organEditable = true;
+      this.$nextTick(() => this.$refs.organInput.focus());
+    },
+    handleUpdateOrgan() {
+      this.userLayout.organEditable = false;
+      updateUserOrgan(this.userData.id, this.userData.organization).then(() => {
+        this.$Notice.success({ title: 'organization updated' });
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+    },
+    handleEditBio() {
+      this.userLayout.bioEditable = true;
+      this.$nextTick(() => this.$refs.bioInput.focus());
+    },
+    handleUpdateBio() {
+      this.userLayout.bioEditable = false;
+      updateUserBio(this.userData.id, this.userData.bio).then(() => {
+        this.$Notice.success({ title: 'bio updated' });
       }).catch((err) => {
         pushErr(this, err, true);
       });
