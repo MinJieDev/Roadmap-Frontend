@@ -196,6 +196,7 @@
               <Tag v-if="interestReveal"
                 v-for="(item) in userData.interest" :key="item"
                 type="border" closable color="primary" size="large"
+                style="font-size: 16px; margin-left: 11px; margin-top: 9px"
                 @on-close="deleteInterestItem(item)">
                 {{item}}
               </Tag>
@@ -246,6 +247,7 @@ export default {
         id: '',
         name: '',
         email: '',
+        interestDB: [],
         interest: [],
         bio: 'Coding everyday',
         city: 'Beijing',
@@ -259,6 +261,40 @@ export default {
         organEditable: false,
       },
       interestReveal: true,
+      fieldList: [
+        {
+          value: 'Artificial Intelligence 人工智能',
+          label: 'cs.AI',
+        },
+        {
+          value: 'Computational Geometry 计算几何学',
+          label: 'cs.CG',
+        },
+        {
+          value: 'Computation and Language 计算语言学',
+          label: 'cs.CL',
+        },
+        {
+          value: 'Computer Vision 计算视觉与模式识别',
+          label: 'cs.CV',
+        },
+        {
+          value: 'Databases 数据库',
+          label: 'cs.DB',
+        },
+        {
+          value: 'Multimedia 多媒体',
+          label: 'cs.MM',
+        },
+        {
+          value: 'Neural and Evolutionary Computing 神经与进化计算',
+          label: 'cs.NE',
+        },
+        {
+          value: 'Robotics 机器人',
+          label: 'cs.RO',
+        },
+      ],
       articleTotal: 0,
       articles: [],
       roadmapTotal: 0,
@@ -275,8 +311,8 @@ export default {
     openUserInterest() {
       this.content = 'interest';
       this.getUserInterest();
-      window.console.log('interest length', this.userData.interest.length,
-        'interest', this.userData.interest);
+      // window.console.log('interest length', this.userData.interest.length,
+      //   'interest', this.userData.interest);
     },
     openArticleStatcs() {
       this.content = 'artcSt';
@@ -302,9 +338,19 @@ export default {
     },
     getUserInterest() {
       reqSingle('api/users', 'GET').then((res) => {
-        this.userData.interest = _.split(res.data[0].interest, ',');
-        window.console.log('interest', this.userData.interest, 'interest res', res.data[0].interest);
-        this.interestReveal = (this.userData.interest.length > 0 && res.data[0].interest !== '');
+        this.userData.interestDB = _.split(res.data[0].interest, ',');
+        this.userData.interest = [];
+        this.interestReveal = (this.userData.interestDB.length > 0
+          && res.data[0].interest !== '');
+        // transfer interest DB form to interest Web form
+        _.forEach(this.userData.interestDB, (item) => {
+          _.forEach(this.fieldList, (field) => {
+            if (item === field.label) {
+              this.userData.interest = _.concat(this.userData.interest, field.value);
+            }
+          });
+        });
+        window.console.log('interest DB', this.userData.interestDB, '\ninterest', this.userData.interest);
       }).catch((err) => {
         pushErr(this, err, true);
       });
@@ -397,11 +443,15 @@ export default {
       });
     },
     deleteInterestItem(item) {
-      // TODO: test: delete to zero
-      // this.userData.interest = _.slice(this.userData.interest, index, index + 1);
+      // TODO: debug: delete to zero
       this.userData.interest = _.pull(this.userData.interest, item);
-      const interestStr = _.toString(this.userData.interest);
-      // window.console.log('interest array', this.userData.interest,
+      _.forEach(this.fieldList, (field) => {
+        if (item === field.value) {
+          this.userData.interestDB = _.pull(this.userData.interestDB, field.label);
+        }
+      });
+      const interestStr = _.toString(this.userData.interestDB);
+      // window.console.log('interestDB array', this.userData.interestDB,
       //   '\ninterest str', interestStr);
       updateInterest(this.userData.id, interestStr).then(() => {
         this.$Notice.success({ title: 'interest updated' });
