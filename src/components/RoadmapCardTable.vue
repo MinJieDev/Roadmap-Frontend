@@ -1,32 +1,39 @@
 <template>
   <div>
-    <div style="margin-right: 10px; float: right;">
-      切换布局
-      <i-switch
-        @on-change="onChangeViewStyle"
-        size="large">
-        <span slot="open">Card</span>
-        <span slot="close">Table</span>
-      </i-switch>
+    <div style="float: right; width: 100%; margin-bottom: 10px">
+      <div style="margin-right: 10px; float: right;">
+        包含文献
+        <Select v-model="filtArticle" style="width:200px" @on-select="handleFiltArticle">
+          <Option v-for="item in filtArticleList" :value="item.id" :key="item.id">{{ item.title }}
+          </Option>
+        </Select>
+        切换布局
+        <i-switch
+          @on-change="onChangeViewStyle"
+          size="large">
+          <span slot="open">Card</span>
+          <span slot="close">Table</span>
+        </i-switch>
+      </div>
     </div>
     <div v-if="this.viewStyle==='table'">
-        <Button
-          @click="onClickNewRoadmap(0)"
-          type="primary"
-          style="margin-left: 10px; margin-bottom: 10px ">
-          新建路书
-        </Button>
-        <Table row-key="id"
-               :columns="columns"
-               :data="data"
-               border>
-        </Table>
-        <ItemEditor
-          v-bind:drawer="drawer"
-          @cancelDrawer="cancelDrawer">
-        </ItemEditor>
+      <Button
+        @click="onClickNewRoadmap(0)"
+        type="primary"
+        style="margin-left: 10px; margin-bottom: 10px ">
+        新建路书
+      </Button>
+      <Table row-key="id"
+             :columns="columns"
+             :data="data"
+             border>
+      </Table>
+      <ItemEditor
+        v-bind:drawer="drawer"
+        @cancelDrawer="cancelDrawer">
+      </ItemEditor>
     </div>
-    <div v-else-if="this.viewStyle==='card'">
+    <div v-else-if="this.viewStyle==='card'" style="margin-top: 20px;">
     <Row v-for="r in rows" v-bind:key="r" type="flex" justify="center" :gutter="20">
       <i-col v-for="c in cols" v-bind:key="c" span="6" align="center" >
         <!-- getIndex函数用于获取指定r和c后，路书在index中的索引。对于新建路书，getIndex会返回-1 -->
@@ -44,12 +51,28 @@
           </div>
           <!--已有路书卡片-->
           <div class="card_content" v-else>
-            <p class=single_line v-if="getIndex(r, c, cols) < data.length">
+            <!-- 标题 -->
+            <h4 class=single_line v-if="getIndex(r, c, cols) < data.length">
               {{data[getIndex(r, c, cols)].title}}
-            </p>
-            <img class="card_img" src="../assets/RoadmapDefault.png" height="250"
-                 @click="onEdit(roadmaps[getIndex(r, c, cols)].id)">
-            <br>
+            </h4>
+
+            <!-- 缩略图或默认图加载 -->
+            <div class="card_img"
+                 @mouseenter="mouseOnThumbnail"
+                 @mouseleave="mouseLeaveThumbnail">
+              <img v-if="showThumbnail(r, c)"
+                   :src="data[getIndex(r,c,cols)].thumbnail"
+                   class="card_img"
+                   @click="onEdit(roadmaps[getIndex(r, c, cols)].id)"
+              >
+              <img v-else
+                   src="../assets/RoadmapDefault.png"
+                   class="card_img"
+                   @click="onEdit(roadmaps[getIndex(r, c, cols)].id)"
+              >
+            </div>
+
+            <!-- 按钮 -->
             <Button type="primary" size="small" @click="onView(roadmaps[getIndex(r, c, cols)].id)">
               查看
             </Button>
@@ -68,12 +91,12 @@
       <br>
       <br>
       </Row>
+    </div>
     <!-- 抽屉暂未使用，用于创建自动生成的路书 -->
     <ItemEditor
       v-bind:drawer="drawer"
       @cancelDrawer="cancelDrawer">
     </ItemEditor>
-    </div>
   </div>
 </template>
 
@@ -92,8 +115,11 @@ export default {
       drawer: false,
       cols: 3,
       viewStyle: 'card',
-      data: [],
-      roadmaps: [],
+      filtArticle: -1,
+      // data: [],
+      rawroadmaps: [],
+      articleFilter: null,
+      articles: [],
       columns: [
         {
           title: '序号',
@@ -198,15 +224,20 @@ export default {
     };
   },
   mounted() {
-    reqSingle('/api/road_maps/', 'GET', { page: 1 })
+    reqSingle('/api/road_maps/', 'GET')
       .then((res) => {
         // window.console.log('roadmap card', res);
-        this.roadmaps = res.data.results;
-        this.data = this.getData();
+        this.rawroadmaps = res.data;
+        // this.data = this.getData();
       })
       .catch((err) => {
         pushErr(this, err, true);
       });
+    reqSingle('/api/articles/', 'GET').then((res) => {
+      this.articles = res.data;
+    }).catch((err) => {
+      pushErr(this, err, true);
+    });
   },
   computed: {
     rows() {
@@ -214,12 +245,24 @@ export default {
       window.console.info('Card Rows Change', newRows);
       return newRows;
     },
-  },
-  methods: {
-    getIndex(r, c, col) {
-      return (((r - 1) * col) + (c - 1)) - 1;
+    showThumbnail() {
+      return (r, c) => this.getIndex(r, c, this.cols) < this.data.length
+          && this.data[this.getIndex(r, c, this.cols)].thumbnail !== -1
+          && !this.data[this.getIndex(r, c, this.cols)].isEmpty;
     },
-    getData() {
+    filtArticleList() {
+      return [{ id: -1, title: '取消选择' }, ...this.articles];
+    },
+    roadmaps() {
+      if (this.articleFilter === null) {
+        return this.rawroadmaps;
+      }
+      return _.filter(this.rawroadmaps, (roadmap) => {
+        const tmp = _.find(this.articleFilter, rmId => String(rmId) === String(roadmap.id));
+        return typeof tmp !== 'undefined';
+      });
+    },
+    data() {
       const data = [];
       let index = 0;
       _(this.roadmaps)
@@ -230,10 +273,19 @@ export default {
             title: roadmap.title,
             // tags: [],
             description: roadmap.description,
+            isEmpty: JSON.parse(roadmap.text).nodes.length === 0,
+            thumbnail: JSON.parse(roadmap.text).thumbnail !== undefined ?
+              JSON.parse(roadmap.text).thumbnail : -1,
           });
-          window.console.log(roadmap);
+          // window.console.log(roadmap);
         });
+      // window.console.log(data);
       return data;
+    },
+  },
+  methods: {
+    getIndex(r, c, col) {
+      return (((r - 1) * col) + (c - 1)) - 1;
     },
     onView(index) {
       window.console.log('onView', index);
@@ -301,6 +353,27 @@ export default {
         this.viewStyle = 'card';
       }
     },
+    mouseOnThumbnail() {
+      window.console.info('Mouse enter.');
+    },
+    mouseLeaveThumbnail() {
+      window.console.info('Mouse left.');
+    },
+    getArticleById(id) {
+      return _(this.articles).find(art => String(art.id) === String(id));
+    },
+    handleFiltArticle(art) {
+      if (art.value === -1) {
+        this.articleFilter = null;
+      } else {
+        const article = this.getArticleById(art.value);
+        if (article) {
+          this.articleFilter = article.road_maps;
+        } else {
+          this.articleFilter = null;
+        }
+      }
+    },
   },
 };
 </script>
@@ -308,7 +381,8 @@ export default {
 <style scoped>
   /*单行文本的溢出显示省略号*/
   .single_line{
-    height: 25px;
+    height: 20px;
+    width: 250px;
     vertical-align: middle;
     overflow:hidden;
     text-overflow:ellipsis;
@@ -321,5 +395,8 @@ export default {
   }
   .card_img{
     cursor: pointer;  /*鼠标悬停变小手*/
+    overflow: hidden;
+    width:250px;
+    height:250px;
   }
 </style>

@@ -12,7 +12,7 @@
             <Icon type="md-more"></Icon>
           </a>
           <DropdownMenu slot="list">
-            <DropdownItem @click.native="handleAddFileNode">添加文献节点</DropdownItem>
+            <DropdownItem @click.native="handleAddFileNode">添加节点</DropdownItem>
           </DropdownMenu>
         </Dropdown>
       </Col>

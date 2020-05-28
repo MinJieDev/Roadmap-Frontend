@@ -9,11 +9,11 @@
         <Submenu name="1">
           <template slot="title">
             <Icon type="ios-navigate"></Icon>
-            文献栏
+            文献列表
           </template>
           <draggable
             class="dragArea list-group"
-            :list="articles"
+            :list="articleDragList"
             :group="{ name: 'article', pull: 'clone', put: false }"
             :sort="false"
           >
@@ -24,6 +24,29 @@
                 :display="isFileItemDisplay('1-'+article.id)"
                 :articleId="article.id"
                 @node-added="handleArticleNodeAdded"
+              >
+              </FileItem>
+            </MenuItem>
+          </draggable>
+        </Submenu>
+        <Submenu name="2">
+          <template slot="title">
+            <Icon type="ios-navigate"></Icon>
+            随笔列表
+          </template>
+          <draggable
+            class="dragArea list-group"
+            :list="essayDragList"
+            :group="{ name: 'article', pull: 'clone', put: false }"
+            :sort="false"
+          >
+            <MenuItem v-for="(essay, index) in essays" :key="index" :name="'2-'+essay.id" >
+              <FileItem
+                :fileName="essay.title"
+                :articleUrl="''"
+                :display="isFileItemDisplay('2-'+essay.id)"
+                :articleId="essay.id"
+                @node-added="handleEssayNodeAdded"
               >
               </FileItem>
             </MenuItem>
@@ -77,21 +100,23 @@
         :list="roadmapDragArticleList"
         :group="{ name: 'article', put: true }"
         ghostClass="ghost"
-        @change="handleArticleDraggedIn"
+        @change="handleDraggedIn"
       >
-        <roadmap
-          ref="road_map"
-          :nodes="nodes"
-          :connections="mergedConnections"
-          :editable="true"
-          :key="repaint"
-          :live-node="curNode"
-          @node-click="handleNodeClick"
-          @node-dblclick="handleNodeDblClick"
-          @subnode-dblclick="handleSubnodeDblClick"
-          @svg-click="handleSvgClick"
-          @conn-click="handleConnClick"
-        />
+        <div id="target">
+          <roadmap
+            ref="road_map"
+            :nodes="nodes"
+            :connections="mergedConnections"
+            :editable="true"
+            :key="repaint"
+            :live-node="curNode"
+            @node-click="handleNodeClick"
+            @node-dblclick="handleNodeDblClick"
+            @subnode-dblclick="handleSubnodeDblClick"
+            @svg-click="handleSvgClick"
+            @conn-click="handleConnClick"
+          />
+        </div>
       </draggable>
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}">
@@ -110,10 +135,26 @@
         分&emsp;&emsp;享
         <Icon type="ios-share" />
       </Button>
+      <Button type="success" @click="handleClkExport"
+              :disabled="roadMapId===-1" class="b-ro">
+        导出图片
+        <Icon type="ios-share" />
+      </Button>
       <Button type="warning" @click="handleClkSaveRoadmap"
               class="b-ro">
         保存路书
         <Icon type="md-cloud-upload" />
+      </Button>
+      <Button type="success" @click="handleClkBindEssay"
+              class="b-ro" :disabled="roadMapId===-1">
+        <div v-if="hasBindEssay">
+          修改随笔
+          <Icon type="md-cloud-upload" />
+        </div>
+        <div v-else>
+          新建随笔
+          <Icon type="md-cloud-upload" />
+        </div>
       </Button>
       <Button type="info" @click="handleClkSaveRoadmap"
               class="b-ro">
@@ -129,6 +170,10 @@
           <MenuItem name="open-url" @click.native="handleOpenUrl" v-if="openable">
             打开链接
             <Icon type="ios-link" />
+          </MenuItem>
+          <MenuItem name="open-essay" @click.native="handleOpenEssay" v-if="curNodeType==='essay'">
+            打开随笔
+            <Icon type="ios-book" />
           </MenuItem>
           <MenuItem name="open-note" @click.native="handleOpenNote" v-if="curNodeType==='article'">
             打开笔记
@@ -188,6 +233,7 @@
 <script>
 import _ from 'lodash';
 import Vue from 'vue';
+import domtoimage from 'dom-to-image';
 import draggable from 'vuedraggable';
 import AddNodeForm from '../components/AddNodeForm';
 import AddConnectionForm from '../components/AddConnectionForm';
@@ -204,6 +250,7 @@ import FileItem from '../components/FileItem';
 import NoteMarkdown from '../components/NoteMarkdown';
 import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
+import { getEssay } from '../apis/EssayEditorApis';
 import {
   createRoadmap,
   updateRoadmap,
@@ -237,9 +284,11 @@ export default {
   },
   data() {
     return {
+      text: null,
       roadMapId: -1,
       roadMapTitle: 'New RoadMap',
       articles: [],
+      essays: [],
       display: false,
       SideMenuActiveItem: '',
       repaint: 1,
@@ -258,6 +307,10 @@ export default {
       refCurves: [
       ],
       roadmapDragArticleList: [
+      ],
+      roadmapArticles: [
+      ],
+      roadmapEssays: [
       ],
     };
   },
@@ -279,7 +332,9 @@ export default {
       _(this.nodes).forEach((node) => {
         let saveTxt = node.content;
         if (node.category === 'article') {
-          saveTxt = `$${this.getArticleIdByTitle(node.content)}`;
+          saveTxt = node.category_id ? `$${node.category_id}` : `$${this.getArticleIdByTitle(node.content)}`;
+        } else if (node.category === 'essay') {
+          saveTxt = `$${node.category_id}`;
         }
         ret = [...ret, {
           text: node.text,
@@ -406,30 +461,57 @@ export default {
       }
       return '';
     },
+    articleDragList() {
+      let ret = [];
+      _(this.articles).forEach((art) => {
+        ret = [...ret, { ...art, category: 'article' }];
+      });
+      return ret;
+    },
+    essayDragList() {
+      let ret = [];
+      _(this.essays).forEach((ess) => {
+        ret = [...ret, { ...ess, category: 'essay' }];
+      });
+      return ret;
+    },
+    hasBindEssay() {
+      return this.text && this.text.bindEssay && this.text.bindEssay !== -1;
+    },
   },
   mounted() {
     // GET articles for l-sider
-    reqSingle('/api/articles/', 'GET', { page: 1 }).then((res1) => {
-      this.articles = res1.data.results;
-      // load roadMap if has query
-      if ((typeof (this.$route.query.selected) !== 'undefined') &&
-        (String(this.$route.query.selected) !== '-1')) {
-        this.roadMapId = this.$route.query.selected;
-        getRoadmap(this.roadMapId)
-          .then((res) => {
-            this.nodes = this.toDisplayNodes(JSON.parse(res.data.text).nodes);
-            this.connections = this.toDisplayConnections(JSON.parse(res.data.text).connections);
-            this.refCurves = JSON.parse(res.data.text).refConnections;
-            this.roadMapTitle = res.data.title;
-            this.description = res.data.description;
-            this.nextNodeId = JSON.parse(res.data.text).nextNodeId;
-            this.initMindMap();
-            this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
-          })
-          .catch((err) => {
-            pushErr(this, err, true);
-          });
-      }
+    reqSingle('/api/articles/', 'GET').then((res1) => {
+      window.console.log('article', res1);
+      this.articles = res1.data;
+      reqSingle('/api/essays/', 'GET').then((res2) => {
+        this.essays = res2.data;
+        // load roadMap if has query
+        if ((typeof (this.$route.query.selected) !== 'undefined') &&
+          (String(this.$route.query.selected) !== '-1')) {
+          this.roadMapId = this.$route.query.selected;
+          getRoadmap(this.roadMapId)
+            .then((res) => {
+              this.text = JSON.parse(res.data.text);
+              this.nodes = this.toDisplayNodes(JSON.parse(res.data.text).nodes);
+              this.connections = this.toDisplayConnections(JSON.parse(res.data.text).connections);
+              this.refCurves = JSON.parse(res.data.text).refConnections;
+              this.roadMapTitle = res.data.title;
+              this.description = res.data.description;
+              this.nextNodeId = JSON.parse(res.data.text).nextNodeId;
+              this.roadmapArticles = res.data.articles;
+              this.roadmapEssays = res.data.essays;
+              this.initMindMap();
+              this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
+              window.console.log('data', res.data);
+            })
+            .catch((err) => {
+              pushErr(this, err, true);
+            });
+        }
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
     }).catch((err) => {
       pushErr(this, err, true);
     });
@@ -516,6 +598,9 @@ export default {
       if (category === 'article') {
         defaultColor = '#f5d72b';
       }
+      if (category === 'essay') {
+        defaultColor = '#f5b5d7';
+      }
       this.nodes = [...this.nodes,
         {
           text: `#${this.nextNodeId}`, // 为#nodeId，保证不重名
@@ -526,6 +611,7 @@ export default {
           fy: pos.fy,
           nodes: [],
           category: category || 'mindmap',
+          category_id: nodeInfo.articleId || -1,
         }];
       this.nextNodeId += 1;
       this.repaintMindMap();
@@ -543,7 +629,12 @@ export default {
       this.repaintMindMap();
     },
     handleArticleNodeAdded(nodeInfo) {
+      this.roadmapArticles = _.uniq([...this.roadmapArticles, nodeInfo.articleId]);
       this.handleNodeAdded(nodeInfo, 'article');
+    },
+    handleEssayNodeAdded(nodeInfo) {
+      this.roadmapEssays = _.uniq([...this.roadmapEssays, nodeInfo.articleId]);
+      this.handleNodeAdded(nodeInfo, 'essay');
     },
     // 删除文献结点
     // @deprecated method
@@ -558,6 +649,19 @@ export default {
     },
     handleNodeDeleted() {
       this.nodes = _.filter(this.nodes, node => node.text !== this.curNode.text);
+      if (this.curNode.category === 'article') {
+        if (!_(this.nodes).find(node => (node.category === 'article' && node.category_id === this.curNode.category_id))) {
+          _.remove(this.roadmapArticles,
+            artid => String(artid) === String(this.curNode.category_id));
+        }
+      }
+      if (this.curNode.category === 'essay') {
+        if (!_(this.nodes).find(node => (node.category === 'essay' && node.category_id === this.curNode.category_id))) {
+          window.console.log('fuck', this.roadmapEssays);
+          _.remove(this.roadmapEssays, essid => String(essid) === String(this.curNode.category_id));
+          window.console.log('fuck2', this.roadmapEssays);
+        }
+      }
       this.connections = _.filter(this.connections, connection =>
         (connection.source.text !== this.curNode.text
           && connection.target.text !== this.curNode.text));
@@ -636,29 +740,15 @@ export default {
     },
     handleClkSaveRoadmap() {
       this.refCurves = this.getCurves();
-      // id ==
-      if (this.roadMapId === -1) {
-        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.refCurves, this.description, this.nextNodeId)
-          .then((res) => {
-            this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
-            this.roadMapId = res.data.id;
-            this.$router.push({
-              path: '/editor',
-              query: { selected: res.data.id },
-            });
-          }).catch((err) => {
-            pushErr(this, err, true);
-          });
-      } else {
-        updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.refCurves, this.description, this.nextNodeId)
-          .then(() => {
-            this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
-          }).catch((err) => {
-            pushErr(this, err, true);
-          });
-      }
+      // generate thumbnail image formatted as base 64.
+      this.getRoadmapThumbnail().then((data) => {
+        window.console.info(data);
+        this.createOrUpdate(data);
+      }).catch(() => {
+        window.console.log('获取缩略图失败');
+        this.createOrUpdate(undefined);
+        pushErr(this, '获取缩略图失败');
+      });
     },
     // @deprecated
     handleClkLoadRoadmap(roadmapInfo) {
@@ -727,6 +817,19 @@ export default {
         pushErr(this, err, true);
       });
     },
+    handleClkExport() {
+      this.getRoadmapThumbnail().then((pngUrl) => {
+        const name = `${this.roadMapTitle}.png`;
+        const a = document.createElement('a');
+        if (pngUrl) {
+          a.href = pngUrl;
+          a.download = name;
+          a.click();
+        }
+      }).catch(() => {
+        pushErr(this, '生成缩略图失败', true);
+      });
+    },
     getArticleByTitle(title) {
       return _(this.articles).find(art => art.title === title);
     },
@@ -736,21 +839,43 @@ export default {
     getArticleById(id) {
       return _(this.articles).find(art => String(art.id) === String(id));
     },
+    getEssayById(id) {
+      return _(this.essays).find(ess => String(ess.id) === String(id));
+    },
     toDisplayNodes(savedNodes) {
       let ret = [];
       _(savedNodes).forEach((node) => {
         if (node.category === 'article') {
-          const art = this.getArticleById(_.split(node.content, '$', 2)[1]);
+          const articleId = _.split(node.content, '$', 2)[1];
+          const art = this.getArticleById(articleId);
           if (typeof art !== 'undefined') {
             // eslint-disable-next-line no-param-reassign
             node.content = art.title;
             // eslint-disable-next-line no-param-reassign
             node.URI = art.url;
+            // eslint-disable-next-line no-param-reassign
+            node.category_id = articleId;
           } else {
             // eslint-disable-next-line no-param-reassign
             node.category = 'mindmap';
             // eslint-disable-next-line no-param-reassign
             node.content += ': article not found';
+          }
+        } else if (node.category === 'essay') {
+          const essayId = _.split(node.content, '$', 2)[1];
+          const ess = this.getEssayById(essayId);
+          if (typeof ess !== 'undefined') {
+            // eslint-disable-next-line no-param-reassign
+            node.content = ess.title;
+            // eslint-disable-next-line no-param-reassign
+            node.URI = '';
+            // eslint-disable-next-line no-param-reassign
+            node.category_id = essayId;
+          } else {
+            // eslint-disable-next-line no-param-reassign
+            node.category = 'mindmap';
+            // eslint-disable-next-line no-param-reassign
+            node.content += ': essay not found';
           }
         }
         ret = [...ret, node];
@@ -846,12 +971,104 @@ export default {
       });
     },
     handleArticleDraggedIn(evt) {
-      this.handleNodeAdded({
+      this.handleArticleNodeAdded({
         nodeName: evt.added.element.title,
         articleId: evt.added.element.id,
         nodeUrl: evt.added.element.url,
-      }, 'article');
+      });
+    },
+    handleEssayDraggedIn(evt) {
+      this.handleEssayNodeAdded({
+        nodeName: evt.added.element.title,
+        articleId: evt.added.element.id,
+        nodeUrl: '',
+      });
+    },
+    handleDraggedIn(evt) {
       window.console.log(evt);
+      if (evt.added.element.category === 'article') {
+        this.handleArticleDraggedIn(evt);
+      } else if (evt.added.element.category === 'essay') {
+        this.handleEssayDraggedIn(evt);
+      }
+    },
+    getRoadmapThumbnail() {
+      return domtoimage.toPng(document.getElementById('target'));
+    },
+    createOrUpdate(thumbnail64) {
+      // id ==
+      if (this.roadMapId === -1) {
+        createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections,
+          this.refCurves, this.description, this.nextNodeId, thumbnail64,
+          this.roadmapArticles, this.roadmapEssays)
+          .then((res) => {
+            this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
+            this.roadMapId = res.data.id;
+            this.$router.push({
+              path: '/editor',
+              query: { selected: res.data.id },
+            });
+          })
+          .catch((err) => {
+            pushErr(this, err, true);
+          });
+      } else {
+        let bindess = -1;
+        if (this.text && this.text.bindEssay) bindess = this.text.bindEssay;
+        updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
+          this.refCurves, this.description, this.nextNodeId, thumbnail64, bindess,
+          this.roadmapArticles, this.roadmapEssays)
+          .then(() => {
+            this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
+          })
+          .catch((err) => {
+            pushErr(this, err, true);
+          });
+      }
+    },
+    handleOpenEssay() {
+      this.$router.push({
+        path: '/essayReader',
+        query: { selected: this.curNode.category_id },
+      });
+    },
+    handleClkBindEssay() {
+      if (!this.hasBindEssay) {
+        // 新建随笔
+        reqSingle('/api/essays/', 'POST',
+          {
+            title: `随笔：${this.roadMapTitle}`,
+            text: JSON.stringify({
+              bindRoadmap: this.roadMapId,
+              refRoadmap: this.roadMapId,
+              content: '',
+            }),
+          },
+        ).then((res) => {
+          // 先保存路书
+          this.text.bindEssay = res.data.id;
+          this.createOrUpdate(this.text.thumbnail);
+          this.$Message.info('创建成功! id=', res.data.id);
+          this.$router.push({
+            path: '/essayEditor',
+            query: { selected: res.data.id },
+          });
+        }).catch((err) => {
+          pushErr(this, err, true);
+        });
+      } else {
+        getEssay(this.text.bindEssay).then(() => {
+          // 先保存路书
+          this.createOrUpdate(this.text.thumbnail);
+          this.$router.push({
+            path: '/essayEditor',
+            query: { selected: this.text.bindEssay },
+          });
+        }).catch(() => {
+          this.$Modal.error({ title: `Essay ${this.text.bindEssay} not found` });
+          this.text.bindEssay = -1;
+        });
+      }
     },
   },
 };
