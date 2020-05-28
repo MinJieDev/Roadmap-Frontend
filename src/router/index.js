@@ -108,6 +108,15 @@ const routes = [
       level: 5,
     },
   },
+  {
+    path: '/PaperRecommend',
+    name: 'PaperRecommend',
+    component: () => import('../components/PaperRecommend'),
+    meta: {
+      nickName: '文献推荐',
+      level: 2,
+    },
+  },
 ];
 
 const router = new VueRouter({

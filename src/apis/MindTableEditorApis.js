@@ -10,3 +10,5 @@ export const deleteMTdata = id => req(
 
 export const changeMTdata = data => req(
   `api/articles/${data.id}/`, 'PATCH', {}, data);
+
+export const getAllNewPapers = () => req('/api/newpapers/', 'GET', {});
