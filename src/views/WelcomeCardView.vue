@@ -35,7 +35,7 @@
       <Card >
         <div style="text-align:center">
           <a href="PaperRecommend">
-            <img src="../assets/welcome/books.png" style="width:70%" alt="Load Fail">
+            <img src="../assets/welcome/recommand.png" style="width:70%" alt="Load Fail">
             <h3>文献推荐</h3>
           </a>
         </div>
