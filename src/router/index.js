@@ -129,6 +129,15 @@ const routes = [
     },
   },
   {
+    path: '/PaperRecommend',
+    name: 'PaperRecommend',
+    component: () => import('../components/PaperRecommend'),
+    meta: {
+      nickName: '文献推荐',
+      level: 2,
+    },
+  },
+  {
     path: '/essayRoadmapReader',
     name: 'EssayRoadmapReader',
     component: () => import(/* webpackChunkName: "about" */ '../views/EssayRoadmapBindReader.vue'),
