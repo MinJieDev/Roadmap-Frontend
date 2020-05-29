@@ -226,10 +226,7 @@
         <h1>文献统计</h1>
         <Divider />
         <br>
-        <ArticleStatistics
-          :articles="articles"
-          :articleTotal="articleTotal">
-        </ArticleStatistics>
+        <ArticleStatistics></ArticleStatistics>
       </div>
       <div v-else-if="content==='roadmapSt'"
            style="margin-left: 60px">
@@ -340,7 +337,6 @@ export default {
     },
     openArticleStatcs() {
       this.content = 'artcSt';
-      this.getArticleData();
     },
     openRoadmapStatcs() {
       this.content = 'roadmapSt';
@@ -377,15 +373,6 @@ export default {
         this.transfer.targetKeys = _.clone(this.userData.interestDB);
         // window.console.log('interest DB', this.userData.interestDB,
         // '\ninterest', this.userData.interest);
-      }).catch((err) => {
-        pushErr(this, err, true);
-      });
-    },
-    getArticleData() {
-      reqSingle('api/articles/', 'GET').then((res) => {
-        // window.console.log('show article res:', res);
-        this.articles = res.data;
-        this.articleTotal = this.articles.length;
       }).catch((err) => {
         pushErr(this, err, true);
       });
