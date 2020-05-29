@@ -223,7 +223,13 @@
       </div>
       <div v-else-if="content==='artcSt'"
            style="margin-left: 60px">
-        article
+        <h1>文献统计</h1>
+        <Divider />
+        <br>
+        <ArticleStatistics
+          :articles="articles"
+          :articleTotal="articleTotal">
+        </ArticleStatistics>
       </div>
       <div v-else-if="content==='roadmapSt'"
            style="margin-left: 60px">
@@ -243,9 +249,11 @@ import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
 import { updateUserName, updateUserEmail, updateInterest, updateUserCity,
   updateUserBio, updateUserOrgan } from '../apis/UserProfileApis';
+import ArticleStatistics from '../components/ArticleStatistics';
 
 export default {
   name: 'UserProfileView',
+  components: { ArticleStatistics },
   data() {
     return {
       content: 'profile',
