@@ -31,9 +31,9 @@
     <div style="float: right; margin-right: 40px; font-size: 15px">
       <Tooltip content="导出全部文献作者出现频次" placement="bottom">
         <Button
-          type="text" size="large"
+          type="success"
           @click="exportAuthorStat"
-          style="margin-right: 9px">
+          style="margin-right: 9px; font-size: 16px;">
           数据导出
         </Button>
       </Tooltip>
@@ -47,7 +47,7 @@
         <span slot="close">表</span>
       </i-switch>
     </div>
-    <br>
+    <br><br>
     <div v-if="this.viewStyle==='chart'">
 
     </div>
@@ -55,18 +55,26 @@
       <Table
         stripe
         :columns="columns"
-        :data="getTableData">
+        :data="tableData">
       </Table>
     </div>
     <Modal
-      v-model="authorStat.modal"
+      v-model="authExport.modal"
       title="导出全部文献作者频次"
       :styles="{top: '20px'}"
       @on-cancel="cancelAuthorExportModal">
-      <p v-html="authorStat.content"></p>
+      <p v-html="authExport.content"></p>
       <p slot="header" style="text-align:center">
         <Icon type="md-checkmark-circle-outline" />
         <span>导出成功</span>
+        <i-switch
+          size="large"
+          true-color="#19be6b" false-color="#2db7f5"
+          style="float: right; margin-right: 30px"
+          @on-change="onChangeExportStyle">
+          <span slot="open">姓名</span>
+          <span slot="close">频次</span>
+        </i-switch>
       </p>
       <div slot="footer">
         <Button
@@ -93,10 +101,14 @@ export default {
       articles: [],
       articleTotal: 0,
       authorStat: {
-        modal: false,
-        content: '',
         // data: [ {name: '', times: Number, articles: [] ]
         data: [],
+      },
+      authExport: {
+        // view, times or name
+        view: 'times',
+        modal: false,
+        content: '',
       },
       // view: chart or table
       viewStyle: 'chart',
@@ -111,8 +123,6 @@ export default {
         successPercent: 100,
         tipContent: '',
       },
-      authTimeDesc: [],
-      authNameAsc: [],
       columns: [
         {
           type: 'expand',
@@ -124,8 +134,13 @@ export default {
           }),
         },
         {
+          type: 'index',
+          width: 60,
+          align: 'center',
+        },
+        {
           title: '文献作者',
-          key: 'author',
+          key: 'name',
         },
         {
           title: '频次',
@@ -144,17 +159,35 @@ export default {
       this.$Notice.success({ title: '图表转换成功' });
     },
     exportAuthorStat() {
-      this.authorStat.modal = true;
+      _.forEach(this.authTimeDesc, (item) => {
+        this.authExport.content = `${this.authExport.content}${_.toString(item.name)} - ${_.toString(item.times)}<br>`;
+      });
+      this.authExport.modal = true;
+    },
+    onChangeExportStyle() {
+      if (this.authExport.view === 'times') {
+        this.authExport.view = 'name';
+      } else {
+        this.authExport.view = 'times';
+      }
+      this.authExport.content = '';
+      if (this.authExport.view === 'times') {
+        _.forEach(this.authTimeDesc, (item) => {
+          this.authExport.content = `${this.authExport.content}${_.toString(item.name)} - ${_.toString(item.times)}<br>`;
+        });
+      } else {
+        _.forEach(this.authNameAsc, (item) => {
+          this.authExport.content = `${this.authExport.content}${_.toString(item.name)} - ${_.toString(item.times)}<br>`;
+        });
+      }
     },
     cancelAuthorExportModal() {
       this.authorStat.modal = false;
+      this.authExport.content = '';
     },
     copyAuthorStat() {
       this.authorStat.modal = false;
       this.$Notice.success({ title: '复制剪切板成功' });
-    },
-    getTableData() {
-
     },
   },
   mounted() {
@@ -175,7 +208,7 @@ export default {
         } else {
           this.readState.unread += 1;
         }
-        const newAuthors = _.split(item.author, 'and');
+        const newAuthors = _.split(item.author, ' and ');
         _.forEach(newAuthors, (newAuth) => {
           const findRes = _.find(this.authorStat.data, stAuth => stAuth.name === newAuth);
           if (findRes === undefined) {
@@ -208,14 +241,21 @@ export default {
         if (this.readState.read === this.articleTotal) {
           this.progress.successPercent = 100;
         }
-        this.authTimeDesc = _.orderBy(this.authorStat.data, ['times', 'name'], ['desc', 'asc']);
-        this.authNameAsc = _.orderBy(this.authorStat.data, 'name', 'asc');
-        window.console.log('time desc ', this.authTimeDesc);
-        window.console.log('name asc', this.authNameAsc);
       }
     }).catch((err) => {
       pushErr(this, err, true);
     });
+  },
+  computed: {
+    authTimeDesc() {
+      return _.orderBy(this.authorStat.data, ['times', 'name'], ['desc', 'asc']);
+    },
+    authNameAsc() {
+      return _.orderBy(this.authorStat.data, 'name', 'asc');
+    },
+    tableData() {
+      return _.slice(this.authTimeDesc, 0, 15);
+    },
   },
 };
 </script>
