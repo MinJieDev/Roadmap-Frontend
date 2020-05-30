@@ -9588,6 +9588,11 @@ sax@>=0.6.0, sax@^1.2.4, sax@~1.2.1, sax@~1.2.4:
   resolved "https://registry.npm.taobao.org/sax/download/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
   integrity sha1-KBYjTiN4vdxOU1T6tcqold9xANk=
 
+schart.js@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.npm.taobao.org/schart.js/download/schart.js-3.0.0.tgz#45bdb6b112a603fae0c3aad5d2fdbb9b80f86d57"
+  integrity sha1-Rb22sRKmA/rgw6rV0v27m4D4bVc=
+
 schema-utils@^0.3.0:
   version "0.3.0"
   resolved "https://registry.npm.taobao.org/schema-utils/download/schema-utils-0.3.0.tgz?cache=0&sync_timestamp=1583928409383&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fschema-utils%2Fdownload%2Fschema-utils-0.3.0.tgz#f5877222ce3e931edae039f17eb3716e7137f8cf"
@@ -11049,6 +11054,13 @@ vue-router@^3.0.1:
   version "3.1.6"
   resolved "https://registry.npm.taobao.org/vue-router/download/vue-router-3.1.6.tgz#45f5a3a3843e31702c061dd829393554e4328f89"
   integrity sha1-RfWjo4Q+MXAsBh3YKTk1VOQyj4k=
+
+vue-schart@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npm.taobao.org/vue-schart/download/vue-schart-2.0.0.tgz#744f26bbbf3c10bc5a584931e002335970810901"
+  integrity sha1-dE8mu788ELxaWEkx4AIzWXCBCQE=
+  dependencies:
+    schart.js "^3.0.0"
 
 vue-style-loader@^3.0.0:
   version "3.1.2"
