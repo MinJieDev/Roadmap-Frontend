@@ -17,5 +17,5 @@ export default (node) => {
     emoji = '';
   }
 
-  return `<a id="node-${node.index}" ${href}>${node.content || node.text || ''} ${emoji}</a>`;
+  return `<a id="node-${node.index}" ${href}>${node.anotherName || node.content || node.text || ''} ${emoji}</a>`;
 };

@@ -208,9 +208,12 @@
           </MenuItem>
           <ModifyColor
             @color-modified="handleColorModified"
-            :color="curColor"
-            ref="modifyColor">
+            :color="curColor">
           </ModifyColor>
+          <AddAnotherName
+            @another-name-added="handleAnotherNameAdded" v-if="curNodeType==='article'"
+            :name="curName()">
+          </AddAnotherName>
         </Submenu>
       </Menu>
       <Menu active-name="1-2" theme="light" width="auto" :open-names="['1']"
@@ -245,6 +248,7 @@ import LoadRoadmapForm from '../components/LoadRoadmapForm';
 import EditRoadmapDescriptionForm from '../components/EditRoadmapDescriptionForm';
 import ModifyCommentForm from '../components/ModifyCommentForm';
 import ModifyColor from '../components/ModifyColor';
+import AddAnotherName from '../components/AddAnotherName';
 import ModifyNodeForm from '../components/ModifyNodeForm';
 import FileItem from '../components/FileItem';
 import NoteMarkdown from '../components/NoteMarkdown';
@@ -278,6 +282,7 @@ export default {
     EditRoadmapDescriptionForm,
     ModifyCommentForm,
     ModifyColor,
+    AddAnotherName,
     ModifyNodeForm,
     NoteMarkdown,
     draggable,
@@ -339,6 +344,7 @@ export default {
         ret = [...ret, {
           text: node.text,
           content: saveTxt,
+          anotherName: node.anotherName,
           URI: node.URI,
           color: node.color,
           fx: node.fx,
@@ -578,6 +584,13 @@ export default {
         fy: (yMin + yMax) / 2,
       };
     },
+    curName() {
+      if (!(this.curNode)) {
+        return null;
+      }
+      const ret = _.find(this.nodes, node => (node.text === this.curNode.text));
+      return ret.anotherName || ret.content || ret.text;
+    },
     getCurves() {
       let ret = [];
       const allConns = this.$refs.road_map.getConn();
@@ -705,6 +718,15 @@ export default {
         if (node.text === this.curNode.text) {
           // eslint-disable-next-line no-param-reassign
           node.color = colorInfo;
+        }
+      });
+      this.repaintMindMap();
+    },
+    handleAnotherNameAdded(nameInfo) {
+      _.forEach(this.nodes, (node) => {
+        if (node.text === this.curNode.text) {
+          // eslint-disable-next-line no-param-reassign
+          node.anotherName = nameInfo;
         }
       });
       this.repaintMindMap();
