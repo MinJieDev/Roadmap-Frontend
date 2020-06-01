@@ -301,7 +301,6 @@ export default {
         const tmp = _.find(this.articleFilter, rmId => String(rmId) === String(roadmap.id));
         return typeof tmp !== 'undefined';
       });
-      },
     },
     data() {
       const data = [];
@@ -326,7 +325,7 @@ export default {
     },
   },
   methods: {
-     randomColor(id) {
+    randomColor(id) {
       if (id % 7 === 0) {
         return 'primary';
       } else if (id % 7 === 1) {
