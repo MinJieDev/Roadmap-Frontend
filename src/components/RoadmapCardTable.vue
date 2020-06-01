@@ -89,8 +89,10 @@ import _ from 'lodash';
 import ItemEditor from './RoadItemEditor';
 import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
-import { delRoadmap, postRoadmapShareLink,
-  getTags, getTagsByRoadmaps, delTag, updateTag } from '../apis/RoadmapEditorApis';
+import {
+  delRoadmap, postRoadmapShareLink,
+  createTag, updateRoadmapTag,
+} from '../apis/RoadmapEditorApis';
 
 export default {
   name: 'RoadmapCardTable',
@@ -102,6 +104,7 @@ export default {
       tagIndex: -1,
       tagPos: -1,
       TagValue: '',
+      oriTags: [],
       cols: 3,
       viewStyle: 'card',
       data: [],
@@ -136,14 +139,17 @@ export default {
                 // type: 'border',
                 key: item.name,
                 name: item.name,
-                color: 'primary',
+                color: this.randomColor(item.id),
                 closable: true,
                 style: 'margin-left: 3px',
               },
               on: {
                 'on-close': () => {
                   window.console.info('click me');
-                  delTag(item.id);
+                  this.tagIndex = this.roadmaps[params.index].id;
+                  this.tagPos = params.index;
+                  this.oriTags = this.roadmaps[params.index].tag;
+                  this.deleteTag(item.id);
                 },
               },
             },
@@ -159,6 +165,7 @@ export default {
                   this.addTagModal = true;
                   this.tagIndex = this.roadmaps[params.index].id;
                   this.tagPos = params.index;
+                  this.oriTags = this.roadmaps[params.index].tag;
                 },
               },
             })]);
@@ -235,7 +242,7 @@ export default {
         window.console.log('roadmap card', res);
         this.roadmaps = res.data.results;
         this.data = this.getData();
-        this.refreshTags();
+        // this.refreshTags();
       })
       .catch((err) => {
         pushErr(this, err, true);
@@ -249,61 +256,82 @@ export default {
     },
   },
   methods: {
+    randomColor(id) {
+      if (id % 7 === 0) {
+        return 'primary';
+      } else if (id % 7 === 1) {
+        return 'success';
+      } else if (id % 7 === 2) {
+        return 'magenta';
+      } else if (id % 7 === 3) {
+        return 'volcano';
+      } else if (id % 7 === 4) {
+        return 'cyan';
+      } else if (id % 7 === 5) {
+        return 'blue';
+      } else if (id % 7 === 6) {
+        return 'geekblue';
+      }
+      return 'primary';
+    },
     okAddTag() {
-      // updateRoadmapTag(this.tagIndex)
-      //   .catch((err) => {
-      //     pushErr(this, err, true);
-      //   });
-
-
-      updateTag(this.TagValue, [this.tagIndex])
-        .catch((err) => {
+      createTag(this.TagValue).then((tagRes) => {
+        let haveThisTag = false;
+        const tagsArray = [];
+        for (let i = 0; i < this.oriTags.length; i += 1) {
+          if (this.oriTags[i].id !== tagRes.data.id) {
+            tagsArray.push(this.oriTags[i].id);
+          } else {
+            haveThisTag = true;
+          }
+        }
+        updateRoadmapTag(this.tagIndex, tagsArray.concat([tagRes.data.id])).then(() => {
+          if (haveThisTag === false) {
+            this.data[this.tagPos].tags.push({ id: tagRes.data.id, name: this.TagValue });
+          }
+        }).catch((err) => {
           pushErr(this, err, true);
         });
-      this.data[this.tagPos].tags.push({ name: this.TagValue });
-      this.TagValue = '';
-      this.tagIndex = -1;
-      this.tagPos = -1;
+      });
       this.addTagModel = false;
     },
     cancelAddTag() {
-      getTags().then((res) => {
-        window.console.info(res);
-      }).catch((err) => {
-        pushErr(this, err, true);
-      });
       this.TagValue = '';
       this.tagIndex = -1;
       this.addTagModel = false;
     },
+    deleteTag(tagId) {
+      const tagsArray = [];
+      const tagsIdArray = [];
+      window.console.info(this.oriTags);
+      for (let i = 0; i < this.oriTags.length; i += 1) {
+        if (this.oriTags[i].id !== tagId) {
+          tagsIdArray.push(this.oriTags[i].id);
+          tagsArray.push(this.oriTags[i]);
+        }
+      }
+      updateRoadmapTag(this.tagIndex, (tagsIdArray || [])).then(() => {
+        this.data[this.tagPos].tags = tagsArray;
+        this.roadmaps[this.tagPos].tag = tagsArray;
+        this.oriTags = tagsArray;
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+    },
     getIndex(r, c, col) {
       return (((r - 1) * col) + (c - 1)) - 1;
-    },
-    refreshTags() {
-      let tagsData = 0;
-      _(this.data)
-        .forEach((dataItem) => {
-          const dataId = this.roadmaps[dataItem.id - 1].id;
-          getTagsByRoadmaps(dataId).then((res) => {
-            tagsData = res.data;
-            _(tagsData).forEach((tagItem) => {
-              this.data[dataItem.id - 1].tags.push(tagItem);
-            });
-          }).catch((err) => {
-            pushErr(this, err, true);
-          });
-        });
     },
     getData() {
       const data = [];
       let index = 0;
       _(this.roadmaps)
         .forEach((roadmap) => {
+          window.console.info(roadmap.tag);
           index += 1;
           data.push({
             id: index,
             title: roadmap.title,
-            tags: [],
+            tags: (roadmap.tag || []),
             description: roadmap.description,
           });
           // window.console.log(roadmap);
