@@ -1,15 +1,6 @@
 <template>
   <Layout>
     <Content :style="{minHeight: '280px', background: '#fff'}">
-      <div  id="roadmap-title">
-        {{roadMapTitle}}
-      </div>
-      <Collapse value="1">
-        <Panel name="1">
-          Description
-          <p slot="content">{{description}}</p>
-        </Panel>
-      </Collapse>
       <roadmap
         :nodes="nodes"
         :connections="mergedConnections"
@@ -21,39 +12,9 @@
         @svg-click="handleSvgClick"
         @conn-click="handleConnClick"
       />
-      <Likes></Likes>
-      <Comment :comments="comments" @comment-committed="handleCommentCommitted"></Comment>
     </Content>
-    <Sider hide-trigger :style="{background: '#fff'}" v-if="sharedId===-1">
-      <Button  @click="handleClkHelp"
-               class="b-ed">
-        使用帮助
-        <Icon type="ios-help-circle" />
-      </Button>
-      <Button type="warning" @click="handleClkEdit" class="b-ed">
-        编&emsp;&emsp;辑
-        <Icon type="ios-create"/>
-      </Button>
-      <Button type="success" @click="handleClkShare" class="b-ed">
-        分&emsp;&emsp;享
-        <Icon type="ios-share" />
-      </Button>
-      <Button type="primary" @click="handleOpenUrl" class="b-ed" v-if="openable">
-        查看链接
-        <Icon type="ios-link" />
-      </Button>
-      <Button type="info" @click="handleOpenNote" class="b-ed" v-if="curNodeType==='article'">
-        查看笔记
-        <Icon type="ios-book" />
-      </Button>
-      <Button type="success" @click="handleClkBindEssay"
-              class="b-ed" v-if="hasBindEssay">
-          查看随笔
-          <Icon type="md-cloud-upload" />
-      </Button>
-      <NoteMarkdown :note="curNote" ref="notemdReader"
-                    @article-note-edit="jumpArticleNoteEdit"></NoteMarkdown>
-    </Sider>
+    <NoteMarkdown :note="curNote" ref="notemdReader"
+                  @article-note-edit="jumpArticleNoteEdit"></NoteMarkdown>
   </Layout>
 </template>
 
@@ -65,24 +26,19 @@ import { getRoadmap, getRoadmapShareLink, postRoadmapShareLink } from '../apis/R
 import { reqSingle } from '../apis/util';
 import Roadmap from '../components/roadmap/Roadmap';
 import NoteMarkdown from '../components/NoteMarkdown';
-import Likes from '../components/Likes';
-import Comment from '../components/comment/Comment';
-import { getEssay } from '../apis/EssayEditorApis';
 
 Vue.prototype._ = _;
 
 export default {
   name: 'RoadmapReader',
+  props: ['roadMapId'],
   components: {
     Roadmap,
     NoteMarkdown,
-    Likes,
-    Comment,
   },
   data() {
     return {
       text: null,
-      roadMapId: -1,
       sharedId: -1,
       roadMapTitle: 'roadMapTitleDefalt',
       repaint: 1,
@@ -118,7 +74,6 @@ export default {
         pushErr(this, err, true);
       }
     } else {
-      this.roadMapId = this.$route.query.selected;
       try {
         this.articles = (await reqSingle('/api/articles/', 'GET')).data;
         this.essays = (await reqSingle('/api/essays/', 'GET')).data;
@@ -138,9 +93,9 @@ export default {
   },
   computed: {
     /**
-     * auto generated reference connections
-     * @type {Array}
-     */
+       * auto generated reference connections
+       * @type {Array}
+       */
     refConnections() {
       let conn = [];
       let articleNodes = _.filter(this.nodes, node => (node.category === 'article'));
@@ -170,9 +125,9 @@ export default {
     },
 
     /**
-     * simple connections and reference connections
-     * @returns {*[]}
-     */
+       * simple connections and reference connections
+       * @returns {*[]}
+       */
     mergedConnections() {
       return [...this.connections, ...this.refConnections];
     },
@@ -293,6 +248,12 @@ export default {
         window.console.log('pass');
       }
     },
+    handleOpenEssay() {
+      this.$router.push({
+        path: '/essayReader',
+        query: { selected: this.curNode.category_id },
+      });
+    },
     handleSvgClick() {
       this.curNode = null;
     },
@@ -306,8 +267,8 @@ export default {
       this.$Modal.info({
         title: '使用帮助',
         content:
-          '快捷键：</br>' +
-          '双击节点可以打开节点中的URL。</br>',
+            '快捷键：</br>' +
+            '双击节点可以打开节点中的URL。</br>',
         scrollable: true,
         closable: true,
       });
@@ -335,20 +296,9 @@ export default {
       this.comments = [...this.comments, com];
     },
     handleClkBindEssay() {
-      getEssay(this.text.bindEssay).then(() => {
-        this.$router.push({
-          path: '/essayRoadmapReader',
-          query: { selected: this.text.bindEssay },
-        });
-      }).catch(() => {
-        this.$Modal.error({ title: `Essay ${this.text.bindEssay} not found` });
-        this.text.bindEssay = -1;
-      });
-    },
-    handleOpenEssay() {
       this.$router.push({
         path: '/essayReader',
-        query: { selected: this.curNode.category_id },
+        query: { selected: this.text.bindEssay },
       });
     },
   },

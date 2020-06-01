@@ -105,8 +105,8 @@ export default {
       });
       nodes
         .attr('class', (node) => {
-          if (node.category === 'article') {
-            return 'article-node article-node--editable';
+          if (node.category === 'article' || node.category === 'essay') {
+            return `${node.category}-node ${node.category}-node--editable`;
           }
           return 'mindmap-node mindmap-node--editable';
         })
@@ -137,6 +137,13 @@ export default {
           window.console.log('nodeclk', this.curNode);
         });
       nodes.call(d3Drag(this.simulation, svg, nodes));
+      // eslint-disable-next-line
+      let groups = nodes._groups[0];
+      let k = 0;
+      nodes.selectAll('a').attr('style', () =>
+        // eslint-disable-next-line
+         `background: ${groups[k++].__data__.color}`
+      );
       subnodes
         .on('click', (node) => {
           window.console.log('clk sub', node);

@@ -14,6 +14,8 @@
       <Input v-model="nodeInfo.nodeName" placeholder="Enter something..." style="width: 300px" />
       <p>Url</p>
       <Input v-model="nodeInfo.nodeUrl" placeholder="Enter something..." style="width: 300px" />
+      <p>Color</p>
+      <ColorPicker v-model="nodeInfo.color" recommend :hue="false"/>
     </Modal>
   </div>
 </template>
@@ -26,6 +28,7 @@ export default {
       nodeInfo: {
         nodeName: '',
         nodeUrl: '',
+        color: '#f5f5f5',
       },
     };
   },

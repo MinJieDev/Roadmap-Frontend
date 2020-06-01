@@ -54,14 +54,34 @@ const routes = [
     },
   },
   {
+    path: '/userProfile',
+    name: 'UserProfile',
+    component: () => import('../views/UserProfileView'),
+    meta: {
+      nickName: '用户档案',
+      level: 2,
+    },
+  },
+  {
     path: '/editor',
     name: 'Editor',
     component: () => import(/* webpackChunkName: "about" */ '../views/RoadmapEditorView.vue'),
     meta: {
-      nickName: '路书编辑页',
+      nickName: '路书编辑',
       name: ['路书目录', '路书编辑页'],
       path: ['/RoadmapTable', '/editor'],
       level: 5,
+    },
+  },
+  {
+    path: '/essayTable',
+    name: 'EssayTable',
+    component: () => import(/* webpackChunkName: "about" */ '../views/EssayTableView.vue'),
+    meta: {
+      nickName: '随笔目录',
+      name: ['随笔目录'],
+      path: ['/essayTable'],
+      level: 2,
     },
   },
   {
@@ -83,6 +103,48 @@ const routes = [
       nickName: '路书阅览',
       name: ['路书目录', '路书阅览'],
       path: ['/RoadmapTable', '/reader'],
+      level: 5,
+    },
+  },
+  {
+    path: '/essayReader',
+    name: 'EssayReader',
+    component: () => import(/* webpackChunkName: "about" */ '../views/EssayReaderView.vue'),
+    meta: {
+      nickName: '随笔阅览',
+      name: ['随笔目录', '随笔阅览'],
+      path: ['/essayTable', '/essayReader'],
+      level: 5,
+    },
+  },
+  {
+    path: '/essayEditor',
+    name: 'EssayEditor',
+    component: () => import(/* webpackChunkName: "about" */ '../views/EssayEditor.vue'),
+    meta: {
+      nickName: '随笔编辑',
+      name: ['随笔目录', '路书编辑'],
+      path: ['/RoadmapTable', '/editor'],
+      level: 5,
+    },
+  },
+  {
+    path: '/PaperRecommend',
+    name: 'PaperRecommend',
+    component: () => import('../components/PaperRecommend'),
+    meta: {
+      nickName: '文献推荐',
+      level: 2,
+    },
+  },
+  {
+    path: '/essayRoadmapReader',
+    name: 'EssayRoadmapReader',
+    component: () => import(/* webpackChunkName: "about" */ '../views/EssayRoadmapBindReader.vue'),
+    meta: {
+      nickName: '随笔阅览',
+      name: ['随笔目录', '随笔阅览'],
+      path: ['/essayTable', '/essayReader'],
       level: 5,
     },
   },
