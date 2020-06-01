@@ -895,8 +895,8 @@ export default {
             node.category_id = articleId;
             // eslint-disable-next-line no-param-reassign
             node.using_alias = node.using_alias || false;
-            // eslint-disable-next-line no-param-reassign
-            node.content = node.using_alias ? art.alias : art.title;
+            // eslint-disable-next-line no-param-reassign,no-nested-ternary
+            node.content = node.using_alias ? (art.alias === '' ? art.title : art.alias) : art.title;
           } else {
             // eslint-disable-next-line no-param-reassign
             node.category = 'mindmap';
