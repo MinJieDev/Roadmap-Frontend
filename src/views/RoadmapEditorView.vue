@@ -187,6 +187,12 @@
             v-if="curNodeType==='mindmap'"
             ref="modifyNode">
           </ModifyNodeForm>
+          <ModifyAliasForm
+            @alias-modified="handleAliasModified"
+            :alias-info-old="curAliasInfo"
+            v-if="curNodeType==='article'"
+            ref="modifyAlias">
+          </ModifyAliasForm>
           <MenuItem name="del-node" @click.native="handleNodeDeleted">
             删除节点
             <Icon type="md-trash" />
@@ -251,6 +257,7 @@ import NoteMarkdown from '../components/NoteMarkdown';
 import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
 import { getEssay } from '../apis/EssayEditorApis';
+import { updateAlias } from '../apis/MindTableEditorApis';
 import {
   createRoadmap,
   updateRoadmap,
@@ -260,6 +267,7 @@ import {
   postRoadmapShareLink,
 } from '../apis/RoadmapEditorApis';
 import Roadmap from '../components/roadmap/Roadmap';
+import ModifyAliasForm from '../components/ModifyAliasForm';
 
 Vue.prototype._ = _;
 
@@ -281,6 +289,7 @@ export default {
     ModifyNodeForm,
     NoteMarkdown,
     draggable,
+    ModifyAliasForm,
   },
   data() {
     return {
@@ -331,9 +340,7 @@ export default {
       let ret = [];
       _(this.nodes).forEach((node) => {
         let saveTxt = node.content;
-        if (node.category === 'article') {
-          saveTxt = node.category_id ? `$${node.category_id}` : `$${this.getArticleIdByTitle(node.content)}`;
-        } else if (node.category === 'essay') {
+        if (node.category === 'article' || node.category === 'essay') {
           saveTxt = `$${node.category_id}`;
         }
         ret = [...ret, {
@@ -345,6 +352,7 @@ export default {
           fy: node.fy,
           nodes: node.nodes,
           category: node.category,
+          using_alias: node.using_alias || false,
         }];
       });
       return ret;
@@ -371,12 +379,12 @@ export default {
       let conn = [];
       let articleNodes = _.filter(this.nodes, node => (node.category === 'article'));
       articleNodes = _.map(articleNodes, (node) => {
-        const article = _.find(this.articles, atc => (atc.title === node.content));
+        const article = this.getArticleById(node.category_id);
         return { ...node, article };
       });
       _.forEach(articleNodes, (ni) => {
         _.forEach(articleNodes, (nj) => {
-          if (_.includes(ni.article.article_references, nj.article.id)) {
+          if (_.includes(ni.article.article_references, nj.category_id)) {
             let curve = { x: 0, y: 0 };
             const tempConn = _.find(this.refCurves, nk =>
               (nk.curve && (ni.text === nk.source) && (nj.text === nk.target)));
@@ -456,8 +464,8 @@ export default {
     },
     curNote() {
       if (!this.curNode || this.curNode.category !== 'article') return '';
-      if (this.getArticleByTitle(this.curNode.content).note) {
-        return this.getArticleByTitle(this.curNode.content).note;
+      if (this.getArticleById(this.curNode.category_id).note) {
+        return this.getArticleById(this.curNode.category_id).note;
       }
       return '';
     },
@@ -477,6 +485,16 @@ export default {
     },
     hasBindEssay() {
       return this.text && this.text.bindEssay && this.text.bindEssay !== -1;
+    },
+    curAliasInfo() {
+      if (!this.curNode || this.curNode.category !== 'article') {
+        return null;
+      }
+      const art = this.getArticleById(this.curNode.category_id);
+      return {
+        using_alias: this.curNode.using_alias || false,
+        alias: art.alias,
+      };
     },
   },
   mounted() {
@@ -520,7 +538,7 @@ export default {
     // 监控键盘事件
     document.onkeydown = (e) => {
       if (this.$route.name !== 'Editor') return;
-      window.console.log('但是噶', e);
+      window.console.log('键盘事件', e);
       // 事件对象兼容
       const e1 = e;
       // 键盘按键判断:左箭头-37;上箭头-38；右箭头-39;下箭头-40
@@ -627,6 +645,24 @@ export default {
         }
       });
       this.repaintMindMap();
+    },
+    handleAliasModified(aliasInfo) {
+      _.forEach(this.nodes, (node) => {
+        if (node.text === this.curNode.text) {
+          updateAlias(this.curNode.category_id, aliasInfo.alias).then(() => {
+            this.$Notice.success({ title: 'alias modified' });
+            const art = this.getArticleById(this.curNode.category_id);
+            art.alias = aliasInfo.alias;
+            // eslint-disable-next-line no-param-reassign
+            node.using_alias = aliasInfo.using_alias;
+            // eslint-disable-next-line no-param-reassign,no-nested-ternary
+            node.content = node.using_alias ? (art.alias === '' ? art.title : art.alias) : art.title;
+            this.repaintMindMap();
+          }).catch((err) => {
+            pushErr(this, err, true);
+          });
+        }
+      });
     },
     handleArticleNodeAdded(nodeInfo) {
       this.roadmapArticles = _.uniq([...this.roadmapArticles, nodeInfo.articleId]);
@@ -830,10 +866,14 @@ export default {
         pushErr(this, '生成缩略图失败', true);
       });
     },
+    // @deprecated
     getArticleByTitle(title) {
+      window.console.warn('this function is deprecated, which cannot suport duplicated article name. Use getArticleById instead');
       return _(this.articles).find(art => art.title === title);
     },
+    // @deprecated
     getArticleIdByTitle(title) {
+      window.console.warn('this function is deprecated, which cannot suport duplicated article name. Use getArticleById instead');
       return _(this.articles).find(art => art.title === title).id;
     },
     getArticleById(id) {
@@ -850,11 +890,13 @@ export default {
           const art = this.getArticleById(articleId);
           if (typeof art !== 'undefined') {
             // eslint-disable-next-line no-param-reassign
-            node.content = art.title;
-            // eslint-disable-next-line no-param-reassign
             node.URI = art.url;
             // eslint-disable-next-line no-param-reassign
             node.category_id = articleId;
+            // eslint-disable-next-line no-param-reassign
+            node.using_alias = node.using_alias || false;
+            // eslint-disable-next-line no-param-reassign
+            node.content = node.using_alias ? art.alias : art.title;
           } else {
             // eslint-disable-next-line no-param-reassign
             node.category = 'mindmap';
@@ -917,7 +959,10 @@ export default {
       window.console.log('dbclick', node);
       window.console.log('url', node.URI);
       if (node.category === 'article') {
-        window.console.log('pass');
+        this.$nextTick(() => {
+          window.console.log(this.curNode);
+          this.$refs.modifyAlias.handleClkModifyAlias();
+        });
       } else {
         this.$nextTick(() => {
           this.$refs.modifyNode.handleClkModifyNode();
@@ -967,7 +1012,7 @@ export default {
     jumpArticleNoteEdit() {
       this.$router.push({
         path: '/articleMde',
-        query: { selected: this.getArticleIdByTitle(this.curNode.content) },
+        query: { selected: this.curNode.category_id },
       });
     },
     handleArticleDraggedIn(evt) {
