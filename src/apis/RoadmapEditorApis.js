@@ -30,3 +30,8 @@ export const delRoadmap = id => req(`/api/road_maps/${id}/`, 'DELETE');
 export const postRoadmapShareLink = id => req('/api/share/roadmap/', 'POST', {}, { id });
 
 export const getRoadmapShareLink = id => req(`/api/share/roadmap/${id}`, 'GET');
+
+export const updateRoadmapTag = (id, tag) => req(`/api/road_maps/${id}/`, 'PATCH', {}, { tag });
+
+export const createTag = name => req('/api/tags/', 'POST', {}, { name });
+
