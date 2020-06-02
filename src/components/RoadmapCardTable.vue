@@ -265,9 +265,9 @@ export default {
   mounted() {
     reqSingle('/api/road_maps/', 'GET')
       .then((res) => {
-        window.console.log('roadmap card', res);
-        this.roadmaps = res.data.results;
-        this.data = this.getData();
+        // window.console.log('roadmap card', res);
+        // this.roadmaps = res.data.results;
+        // this.data = this.getData();
         this.rawroadmaps = res.data;
       })
       .catch((err) => {
