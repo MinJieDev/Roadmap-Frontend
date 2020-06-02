@@ -384,7 +384,7 @@ export default {
       });
       _.forEach(articleNodes, (ni) => {
         _.forEach(articleNodes, (nj) => {
-          if (_.includes(ni.article.article_references, nj.category_id)) {
+          if (_.includes(ni.article.article_references, nj.article.id)) {
             let curve = { x: 0, y: 0 };
             const tempConn = _.find(this.refCurves, nk =>
               (nk.curve && (ni.text === nk.source) && (nj.text === nk.target)));
