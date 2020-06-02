@@ -105,7 +105,7 @@ export default {
           this.$router.push({
             path: '/essayRoadmapReader/',
             query: {
-              selected: this.sharedId,
+              sharedId: this.sharedId,
             },
           });
         }
