@@ -1,12 +1,12 @@
 <template>
   <div class="comment-wrap">
     <div class="comments-list">
-      <div class="comments-list-item" v-for="(item,index) in comments" v-bind:key="index">
+      <div class="comments-list-item" v-for="(item,index) in comment" v-bind:key="index">
         <div class="comments-list-item-heading">
           <img src="../../assets/img/heading.jpg" />
-          <span class="comments-list-item-username">pppercywang</span>
+          <span class="comments-list-item-username">{{ item.user.username }}</span>
         </div>
-        <div class="comments-list-item-content" v-html="item"></div>
+        <div class="comments-list-item-content" v-html="item.text"></div>
       </div>
     </div>
     <textarea class="comment-input" placeholder="请输入内容" id="textpanel" v-model="content"></textarea>
@@ -23,7 +23,7 @@
 import EmojiPanel from './children/EmojiPanel';
 
 export default {
-  props: ['comments'],
+  props: ['comment'],
   data() {
     return {
       content: '',
