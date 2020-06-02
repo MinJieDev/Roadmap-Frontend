@@ -6,7 +6,7 @@
     </div>
     <div class="markdown-body">
       <VueMarkdown v-if="repaint" style="margin: 20px">{{content}}</VueMarkdown>
-      <Likes></Likes>
+      <Likes @on-share="handleClkShare"></Likes>
       <Comment :comments="comments" @comment-committed="handleCommentCommitted"></Comment>
     </div>
   </div>
@@ -21,6 +21,7 @@ import { pushErr } from '../components/ErrPush';
 import { req } from '../apis/util';
 import Likes from '../components/Likes';
 import Comment from '../components/comment/Comment';
+import { postEssayShareLink, getEssayShareLink } from '../apis/EssayEditorApis';
 
 export default {
   name: 'EssayEditorView',
@@ -28,6 +29,8 @@ export default {
   props: {},
   data() {
     return {
+      sharedId: -1,
+      essayId: -1,
       text: null,
       refRoadmap: -1,
       bindRoadmap: -1,
@@ -42,7 +45,8 @@ export default {
   methods: {
     getData() {
       window.console.log(`/api/essays/${this.$route.query.selected}/`);
-      req(`/api/essays/${this.$route.query.selected}/`, 'GET')
+      this.essayId = this.$route.query.selected;
+      req(`/api/essays/${this.essayId}/`, 'GET')
         .then((res) => {
           this.text = JSON.parse(res.data.text);
           this.content = this.text.content;
@@ -51,11 +55,10 @@ export default {
           this.title = res.data.title;
           this.repaint = true;
           if (this.refRoadmap !== -1) {
-            window.console.log('fuck');
             this.$router.push({
               path: '/essayRoadmapReader/',
               query: {
-                selected: this.$route.query.selected,
+                selected: this.essayId,
               },
             });
           }
@@ -68,9 +71,48 @@ export default {
       window.console.log('com', com);
       this.comments = [...this.comments, com];
     },
+    handleClkShare() {
+      if (this.sharedId !== -1) {
+        this.$Modal.success({
+          title: '随笔分享链接',
+          content: `http://47.94.141.56/essayReader?sharedId=${this.sharedId}`,
+          width: '700',
+        });
+      } else {
+        postEssayShareLink(this.essayId).then((res) => {
+          this.$Modal.success({
+            title: '随笔分享链接',
+            content: `http://47.94.141.56/essayReader?sharedId=${res.data.share_id}/`,
+            width: '700',
+          });
+        }).catch((err) => {
+          pushErr(this, err, true);
+        });
+      }
+    },
   },
   mounted() {
-    if (String(this.$route.query.selected) !== '-1') {
+    if (!this.$route.query.selected) {
+      this.sharedId = this.$route.query.sharedId;
+      getEssayShareLink(this.sharedId).then((res) => {
+        this.text = JSON.parse(res.data.text);
+        this.content = this.text.content;
+        this.refRoadmap = this.text.refRoadmap;
+        this.bindRoadmap = this.text.bindRoadmap;
+        this.title = res.data.title;
+        this.repaint = true;
+        if (this.refRoadmap !== -1) {
+          this.$router.push({
+            path: '/essayRoadmapReader/',
+            query: {
+              selected: this.sharedId,
+            },
+          });
+        }
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+    } else if (String(this.$route.query.selected) !== '-1') {
       this.getData();
     }
   },
