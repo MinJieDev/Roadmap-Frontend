@@ -40,6 +40,8 @@ export default {
     },
     handleClkModifyNode() {
       this.nodeFormModal = true;
+      this.nodeInfo.nodeName = this.nodeInfoOld.name;
+      this.nodeInfo.nodeUrl = this.nodeInfoOld.URI;
       this.$Message.info('handleClk');
     },
   },

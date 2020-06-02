@@ -145,7 +145,7 @@ export default {
       let conn = [];
       let articleNodes = _.filter(this.nodes, node => (node.category === 'article'));
       articleNodes = _.map(articleNodes, (node) => {
-        const article = _.find(this.articles, atc => (atc.title === node.content));
+        const article = this.getArticleById(node.category_id);
         return { ...node, article };
       });
       _.forEach(articleNodes, (ni) => {
@@ -192,8 +192,8 @@ export default {
     },
     curNote() {
       if (!this.curNode || this.curNode.category !== 'article') return '';
-      if (this.getArticleByTitle(this.curNode.content).note) {
-        return this.getArticleByTitle(this.curNode.content).note;
+      if (this.getArticleById(this.curNode.category_id).note) {
+        return this.getArticleById(this.curNode.category_id).note;
       }
       return '';
     },
@@ -236,11 +236,13 @@ export default {
           const art = this.getArticleById(articleId);
           if (typeof art !== 'undefined') {
             // eslint-disable-next-line no-param-reassign
-            node.content = art.title;
-            // eslint-disable-next-line no-param-reassign
             node.URI = art.url;
             // eslint-disable-next-line no-param-reassign
             node.category_id = articleId;
+            // eslint-disable-next-line no-param-reassign
+            node.using_alias = node.using_alias || false;
+            // eslint-disable-next-line no-param-reassign,no-nested-ternary
+            node.content = node.using_alias ? (art.alias === '' ? art.title : art.alias) : art.title;
           } else {
             // eslint-disable-next-line no-param-reassign
             node.category = 'mindmap';
@@ -271,7 +273,9 @@ export default {
     toDisplayConnections(savedConnections) {
       return savedConnections;
     },
+    // @deprecated
     getArticleByTitle(title) {
+      window.console.warn('this function is deprecated, which cannot suport duplicated article name. Use getArticleById instead');
       return _(this.articles).find(art => art.title === title);
     },
     handleNodeClick(node) {
@@ -327,7 +331,7 @@ export default {
     jumpArticleNoteEdit() {
       this.$router.push({
         path: '/articleMde',
-        query: { selected: this.getArticleIdByTitle(this.curNode.content) },
+        query: { selected: this.curNode.category_id },
       });
     },
     handleCommentCommitted(com) {

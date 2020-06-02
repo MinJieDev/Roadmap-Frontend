@@ -14,3 +14,5 @@ export const changeMTdata = data => req(
 export const getAllNewPapers = () => req('/api/newpapers/', 'GET', {});
 
 export const getArticle = id => reqSingle(`/api/articles/${id}/`, 'GET');
+
+export const updateAlias = (id, alias) => reqSingle(`/api/articles/${id}/`, 'PATCH', { alias });
