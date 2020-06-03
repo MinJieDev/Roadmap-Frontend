@@ -1,10 +1,10 @@
 <template>
   <div>
     <ItemEditor
-      v-bind:drawer="drawer"
-      v-bind:index="index"
-      v-bind:drawerFormData="formData"
-      v-bind:articles="tableData"
+      :drawer="drawer"
+      :index="index"
+      :drawerFormData="formData"
+      :articles="tableData"
       @cancelDrawer="cancelDrawer"
       @submitDrawer="submitDrawer"
     >
@@ -363,14 +363,15 @@ export default {
           articleUrl = articleJson[i].entryTags.journal.split(':')[1];
           articleUrl = `https://arxiv.org/pdf/${articleUrl}.pdf`;
         }
-        window.console.log('bib data add', articleJson[i]);
         createMTdata(
           articleJson[i].entryTags.title,
           articleJson[i].entryTags.author,
           articleUrl,
-          '',
           articleJson[i].entryTags.journal,
-          [])
+          articleJson[i].entryTags.year,
+          articleJson[i].entryTags.volume,
+          articleJson[i].entryTags.pages,
+          'U', [])
           .catch((err) => {
             this.$Message.error(`第${i}条BibTex导入失败`);
             window.console.error(err);
@@ -462,15 +463,12 @@ export default {
           if (article.number !== undefined) {
             artStr = artStr.concat(`number={${article.number}},</br>`);
           }
-          if (article.page !== undefined) {
-            artStr = artStr.concat(`pages={${article.page}},</br>`);
+          if (article.pages !== undefined && article.pages !== '') {
+            artStr = artStr.concat(`pages={${article.pages}},</br>`);
           }
-          if (article.year !== undefined) {
-            artStr = artStr.concat(`year={${article.year}},</br>`);
+          if (article.years !== undefined) {
+            artStr = artStr.concat(`year={${article.years}},</br>`);
           }
-          // if (article.publisher !== null) {
-          //   artStr = artStr.concat(`publisher={${article.publisher}},</br>`);
-          // }
           artStr = artStr.concat('}</br>');
           this.BibTexExportContent = this.BibTexExportContent + artStr;
         }

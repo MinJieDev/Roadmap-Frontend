@@ -24,13 +24,12 @@ export default {
   },
   methods: {
     reloadData(page) {
-      if (page === undefined) {
+      if (page === undefined || page < 1) {
         // eslint-disable-next-line no-param-reassign
         page = 1;
       }
       // window.console.log('current page', page);
       reqSingle('/api/articles/', 'GET', { page }).then((res) => {
-        // window.console.log('get page data', res);
         this.articles = res.data.results;
         this.articleTotal = res.data.count;
         // window.console.log('article total:', this.articleTotal);

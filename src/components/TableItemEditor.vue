@@ -10,24 +10,37 @@
       @on-close="cancelDrawer"
     >
       <Row :gutter="32">
-        <Col span="24">
+        <Col span="22">
           <br>
-          <h3>题目</h3>
+          <h3>题名</h3>
           <br>
-          <Row :gutter="50" style="margin-left: 0px">
-            <Col>
-              <Input
-                v-model="drawerData.title"
-                clearable
-                placeholder="请输入文章标题">
-              </Input>
-            </Col>
+          <Row :gutter="50" style="margin-left: 20px">
+            <Input
+              v-model="drawerData.title"
+              clearable
+              placeholder="请输入题目">
+            </Input>
           </Row>
         </Col>
       </Row>
 
       <Row :gutter="32">
-        <Col span="10">
+        <Col span="22">
+          <br>
+          <h3>显示名</h3>
+          <br>
+          <Row :gutter="50" style="margin-left: 20px">
+            <Input
+              v-model="drawerData.alias"
+              clearable
+              placeholder="请输入文献显示名">
+            </Input>
+          </Row>
+        </Col>
+      </Row>
+
+      <Row :gutter="32">
+        <Col span="22">
           <br>
           <h3>作者</h3>
           <br>
@@ -39,18 +52,32 @@
             </Input>
           </Row>
         </Col>
-
-        <Col span="12">
+      </Row>
+      <Row :gutter="32">
+        <Col span="7">
+          <br>
+          <h3>年份</h3>
+          <br>
+          <Row :gutter="50" style="margin-left: 20px">
+            <Input
+              v-model="drawerData.years"
+              clearable
+              placeholder="请输入文章所属年份">
+            </Input>
+          </Row>
+        </Col>
+        <Col span="14">
           <br>
           <h3>阅读状态</h3>
           <br>
-          <Row :gutter="30" style="margin-left: 0px; margin-top: 2px">
+          <Row :gutter="30" style="margin-left: 10px; margin-top: 2px;">
             <Col>
               <Slider
                 v-model="slider.value"
                 :step="slider.step"
                 :max="slider.max"
-                :tip-format="slider.tipFormat"
+                :marks="slider.marks"
+                :tip-format="hideTipFormat"
                 @on-change="sliderChange"
               ></Slider>
             </Col>
@@ -59,7 +86,7 @@
       </Row>
 
       <Row :gutter="32">
-        <Col span="20">
+        <Col span="22">
           <br>
           <h3>链接(URL)</h3>
           <br>
@@ -75,7 +102,7 @@
       </Row>
 
       <Row :gutter="32">
-        <Col span="15">
+        <Col span="16">
           <br>
           <h3>期刊/会议</h3>
           <br>
@@ -88,18 +115,7 @@
           </Row>
         </Col>
 
-        <Col span="7">
-          <br>
-          <h3>年份</h3>
-          <br>
-          <Row :gutter="50" style="margin-left: 20px">
-            <Input
-              v-model="drawerData.years"
-              clearable
-              placeholder="请输入文章所属的年份">
-            </Input>
-          </Row>
-        </Col>
+
       </Row>
 
       <Row :gutter="32">
@@ -174,40 +190,28 @@ export default {
     return {
       slider: {
         value: 1,
-        max: 3,
+        max: 4,
         step: 1,
-        tipFormat: null,
         marks: {
-          0: '0°C',
-          1: '12°C',
-          2: '32°C',
-          3: {
+          1: {
             style: {
               color: '#ff0000',
             },
-            label: this.$createElement('strong', '55°C'),
+            label: this.$createElement('strong', '未读'),
+          },
+          2: {
+            style: {
+              color: '#2db7f5',
+            },
+            label: this.$createElement('strong', '在读'),
+          },
+          3: {
+            style: {
+              color: '#19be6b',
+            },
+            label: this.$createElement('strong', '已读'),
           },
         },
-        // marks: {
-        //   1: {
-        //     style: {
-        //       color: '#ff0000',
-        //     },
-        //     label: this.$createElement('strong', '未读'),
-        //   },
-        //   2: {
-        //     style: {
-        //       color: '#2db7f5',
-        //     },
-        //     label: this.$createElement('strong', '在读'),
-        //   },
-        //   3: {
-        //     style: {
-        //       color: '#19be6b',
-        //     },
-        //     label: this.$createElement('strong', '已读'),
-        //   },
-        // },
       },
       styles: {
         height: 'calc(100% - 55px)',
@@ -246,6 +250,9 @@ export default {
       } else {
         this.drawerData.read_state = 'F';
       }
+    },
+    hideTipFormat() {
+      return null;
     },
   },
 };
