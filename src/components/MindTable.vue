@@ -9,30 +9,40 @@
       @submitDrawer="submitDrawer"
     >
     </ItemEditor>
-    <Button
-      @click="openDrawer(-1)"
-      type="primary"
-      style="margin-left: 10px; margin-bottom: 10px ">
-      创建文献
-    </Button>
-    <Button
-      @click="openBibTexModal"
-      type="success"
-      style="margin-left: 10px; margin-bottom: 10px ">
-      导入BibTex
-    </Button>
-    <Button
-      @click="openBibTexExportModal"
-      type="success"
-      style="margin-left: 10px; margin-bottom: 10px ">
-      导出BibTex
-    </Button>
-    <Button
-      @click="deleteSelectItem"
-      type="error"
-      style="margin-left : 10px; margin-bottom: 10px; float: right; margin-right: 20px">
-      删除勾选项
-    </Button>
+    <Row>
+      <Button
+        @click="openDrawer(-1)"
+        type="primary"
+        style="margin-left: 20px; margin-bottom: 10px ">
+        创建文献
+      </Button>
+      <Button
+        @click="jumpToStatistics"
+        type="primary"
+        style="margin-left: 10px; margin-bottom: 10px; float: right; margin-right: 30px">
+        查看文献统计
+      </Button>
+    </Row>
+    <Row>
+      <Button
+        @click="openBibTexModal"
+        type="success"
+        style="margin-left: 20px; margin-bottom: 10px ">
+        导入BibTex
+      </Button>
+      <Button
+        @click="openBibTexExportModal"
+        type="success"
+        style="margin-left: 10px; margin-bottom: 10px ">
+        导出BibTex
+      </Button>
+      <Button
+        @click="deleteSelectItem"
+        type="error"
+        style="margin-left : 10px; margin-bottom: 10px; float: right; margin-right: 30px">
+        删除勾选项
+      </Button>
+    </Row>
     <Modal
       v-model="BibtexModal"
       title="导入BibTex"
@@ -100,6 +110,7 @@ import { pushErr } from '../components/ErrPush';
 import ItemEditor from './TableItemEditor';
 import MindTableExpand from './MindTableExpand';
 import { deleteMTdata, createMTdata, changeMTdata } from '../apis/MindTableEditorApis';
+import router from '../router';
 
 export default {
   name: 'MindTable',
@@ -495,6 +506,14 @@ export default {
       this.$Message.info('Copy Success');
       this.BibTexExportModal = false;
       this.BibTexExportContent = '';
+    },
+    jumpToStatistics() {
+      router.push({
+        name: 'UserProfile',
+        params: {
+          content: 'artcSt',
+        },
+      });
     },
   },
 };
