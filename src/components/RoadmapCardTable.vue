@@ -11,8 +11,8 @@
         <i-switch
           @on-change="onChangeViewStyle"
           size="large">
-          <span slot="open">Card</span>
-          <span slot="close">Table</span>
+          <span :slot="this.initialViewStyle === 'card' ? 'close' : 'open' ">Card</span>
+          <span :slot="this.initialViewStyle === 'table' ? 'close' : 'open'">Table</span>
         </i-switch>
       </div>
     </div>
@@ -116,6 +116,8 @@ import {
   delRoadmap, postRoadmapShareLink,
   createTag, updateRoadmapTag,
 } from '../apis/RoadmapEditorApis';
+import store from '../vuex/index';
+
 
 export default {
   name: 'RoadmapCardTable',
@@ -130,6 +132,7 @@ export default {
       oriTags: [],
       cols: 3,
       viewStyle: 'card',
+      initialViewStyle: undefined,
       filtArticle: -1,
       // data: [],
       rawroadmaps: [],
@@ -263,6 +266,8 @@ export default {
     };
   },
   mounted() {
+    this.viewStyle = store.state.roadMapTable === undefined ? 'card' : store.state.roadMapTable;
+    this.initialViewStyle = this.viewStyle;
     reqSingle('/api/road_maps/', 'GET')
       .then((res) => {
         // window.console.log('roadmap card', res);
@@ -455,6 +460,7 @@ export default {
       } else {
         this.viewStyle = 'card';
       }
+      store.commit('pushRoadMapTable', this.viewStyle);
     },
     mouseOnThumbnail() {
       window.console.info('Mouse enter.');
