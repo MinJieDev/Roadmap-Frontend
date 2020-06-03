@@ -348,7 +348,7 @@ export default {
     },
     getUserProfileData() {
       reqSingle('api/users', 'GET').then((res) => {
-        window.console.log('user data', res);
+        // window.console.log('user data', res);
         this.userData.id = _.clone(res.data[0].id);
         this.userData.name = _.clone(res.data[0].username);
         this.userData.email = _.clone(res.data[0].email);
@@ -428,7 +428,6 @@ export default {
     },
     handleUpdateCity() {
       this.userLayout.cityEditable = false;
-      window.console.log('city', this.userData.city);
       updateUserCity(this.userData.id, this.userData.city).then(() => {
         this.$Notice.success({ title: 'city updated' });
       }).catch((err) => {
