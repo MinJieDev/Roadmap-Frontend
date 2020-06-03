@@ -48,8 +48,14 @@
       </i-switch>
     </div>
     <br><br>
-    <div v-if="this.viewStyle==='chart'">
-
+    <div v-if="viewStyle==='chart'">
+      <div id="chart">
+        <schart
+          class="wrapper"
+          canvasId="canvas"
+          :options="options"
+        />
+      </div>
     </div>
     <div v-else>
       <Table
@@ -89,13 +95,14 @@
 
 <script>
 import _ from 'lodash';
-// import Schart from 'vue-schart';
+import Schart from 'vue-schart';
 import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
 import ArticleStatisExpand from './ArticleStatisExpand';
 
 export default {
   name: 'ArticleStatistics',
+  components: { ArticleStatisExpand, Schart },
   data() {
     return {
       articles: [],
@@ -104,6 +111,8 @@ export default {
         // data: [ {name: '', times: Number, articles: [] ]
         data: [],
       },
+      authTimeDesc: [],
+      tableData: [],
       authExport: {
         // view, times or name
         view: 'times',
@@ -122,6 +131,23 @@ export default {
         progressPercent: 100,
         successPercent: 100,
         tipContent: '',
+      },
+      options: {
+        type: 'bar',
+        title: {
+          text: '作者统计图',
+        },
+        bgColor: '#fbfbfb',
+        labels: ['1'],
+        leftPadding: 120,
+        xRorate: 15,
+        datasets: [
+          {
+            label: '作者频次',
+            fillColor: 'rgba(92 172 238)',
+            data: [5],
+          },
+        ],
       },
       columns: [
         {
@@ -195,19 +221,18 @@ export default {
       this.articles = res.data;
       this.articleTotal = this.articles.length;
       _.forEach(this.articles, (item) => {
-        // TODO: wait for backEnd
-        // if (item.read_state === 'read') {
-        //   this.readState.read += 1;
-        // } else if (item.read_state === 'reading') {
-        //   this.readState.reading += 1;
-        // } else {
-        //   this.readState.unread += 1;
-        // }
-        if (item.read_state === true) {
+        if (item.read_state === 'read') {
           this.readState.read += 1;
+        } else if (item.read_state === 'reading') {
+          this.readState.reading += 1;
         } else {
           this.readState.unread += 1;
         }
+        // if (item.read_state === true) {
+        //   this.readState.read += 1;
+        // } else {
+        //   this.readState.unread += 1;
+        // }
         const newAuthors = _.split(item.author, ' and ');
         _.forEach(newAuthors, (newAuth) => {
           const findRes = _.find(this.authorStat.data, stAuth => stAuth.name === newAuth);
@@ -242,19 +267,26 @@ export default {
           this.progress.successPercent = 100;
         }
       }
+
+      this.authTimeDesc = _.orderBy(this.authorStat.data, ['times', 'name'], ['desc', 'asc']);
+      this.tableData = _.slice(this.authTimeDesc, 0, 10);
+      let name = [];
+      _.forEach(this.tableData, (item) => {
+        name = _.concat(name, item.name);
+      });
+      this.options.labels = name;
+      let times = [];
+      _.forEach(this.tableData, (item) => {
+        times = _.concat(times, _.toInteger(item.times));
+      });
+      this.options.datasets[0].data = times;
     }).catch((err) => {
       pushErr(this, err, true);
     });
   },
   computed: {
-    authTimeDesc() {
-      return _.orderBy(this.authorStat.data, ['times', 'name'], ['desc', 'asc']);
-    },
     authNameAsc() {
       return _.orderBy(this.authorStat.data, 'name', 'asc');
-    },
-    tableData() {
-      return _.slice(this.authTimeDesc, 0, 15);
     },
   },
 };
@@ -266,5 +298,9 @@ export default {
     margin-left: 20px;
     font-size: 21px;
     font-weight: bold;
+  }
+  .wrapper{
+    width: 850px;
+    height: 500px;
   }
 </style>
