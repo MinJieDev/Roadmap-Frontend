@@ -230,11 +230,11 @@
       </div>
       <div v-else-if="content==='roadmapSt'"
            style="margin-left: 60px">
-        roadmap
+        功能正在开发
       </div>
       <div v-else-if="content==='essaySt'"
            style="margin-left: 60px">
-        essay
+        功能正在开发
       </div>
     </Content>
   </Layout>
@@ -261,9 +261,9 @@ export default {
         email: '',
         interestDB: [],
         interest: [],
-        bio: 'Coding everyday',
-        city: 'Beijing',
-        organization: 'BUAA',
+        bio: '',
+        city: '',
+        organization: '',
       },
       userLayout: {
         nameEditable: false,
@@ -348,10 +348,13 @@ export default {
     },
     getUserProfileData() {
       reqSingle('api/users', 'GET').then((res) => {
-        // window.console.log('user data', res);
+        window.console.log('user data', res);
         this.userData.id = _.clone(res.data[0].id);
         this.userData.name = _.clone(res.data[0].username);
         this.userData.email = _.clone(res.data[0].email);
+        this.userData.city = _.clone(res.data[0].city);
+        this.userData.bio = _.clone(res.data[0].bio);
+        this.userData.organization = _.clone(res.data[0].organization);
       }).catch((err) => {
         pushErr(this, err, true);
       });
@@ -425,6 +428,7 @@ export default {
     },
     handleUpdateCity() {
       this.userLayout.cityEditable = false;
+      window.console.log('city', this.userData.city);
       updateUserCity(this.userData.id, this.userData.city).then(() => {
         this.$Notice.success({ title: 'city updated' });
       }).catch((err) => {
