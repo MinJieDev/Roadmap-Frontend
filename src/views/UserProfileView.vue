@@ -223,15 +223,18 @@
       </div>
       <div v-else-if="content==='artcSt'"
            style="margin-left: 60px">
-        article
+        <h1>文献统计</h1>
+        <Divider />
+        <br>
+        <ArticleStatistics></ArticleStatistics>
       </div>
       <div v-else-if="content==='roadmapSt'"
            style="margin-left: 60px">
-        roadmap
+        功能正在开发
       </div>
       <div v-else-if="content==='essaySt'"
            style="margin-left: 60px">
-        essay
+        功能正在开发
       </div>
     </Content>
   </Layout>
@@ -243,9 +246,11 @@ import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
 import { updateUserName, updateUserEmail, updateInterest, updateUserCity,
   updateUserBio, updateUserOrgan } from '../apis/UserProfileApis';
+import ArticleStatistics from '../components/ArticleStatistics';
 
 export default {
   name: 'UserProfileView',
+  components: { ArticleStatistics },
   data() {
     return {
       content: 'profile',
@@ -256,9 +261,9 @@ export default {
         email: '',
         interestDB: [],
         interest: [],
-        bio: 'Coding everyday',
-        city: 'Beijing',
-        organization: 'BUAA',
+        bio: '',
+        city: '',
+        organization: '',
       },
       userLayout: {
         nameEditable: false,
@@ -332,7 +337,6 @@ export default {
     },
     openArticleStatcs() {
       this.content = 'artcSt';
-      this.getArticleData();
     },
     openRoadmapStatcs() {
       this.content = 'roadmapSt';
@@ -348,6 +352,9 @@ export default {
         this.userData.id = _.clone(res.data[0].id);
         this.userData.name = _.clone(res.data[0].username);
         this.userData.email = _.clone(res.data[0].email);
+        this.userData.city = _.clone(res.data[0].city);
+        this.userData.bio = _.clone(res.data[0].bio);
+        this.userData.organization = _.clone(res.data[0].organization);
       }).catch((err) => {
         pushErr(this, err, true);
       });
@@ -369,15 +376,6 @@ export default {
         this.transfer.targetKeys = _.clone(this.userData.interestDB);
         // window.console.log('interest DB', this.userData.interestDB,
         // '\ninterest', this.userData.interest);
-      }).catch((err) => {
-        pushErr(this, err, true);
-      });
-    },
-    getArticleData() {
-      reqSingle('api/articles/', 'GET').then((res) => {
-        // window.console.log('show article res:', res);
-        this.articles = res.data;
-        this.articleTotal = this.articles.length;
       }).catch((err) => {
         pushErr(this, err, true);
       });

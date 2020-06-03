@@ -273,7 +273,7 @@ export default {
     data() {
       const res = _.slice(this.tableData, 0, this.tableData.length);
       _.forEach(res, (article) => {
-        const authorArr = _.split(article.author, 'and', 2);
+        const authorArr = _.split(article.author, ' and ', 2);
         _.merge(article, { firstAuthor: authorArr[0] });
         // window.console.log(article);
       });
@@ -373,13 +373,12 @@ export default {
           articleJson[i].entryTags.pages,
           'U', [])
           .catch((err) => {
-            this.$Message.error(`第${i}条BibTex导入失败`);
             window.console.error(err);
           }).then(() => {
             this.$emit('reloadData', this.page.current);
           });
       }
-      this.$Message.info(`${articleJson.length}条BibTex导入`);
+      this.$Notice.success({ title: `${articleJson.length}条bib导入成功` });
       this.BibtexModal = false;
       this.BibValue = '';
     },
