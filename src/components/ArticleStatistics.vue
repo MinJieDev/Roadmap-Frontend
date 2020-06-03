@@ -138,14 +138,14 @@ export default {
           text: '作者统计图',
         },
         bgColor: '#fbfbfb',
-        labels: ['1'],
+        labels: [''],
         leftPadding: 120,
         xRorate: 15,
         datasets: [
           {
             label: '作者频次',
             fillColor: 'rgba(92 172 238)',
-            data: [5],
+            data: [0],
           },
         ],
       },
@@ -248,7 +248,7 @@ export default {
           }
         });
       });
-      window.console.log('Author statistics data', this.authorStat.data);
+      // window.console.log('Author statistics data', this.authorStat.data);
       this.progress.tipContent = `${this.readState.read}已读 / ${this.readState.reading}在读
         / ${this.readState.unread}未读`;
       if (this.articleTotal === 0) {
