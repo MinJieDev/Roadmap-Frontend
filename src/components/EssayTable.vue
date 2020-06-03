@@ -101,8 +101,12 @@ export default {
           align: 'center',
           width: 125,
           render: (h, params) => {
-            const type = params.row.state === false ? 'error' : 'primary';
-            const text = params.row.state === false ? 'Unfinished' : 'Finished';
+            // eslint-disable-next-line no-nested-ternary
+            const type = (params.row.state === 'U' ? 'error' :
+              (params.row.state === 'I' ? 'primary' : 'success'));
+            // eslint-disable-next-line no-nested-ternary
+            const text = (params.row.state === 'U' ? 'Unfinished' :
+              (params.row.state === 'I' ? 'Writing' : 'Finished'));
             return h('Button', {
               props: {
                 type,
@@ -229,14 +233,16 @@ export default {
       this.$refs.selection.selectAll(status);
     },
     changeNoteStatus(index) {
-      window.console.log(this.tableData);
       this.noteData = _.clone(this.tableData[index]);
-      if (this.noteData.state === false) {
-        this.noteData.state = true;
-        this.$Message.info(`${this.noteData.title} Finished`);
+      if (this.noteData.state === 'U') {
+        this.noteData.state = 'I';
+        this.$Message.info(`${this.noteData.title} writing`);
+      } else if (this.noteData.state === 'I') {
+        this.noteData.state = 'F';
+        this.$Message.info(`${this.noteData.title} finished`);
       } else {
-        this.noteData.state = false;
-        this.$Message.info(`${this.noteData.title} Unfinished`);
+        this.noteData.state = 'U';
+        this.$Message.info(`${this.noteData.title} unfinished`);
       }
       changeEssay(this.noteData)
         .then(() => {
