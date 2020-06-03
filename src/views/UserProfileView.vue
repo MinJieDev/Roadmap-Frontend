@@ -349,12 +349,12 @@ export default {
     getUserProfileData() {
       reqSingle('api/users', 'GET').then((res) => {
         // window.console.log('user data', res);
-        this.userData.id = _.clone(res.data[0].id);
-        this.userData.name = _.clone(res.data[0].username);
-        this.userData.email = _.clone(res.data[0].email);
-        this.userData.city = _.clone(res.data[0].city);
-        this.userData.bio = _.clone(res.data[0].bio);
-        this.userData.organization = _.clone(res.data[0].organization);
+        this.userData.id = res.data[0].id;
+        this.userData.name = res.data[0].username;
+        this.userData.email = res.data[0].email;
+        this.userData.city = res.data[0].city;
+        this.userData.bio = res.data[0].bio;
+        this.userData.organization = res.data[0].organization;
       }).catch((err) => {
         pushErr(this, err, true);
       });

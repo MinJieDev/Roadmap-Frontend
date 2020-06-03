@@ -221,18 +221,13 @@ export default {
       this.articles = res.data;
       this.articleTotal = this.articles.length;
       _.forEach(this.articles, (item) => {
-        if (item.read_state === 'read') {
+        if (item.read_state === 'F') {
           this.readState.read += 1;
-        } else if (item.read_state === 'reading') {
+        } else if (item.read_state === 'I') {
           this.readState.reading += 1;
         } else {
           this.readState.unread += 1;
         }
-        // if (item.read_state === true) {
-        //   this.readState.read += 1;
-        // } else {
-        //   this.readState.unread += 1;
-        // }
         const newAuthors = _.split(item.author, ' and ');
         _.remove(newAuthors, auth => auth === 'others');
         _.forEach(newAuthors, (newAuth) => {
