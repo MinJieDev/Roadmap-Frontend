@@ -13,6 +13,10 @@ export const changeMTdata = data => req(
 
 export const getAllNewPapers = () => req('/api/newpapers/', 'GET', {});
 
+export const getPaperCertainInterest = interest => req(`/api/newpaper/${interest}`, 'GET', {});
+
+export const getUserDetails = () => req('/api/users/', 'GET', {});
+
 export const getArticle = id => reqSingle(`/api/articles/${id}/`, 'GET');
 
 export const updateAlias = (id, alias) => reqSingle(`/api/articles/${id}/`, 'PATCH', { alias });
