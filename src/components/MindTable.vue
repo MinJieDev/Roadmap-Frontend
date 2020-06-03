@@ -124,6 +124,7 @@ export default {
       BibValue: '',
       formData: {
         title: '',
+        alias: '',
         url: '',
         author: '',
         journal: '',
@@ -153,7 +154,7 @@ export default {
         },
         {
           title: 'Title',
-          key: 'title',
+          key: 'alias',
           // width: 400,
         },
         {
@@ -164,10 +165,14 @@ export default {
           title: 'Read State',
           key: 'status',
           align: 'center',
-          width: 100,
+          width: 105,
           render: (h, params) => {
-            const type = params.row.read_state === false ? 'error' : 'success';
-            const text = params.row.read_state === false ? 'Unread' : 'Read';
+            // eslint-disable-next-line no-nested-ternary
+            const type = (params.row.read_state === 'U' ? 'error' :
+              (params.row.read_state === 'I' ? 'primary' : 'success'));
+            // eslint-disable-next-line no-nested-ternary
+            const text = (params.row.read_state === 'U' ? 'Unread' :
+              (params.row.read_state === 'I' ? 'Reading' : 'Read'));
             return h('Button', {
               props: {
                 type,
@@ -310,6 +315,9 @@ export default {
         };
       } else {
         this.formData = _.clone(this.data[this.index]);
+        if (this.formData.volume === 0) {
+          this.formData.volume = undefined;
+        }
       }
       this.drawer = true;
     },
@@ -322,6 +330,7 @@ export default {
       if (this.index === -1) {
         createMTdata(
           drawerFormData.title,
+          drawerFormData.alias,
           drawerFormData.author,
           drawerFormData.url,
           drawerFormData.journal,
@@ -364,6 +373,7 @@ export default {
           articleUrl = `https://arxiv.org/pdf/${articleUrl}.pdf`;
         }
         createMTdata(
+          articleJson[i].entryTags.title,
           articleJson[i].entryTags.title,
           articleJson[i].entryTags.author,
           articleUrl,
@@ -422,11 +432,14 @@ export default {
     },
     changeReadStatus(index) {
       this.formData = _.clone(this.data[index]);
-      if (this.formData.read_state === false) {
-        this.formData.read_state = true;
+      if (this.formData.read_state === 'U') {
+        this.formData.read_state = 'I';
+        this.$Message.info(`${this.formData.title} Reading`);
+      } else if (this.formData.read_state === 'I') {
+        this.formData.read_state = 'F';
         this.$Message.info(`${this.formData.title} Read`);
       } else {
-        this.formData.read_state = false;
+        this.formData.read_state = 'U';
         this.$Message.info(`${this.formData.title} Unread`);
       }
       changeMTdata(this.formData)
