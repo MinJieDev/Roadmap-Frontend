@@ -23,6 +23,7 @@
     "less-loader": "4.1.0",
     "lodash": "^4.17.15",
     "prism": "^4.1.2",
+    "schart.js": "^3.0.0",
     "simplemde": "^1.11.2",
     "view-design": "^4.2.0",
     "vue": "^2.5.2",
@@ -30,6 +31,7 @@
     "vue-markdown": "^2.2.4",
     "vue-mindmap": "^0.0.4",
     "vue-router": "^3.0.1",
+    "vue-schart": "^2.0.0",
     "vuedraggable": "^2.23.2",
     "vuex": "^3.1.3"
   },
