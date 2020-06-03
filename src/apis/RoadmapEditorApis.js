@@ -40,3 +40,7 @@ export const createComment = text => reqSingle('/api/comments/', 'POST', { text 
 export const putCommentSHA = (id, comment) => reqSingle(`/api/road_maps/${id}`, 'PUT', { comment });
 
 export const putCommentId = (id, comment) => reqSingle(`/api/road_maps/${id}.json`, 'PUT', { comment });
+
+export const putLikeSHA = id => reqSingle(`/api/roadmap_like/${id}`, 'PUT', { action: 'like' });
+
+export const putUnlikeSHA = id => reqSingle(`/api/roadmap_like/${id}`, 'PUT', { action: 'unlike' });
