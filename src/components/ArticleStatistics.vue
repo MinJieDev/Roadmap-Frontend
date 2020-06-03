@@ -69,7 +69,7 @@
       title="导出全部文献作者频次"
       :styles="{top: '20px'}"
       @on-cancel="cancelAuthorExportModal">
-      <p v-html="authExport.content"></p>
+      <p class="text-wrapper">{{authExport.content}}</p>
       <p slot="header" style="text-align:center">
         <Icon type="md-checkmark-circle-outline" />
         <span>导出成功</span>
@@ -186,7 +186,7 @@ export default {
     },
     exportAuthorStat() {
       _.forEach(this.authTimeDesc, (item) => {
-        this.authExport.content = `${this.authExport.content}${_.toString(item.name)} - ${_.toString(item.times)}<br>`;
+        this.authExport.content = `${this.authExport.content}${_.toString(item.name)} - ${_.toString(item.times)}\n`;
       });
       this.authExport.modal = true;
     },
@@ -212,8 +212,14 @@ export default {
       this.authExport.content = '';
     },
     copyAuthorStat() {
+      this.$copyText(this.authExport.content).then(
+        () => {
+          this.$Notice.success({ title: '复制剪切板成功' });
+        }, () => {
+          this.$Notice.warning({ title: '复制剪切板失败' });
+        },
+      );
       this.authorStat.modal = false;
-      this.$Notice.success({ title: '复制剪切板成功' });
     },
   },
   mounted() {
@@ -298,5 +304,8 @@ export default {
   .wrapper{
     width: 850px;
     height: 500px;
+  }
+  .text-wrapper {
+    white-space: pre-wrap;
   }
 </style>

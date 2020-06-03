@@ -2,6 +2,7 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import ViewUI from 'view-design';
 import 'view-design/dist/styles/iview.css';
+import VueClipboard from 'vue-clipboard2';
 import VueMindmap from 'vue-mindmap';
 import 'vue-mindmap/dist/vue-mindmap.css';
 import Vue from 'vue';
@@ -12,6 +13,8 @@ import store from './vuex';
 Vue.config.productionTip = false;
 Vue.use(ViewUI);
 Vue.use(VueMindmap);
+VueClipboard.config.autoSetContainer = true; // add this line
+Vue.use(VueClipboard);
 
 /* eslint-disable no-new */
 new Vue({

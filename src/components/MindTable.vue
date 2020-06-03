@@ -59,7 +59,7 @@
       title="导出BibTex"
       :styles="{top: '20px'}"
       @on-cancel="cancelBibExportModal">
-      <p v-html="BibTexExportContent"></p>
+      <p class="text-wrapper">{{BibTexExportContent}}</p>
       <p slot="header" style="text-align:center">
         <Icon type="md-checkmark-circle-outline" />
         <span>批量导出成功</span>
@@ -472,27 +472,26 @@ export default {
         let artStr = '';
         // eslint-disable-next-line no-underscore-dangle
         if (article._isChecked === true) {
-          artStr = artStr.concat(`@article{,</br>
-              title={${article.title}},</br>`);
+          artStr = artStr.concat(`@article{,\ntitle={${article.title}},\n`);
           if (article.author !== undefined && article.author !== '') {
-            artStr = artStr.concat(`author={${article.author}},</br>`);
+            artStr = artStr.concat(`author={${article.author}},\n`);
           }
           if (article.journal !== undefined && article.journal !== '') {
-            artStr = artStr.concat(`journal={${article.journal}},</br>`);
+            artStr = artStr.concat(`journal={${article.journal}},\n`);
           }
           if (article.volume !== undefined && article.volume > 0) {
-            artStr = artStr.concat(`volume={${article.volume}},</br>`);
+            artStr = artStr.concat(`volume={${article.volume}},\n`);
           }
           if (article.number !== undefined) {
-            artStr = artStr.concat(`number={${article.number}},</br>`);
+            artStr = artStr.concat(`number={${article.number}},\n`);
           }
           if (article.pages !== undefined && article.pages !== '') {
-            artStr = artStr.concat(`pages={${article.pages}},</br>`);
+            artStr = artStr.concat(`pages={${article.pages}},\n`);
           }
           if (article.years !== undefined) {
-            artStr = artStr.concat(`year={${article.years}},</br>`);
+            artStr = artStr.concat(`year={${article.years}},\n`);
           }
-          artStr = artStr.concat('}</br>');
+          artStr = artStr.concat('}\n');
           this.BibTexExportContent = this.BibTexExportContent + artStr;
         }
         // window.console.log(`bibtexExport ${this.BibTexExportContent}`);
@@ -503,9 +502,17 @@ export default {
       this.BibTexExportContent = '';
     },
     copyBibTex() {
-      this.$Message.info('Copy Success');
-      this.BibTexExportModal = false;
-      this.BibTexExportContent = '';
+      this.$copyText(this.BibTexExportContent).then(
+        () => {
+          this.$Message.info('Copy Success');
+          this.BibTexExportModal = false;
+          this.BibTexExportContent = '';
+        }, () => {
+          this.$Message.info('Copy Failed');
+          this.BibTexExportModal = false;
+          this.BibTexExportContent = '';
+        },
+      );
     },
     jumpToStatistics() {
       router.push({
@@ -520,5 +527,7 @@ export default {
 </script>
 
 <style scoped>
-
+  .text-wrapper {
+    white-space: pre-wrap;
+  }
 </style>
