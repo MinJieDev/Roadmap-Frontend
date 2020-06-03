@@ -171,6 +171,10 @@
             打开链接
             <Icon type="ios-link" />
           </MenuItem>
+          <MenuItem name="open-essay" @click.native="handleOpenEssay" v-if="curNodeType==='essay'">
+            打开随笔
+            <Icon type="ios-book" />
+          </MenuItem>
           <MenuItem name="open-note" @click.native="handleOpenNote" v-if="curNodeType==='article'">
             打开笔记
             <Icon type="ios-book" />
@@ -183,6 +187,12 @@
             v-if="curNodeType==='mindmap'"
             ref="modifyNode">
           </ModifyNodeForm>
+          <ModifyAliasForm
+            @alias-modified="handleAliasModified"
+            :alias-info-old="curAliasInfo"
+            v-if="curNodeType==='article'"
+            ref="modifyAlias">
+          </ModifyAliasForm>
           <MenuItem name="del-node" @click.native="handleNodeDeleted">
             删除节点
             <Icon type="md-trash" />
@@ -247,6 +257,7 @@ import NoteMarkdown from '../components/NoteMarkdown';
 import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
 import { getEssay } from '../apis/EssayEditorApis';
+import { updateAlias } from '../apis/MindTableEditorApis';
 import {
   createRoadmap,
   updateRoadmap,
@@ -256,6 +267,7 @@ import {
   postRoadmapShareLink,
 } from '../apis/RoadmapEditorApis';
 import Roadmap from '../components/roadmap/Roadmap';
+import ModifyAliasForm from '../components/ModifyAliasForm';
 
 Vue.prototype._ = _;
 
@@ -277,6 +289,7 @@ export default {
     ModifyNodeForm,
     NoteMarkdown,
     draggable,
+    ModifyAliasForm,
   },
   data() {
     return {
@@ -304,6 +317,10 @@ export default {
       ],
       roadmapDragArticleList: [
       ],
+      roadmapArticles: [
+      ],
+      roadmapEssays: [
+      ],
     };
   },
   computed: {
@@ -323,9 +340,7 @@ export default {
       let ret = [];
       _(this.nodes).forEach((node) => {
         let saveTxt = node.content;
-        if (node.category === 'article') {
-          saveTxt = node.category_id ? `$${node.category_id}` : `$${this.getArticleIdByTitle(node.content)}`;
-        } else if (node.category === 'essay') {
+        if (node.category === 'article' || node.category === 'essay') {
           saveTxt = `$${node.category_id}`;
         }
         ret = [...ret, {
@@ -337,6 +352,7 @@ export default {
           fy: node.fy,
           nodes: node.nodes,
           category: node.category,
+          using_alias: node.using_alias || false,
         }];
       });
       return ret;
@@ -363,7 +379,7 @@ export default {
       let conn = [];
       let articleNodes = _.filter(this.nodes, node => (node.category === 'article'));
       articleNodes = _.map(articleNodes, (node) => {
-        const article = _.find(this.articles, atc => (atc.title === node.content));
+        const article = this.getArticleById(node.category_id);
         return { ...node, article };
       });
       _.forEach(articleNodes, (ni) => {
@@ -448,8 +464,8 @@ export default {
     },
     curNote() {
       if (!this.curNode || this.curNode.category !== 'article') return '';
-      if (this.getArticleByTitle(this.curNode.content).note) {
-        return this.getArticleByTitle(this.curNode.content).note;
+      if (this.getArticleById(this.curNode.category_id).note) {
+        return this.getArticleById(this.curNode.category_id).note;
       }
       return '';
     },
@@ -469,6 +485,16 @@ export default {
     },
     hasBindEssay() {
       return this.text && this.text.bindEssay && this.text.bindEssay !== -1;
+    },
+    curAliasInfo() {
+      if (!this.curNode || this.curNode.category !== 'article') {
+        return null;
+      }
+      const art = this.getArticleById(this.curNode.category_id);
+      return {
+        using_alias: this.curNode.using_alias || false,
+        alias: art.alias,
+      };
     },
   },
   mounted() {
@@ -491,8 +517,11 @@ export default {
               this.roadMapTitle = res.data.title;
               this.description = res.data.description;
               this.nextNodeId = JSON.parse(res.data.text).nextNodeId;
+              this.roadmapArticles = res.data.articles;
+              this.roadmapEssays = res.data.essays;
               this.initMindMap();
               this.$Notice.success({ title: `Roadmap loaded, id: ${this.roadMapId}` });
+              window.console.log('data', res.data);
             })
             .catch((err) => {
               pushErr(this, err, true);
@@ -509,7 +538,7 @@ export default {
     // 监控键盘事件
     document.onkeydown = (e) => {
       if (this.$route.name !== 'Editor') return;
-      window.console.log('但是噶', e);
+      window.console.log('键盘事件', e);
       // 事件对象兼容
       const e1 = e;
       // 键盘按键判断:左箭头-37;上箭头-38；右箭头-39;下箭头-40
@@ -617,10 +646,30 @@ export default {
       });
       this.repaintMindMap();
     },
+    handleAliasModified(aliasInfo) {
+      _.forEach(this.nodes, (node) => {
+        if (node.text === this.curNode.text) {
+          updateAlias(this.curNode.category_id, aliasInfo.alias).then(() => {
+            this.$Notice.success({ title: 'alias modified' });
+            const art = this.getArticleById(this.curNode.category_id);
+            art.alias = aliasInfo.alias;
+            // eslint-disable-next-line no-param-reassign
+            node.using_alias = aliasInfo.using_alias;
+            // eslint-disable-next-line no-param-reassign,no-nested-ternary
+            node.content = node.using_alias ? (art.alias === '' ? art.title : art.alias) : art.title;
+            this.repaintMindMap();
+          }).catch((err) => {
+            pushErr(this, err, true);
+          });
+        }
+      });
+    },
     handleArticleNodeAdded(nodeInfo) {
+      this.roadmapArticles = _.uniq([...this.roadmapArticles, nodeInfo.articleId]);
       this.handleNodeAdded(nodeInfo, 'article');
     },
     handleEssayNodeAdded(nodeInfo) {
+      this.roadmapEssays = _.uniq([...this.roadmapEssays, nodeInfo.articleId]);
       this.handleNodeAdded(nodeInfo, 'essay');
     },
     // 删除文献结点
@@ -636,6 +685,19 @@ export default {
     },
     handleNodeDeleted() {
       this.nodes = _.filter(this.nodes, node => node.text !== this.curNode.text);
+      if (this.curNode.category === 'article') {
+        if (!_(this.nodes).find(node => (node.category === 'article' && node.category_id === this.curNode.category_id))) {
+          _.remove(this.roadmapArticles,
+            artid => String(artid) === String(this.curNode.category_id));
+        }
+      }
+      if (this.curNode.category === 'essay') {
+        if (!_(this.nodes).find(node => (node.category === 'essay' && node.category_id === this.curNode.category_id))) {
+          window.console.log('fuck', this.roadmapEssays);
+          _.remove(this.roadmapEssays, essid => String(essid) === String(this.curNode.category_id));
+          window.console.log('fuck2', this.roadmapEssays);
+        }
+      }
       this.connections = _.filter(this.connections, connection =>
         (connection.source.text !== this.curNode.text
           && connection.target.text !== this.curNode.text));
@@ -804,10 +866,14 @@ export default {
         pushErr(this, '生成缩略图失败', true);
       });
     },
+    // @deprecated
     getArticleByTitle(title) {
+      window.console.warn('this function is deprecated, which cannot suport duplicated article name. Use getArticleById instead');
       return _(this.articles).find(art => art.title === title);
     },
+    // @deprecated
     getArticleIdByTitle(title) {
+      window.console.warn('this function is deprecated, which cannot suport duplicated article name. Use getArticleById instead');
       return _(this.articles).find(art => art.title === title).id;
     },
     getArticleById(id) {
@@ -824,11 +890,13 @@ export default {
           const art = this.getArticleById(articleId);
           if (typeof art !== 'undefined') {
             // eslint-disable-next-line no-param-reassign
-            node.content = art.title;
-            // eslint-disable-next-line no-param-reassign
             node.URI = art.url;
             // eslint-disable-next-line no-param-reassign
             node.category_id = articleId;
+            // eslint-disable-next-line no-param-reassign
+            node.using_alias = node.using_alias || false;
+            // eslint-disable-next-line no-param-reassign,no-nested-ternary
+            node.content = node.using_alias ? (art.alias === '' ? art.title : art.alias) : art.title;
           } else {
             // eslint-disable-next-line no-param-reassign
             node.category = 'mindmap';
@@ -891,7 +959,10 @@ export default {
       window.console.log('dbclick', node);
       window.console.log('url', node.URI);
       if (node.category === 'article') {
-        window.console.log('pass');
+        this.$nextTick(() => {
+          window.console.log(this.curNode);
+          this.$refs.modifyAlias.handleClkModifyAlias();
+        });
       } else {
         this.$nextTick(() => {
           this.$refs.modifyNode.handleClkModifyNode();
@@ -941,22 +1012,22 @@ export default {
     jumpArticleNoteEdit() {
       this.$router.push({
         path: '/articleMde',
-        query: { selected: this.getArticleIdByTitle(this.curNode.content) },
+        query: { selected: this.curNode.category_id },
       });
     },
     handleArticleDraggedIn(evt) {
-      this.handleNodeAdded({
+      this.handleArticleNodeAdded({
         nodeName: evt.added.element.title,
         articleId: evt.added.element.id,
         nodeUrl: evt.added.element.url,
-      }, 'article');
+      });
     },
     handleEssayDraggedIn(evt) {
-      this.handleNodeAdded({
+      this.handleEssayNodeAdded({
         nodeName: evt.added.element.title,
         articleId: evt.added.element.id,
         nodeUrl: '',
-      }, 'essay');
+      });
     },
     handleDraggedIn(evt) {
       window.console.log(evt);
@@ -973,7 +1044,8 @@ export default {
       // id ==
       if (this.roadMapId === -1) {
         createRoadmap(this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.refCurves, this.description, this.nextNodeId, thumbnail64)
+          this.refCurves, this.description, this.nextNodeId, thumbnail64,
+          this.roadmapArticles, this.roadmapEssays)
           .then((res) => {
             this.$Notice.success({ title: `Roadmap created, id: ${res.data.id}` });
             this.roadMapId = res.data.id;
@@ -989,7 +1061,8 @@ export default {
         let bindess = -1;
         if (this.text && this.text.bindEssay) bindess = this.text.bindEssay;
         updateRoadmap(this.roadMapId, this.roadMapTitle, this.savedNodes, this.savedConnections,
-          this.refCurves, this.description, this.nextNodeId, thumbnail64, bindess)
+          this.refCurves, this.description, this.nextNodeId, thumbnail64, bindess,
+          this.roadmapArticles, this.roadmapEssays)
           .then(() => {
             this.$Notice.success({ title: `Roadmap saved, id: ${this.roadMapId}` });
           })
@@ -997,6 +1070,12 @@ export default {
             pushErr(this, err, true);
           });
       }
+    },
+    handleOpenEssay() {
+      this.$router.push({
+        path: '/essayReader',
+        query: { selected: this.curNode.category_id },
+      });
     },
     handleClkBindEssay() {
       if (!this.hasBindEssay) {

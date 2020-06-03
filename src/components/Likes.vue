@@ -10,7 +10,8 @@
         </Card>
       </Col>
       <Col span="12">
-        <Card style="width:75px; height:75px;margin-left: 5px;" :bordered="false">
+        <Card style="width:75px; height:75px;margin-left: 5px;"
+              :bordered="false" @click.native="handleClkShare">
           <div style="text-align:center">
             <Icon type="ios-share" size="25" style="margin-bottom: 5px"/>
             <div>分享</div>
@@ -28,6 +29,9 @@ export default {
     };
   },
   methods: {
+    handleClkShare() {
+      this.$emit('on-share');
+    },
   },
 };
 </script>

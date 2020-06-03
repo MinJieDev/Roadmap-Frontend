@@ -31,6 +31,16 @@
         </div>
       </Card>
     </i-col>
+    <i-col span="5">
+      <Card >
+        <div style="text-align:center">
+          <a href="PaperRecommend">
+            <img src="../assets/welcome/recommand.png" style="width:70%" alt="Load Fail">
+            <h3>文献推荐</h3>
+          </a>
+        </div>
+      </Card>
+    </i-col>
   </Row>
 </div>
 </template>

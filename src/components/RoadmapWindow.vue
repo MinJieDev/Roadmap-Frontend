@@ -31,7 +31,7 @@ Vue.prototype._ = _;
 
 export default {
   name: 'RoadmapReader',
-  props: ['roadMapId'],
+  props: ['roadMapId', 'sharedId'],
   components: {
     Roadmap,
     NoteMarkdown,
@@ -39,7 +39,6 @@ export default {
   data() {
     return {
       text: null,
-      sharedId: -1,
       roadMapTitle: 'roadMapTitleDefalt',
       repaint: 1,
       description: '',
@@ -57,12 +56,13 @@ export default {
   },
   async mounted() {
     // share
-    if (!this.$route.query.selected) {
-      this.sharedId = this.$route.query.sharedId;
+    if (String(this.sharedId) !== '-1') {
       try {
         // this.articles = (await req('/api/articles/', 'GET')).data;
+        window.console.log('window, ', this.sharedId);
         const roadmapData = (await getRoadmapShareLink(this.sharedId)).data;
-        this.articles = roadmapData.articles;
+        this.articles = roadmapData.articles_used;
+        this.essays = roadmapData.essays_used;
         this.nodes = this.toDisplayNodes(JSON.parse(roadmapData.text).nodes);
         this.connections = this.toDisplayConnections(JSON.parse(roadmapData.text).connections);
         this.refCurves = JSON.parse(roadmapData.text).refConnections;
@@ -242,9 +242,17 @@ export default {
           window.open(`http://${node.URI}`, '_blank');
         }
         window.open(node.URI, '_blank');
+      } else if (node.category === 'essay') {
+        this.handleOpenEssay();
       } else {
         window.console.log('pass');
       }
+    },
+    handleOpenEssay() {
+      this.$router.push({
+        path: '/essayReader',
+        query: { selected: this.curNode.category_id },
+      });
     },
     handleSvgClick() {
       this.curNode = null;
