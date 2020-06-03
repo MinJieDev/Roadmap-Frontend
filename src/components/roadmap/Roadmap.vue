@@ -213,9 +213,8 @@ export default {
             onTick(conns, nodes, subnodes)
           ));
       }, 200);
-      window.console.log('wtf1', this.curNode);
+      window.console.log('roadmap curNode', this.curNode);
       if (this.curNode) {
-        window.console.log('wtf');
         nodes.attr('class', (n) => {
           if (n === this.curNode) {
             return `${n.category}-node-chosen article-node--editable`;

@@ -17,21 +17,28 @@
       </div>
     </div>
     <div v-if="this.viewStyle==='table'">
-      <Button
-        @click="onClickNewRoadmap(0)"
-        type="primary"
-        style="margin-left: 10px; margin-bottom: 10px ">
-        新建路书
-      </Button>
-      <Table row-key="id"
-             :columns="columns"
-             :data="data"
-             border>
-      </Table>
-      <ItemEditor
-        v-bind:drawer="drawer"
-        @cancelDrawer="cancelDrawer">
-      </ItemEditor>
+        <Button
+          @click="onClickNewRoadmap(0)"
+          type="primary"
+          style="margin-left: 10px; margin-bottom: 10px ">
+          新建路书
+        </Button>
+        <Table row-key="id"
+               :columns="columns"
+               :data="data"
+               border>
+        </Table>
+        <Modal
+          v-model="addTagModal"
+          title="请输入要加入的tag"
+          @on-ok="okAddTag"
+          @on-cancel="cancelAddTag">
+          <Input v-model="TagValue" style="width: 300px" />
+        </Modal>
+        <ItemEditor
+          v-bind:drawer="drawer"
+          @cancelDrawer="cancelDrawer">
+        </ItemEditor>
     </div>
     <div v-else-if="this.viewStyle==='card'" style="margin-top: 20px;">
     <Row v-for="r in rows" v-bind:key="r" type="flex" justify="center" :gutter="20">
@@ -105,7 +112,10 @@ import _ from 'lodash';
 import ItemEditor from './RoadItemEditor';
 import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
-import { delRoadmap, postRoadmapShareLink } from '../apis/RoadmapEditorApis';
+import {
+  delRoadmap, postRoadmapShareLink,
+  createTag, updateRoadmapTag,
+} from '../apis/RoadmapEditorApis';
 
 export default {
   name: 'RoadmapCardTable',
@@ -113,6 +123,11 @@ export default {
   data() {
     return {
       drawer: false,
+      addTagModal: false,
+      tagIndex: -1,
+      tagPos: -1,
+      TagValue: '',
+      oriTags: [],
       cols: 3,
       viewStyle: 'card',
       filtArticle: -1,
@@ -132,32 +147,56 @@ export default {
           key: 'title',
           align: 'center',
         },
-        // {
-        //   title: '标签',
-        //   key: 'tag',
-        //   width: 300,
-        //   align: 'center',
-        //   render: (h, params) => {
-        //     const tags = this.data[params.index].tags;
-        //     return h('div', (tags || []).map(item => h('Tag', {
-        //       props: {
-        //         // type: 'border',
-        //         key: item.name,
-        //         name: item.name,
-        //         color: item.color,
-        //         closable: true,
-        //         style: 'margin-left: 3px',
-        //       },
-        //     },
-        //     item.name,
-        //     )));
-        //   },
-        // },
         {
           title: '描述',
           key: 'description',
           width: 300,
           align: 'center',
+        },
+        {
+          title: '标签',
+          key: 'tag',
+          width: 200,
+          align: 'center',
+          render: (h, params) => {
+            const tags = this.data[params.index].tags;
+            return h('div', [(tags || []).map(item => h('Tag', {
+              props: {
+                // type: 'border',
+                key: item.name,
+                name: item.name,
+                color: this.randomColor(item.id),
+                closable: true,
+                style: 'margin-left: 3px',
+              },
+              on: {
+                'on-close': () => {
+                  window.console.info('click me');
+                  this.tagIndex = this.roadmaps[params.index].id;
+                  this.tagPos = params.index;
+                  this.oriTags = this.roadmaps[params.index].tag;
+                  this.deleteTag(item.id);
+                },
+              },
+            },
+            item.name,
+            )), h('Button', {
+              props: {
+                icon: 'ios-add',
+                type: 'dashed',
+                size: 'small',
+              },
+              on: {
+                click: () => {
+                  this.addTagModal = true;
+                  this.tagIndex = this.roadmaps[params.index].id;
+                  this.tagPos = params.index;
+                  this.oriTags = this.roadmaps[params.index].tag;
+                },
+              },
+            })]);
+          },
+
         },
         {
           title: '操作',
@@ -227,8 +266,9 @@ export default {
     reqSingle('/api/road_maps/', 'GET')
       .then((res) => {
         // window.console.log('roadmap card', res);
-        this.rawroadmaps = res.data;
+        // this.roadmaps = res.data.results;
         // this.data = this.getData();
+        this.rawroadmaps = res.data;
       })
       .catch((err) => {
         pushErr(this, err, true);
@@ -267,11 +307,12 @@ export default {
       let index = 0;
       _(this.roadmaps)
         .forEach((roadmap) => {
+          window.console.info(roadmap.tag);
           index += 1;
           data.push({
             id: index,
             title: roadmap.title,
-            // tags: [],
+            tags: (roadmap.tag || []),
             description: roadmap.description,
             isEmpty: JSON.parse(roadmap.text).nodes.length === 0,
             thumbnail: JSON.parse(roadmap.text).thumbnail !== undefined ?
@@ -284,6 +325,68 @@ export default {
     },
   },
   methods: {
+    randomColor(id) {
+      if (id % 7 === 0) {
+        return 'primary';
+      } else if (id % 7 === 1) {
+        return 'success';
+      } else if (id % 7 === 2) {
+        return 'magenta';
+      } else if (id % 7 === 3) {
+        return 'volcano';
+      } else if (id % 7 === 4) {
+        return 'cyan';
+      } else if (id % 7 === 5) {
+        return 'blue';
+      } else if (id % 7 === 6) {
+        return 'geekblue';
+      }
+      return 'primary';
+    },
+    okAddTag() {
+      createTag(this.TagValue).then((tagRes) => {
+        let haveThisTag = false;
+        const tagsArray = [];
+        for (let i = 0; i < this.oriTags.length; i += 1) {
+          if (this.oriTags[i].id !== tagRes.data.id) {
+            tagsArray.push(this.oriTags[i].id);
+          } else {
+            haveThisTag = true;
+          }
+        }
+        updateRoadmapTag(this.tagIndex, tagsArray.concat([tagRes.data.id])).then(() => {
+          if (haveThisTag === false) {
+            this.data[this.tagPos].tags.push({ id: tagRes.data.id, name: this.TagValue });
+          }
+        }).catch((err) => {
+          pushErr(this, err, true);
+        });
+      });
+      this.addTagModel = false;
+    },
+    cancelAddTag() {
+      this.TagValue = '';
+      this.tagIndex = -1;
+      this.addTagModel = false;
+    },
+    deleteTag(tagId) {
+      const tagsArray = [];
+      const tagsIdArray = [];
+      window.console.info(this.oriTags);
+      for (let i = 0; i < this.oriTags.length; i += 1) {
+        if (this.oriTags[i].id !== tagId) {
+          tagsIdArray.push(this.oriTags[i].id);
+          tagsArray.push(this.oriTags[i]);
+        }
+      }
+      updateRoadmapTag(this.tagIndex, (tagsIdArray || [])).then(() => {
+        this.data[this.tagPos].tags = tagsArray;
+        this.roadmaps[this.tagPos].tag = tagsArray;
+        this.oriTags = tagsArray;
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+    },
     getIndex(r, c, col) {
       return (((r - 1) * col) + (c - 1)) - 1;
     },
