@@ -56,7 +56,7 @@ import 'github-markdown-css';
 import VueMarkdown from 'vue-markdown';
 import { pushErr } from '../components/ErrPush';
 import { req, reqSingle } from '../apis/util';
-// import { req } from '../apis/util';
+import { getEssay } from '../apis/EssayEditorApis';
 
 export default {
   name: 'EssayEditorView',
@@ -123,7 +123,7 @@ export default {
       this.titleEditable = false;
     },
     getData() {
-      req(`/api/essays/${this.$route.query.selected}/`, 'GET')
+      getEssay(this.$route.query.selected)
         .then((res) => {
           this.text = JSON.parse(res.data.text);
           window.console.log(this.text);
