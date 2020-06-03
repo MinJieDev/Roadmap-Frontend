@@ -128,7 +128,7 @@ export default {
         author: '',
         journal: '',
         pages: 0,
-        read_state: false,
+        read_state: 'U',
         volume: 0,
         years: 0,
       },

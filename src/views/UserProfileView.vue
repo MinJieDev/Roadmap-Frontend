@@ -461,7 +461,6 @@ export default {
       });
     },
     deleteInterestItem(item) {
-      // TODO: debug: delete to zero
       this.userData.interest = _.pull(this.userData.interest, item);
       _.forEach(this.fieldList, (field) => {
         if (item === field.value) {

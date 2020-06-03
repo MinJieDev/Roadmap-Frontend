@@ -10,7 +10,7 @@
       @on-close="cancelDrawer"
     >
       <Row :gutter="32">
-        <Col span="19">
+        <Col span="24">
           <br>
           <h3>题目</h3>
           <br>
@@ -21,24 +21,6 @@
                 clearable
                 placeholder="请输入文章标题">
               </Input>
-            </Col>
-          </Row>
-        </Col>
-
-        <Col span="4">
-          <br>
-          <h3>阅读状态</h3>
-          <br>
-          <Row :gutter="30" style="margin-left: 0px; margin-top: 2px">
-            <Col>
-              <i-switch
-                v-model="drawerData.read_state"
-                size="large"
-                true-color="#13ce66"
-                false-color="#ff4949">
-                <span slot="open">已读</span>
-                <span slot="close">未读</span>
-              </i-switch>
             </Col>
           </Row>
         </Col>
@@ -59,6 +41,25 @@
         </Col>
 
         <Col span="12">
+          <br>
+          <h3>阅读状态</h3>
+          <br>
+          <Row :gutter="30" style="margin-left: 0px; margin-top: 2px">
+            <Col>
+              <Slider
+                v-model="slider.value"
+                :step="slider.step"
+                :max="slider.max"
+                :tip-format="slider.tipFormat"
+                @on-change="sliderChange"
+              ></Slider>
+            </Col>
+          </Row>
+        </Col>
+      </Row>
+
+      <Row :gutter="32">
+        <Col span="20">
           <br>
           <h3>链接(URL)</h3>
           <br>
@@ -171,6 +172,43 @@ export default {
   },
   data() {
     return {
+      slider: {
+        value: 1,
+        max: 3,
+        step: 1,
+        tipFormat: null,
+        marks: {
+          0: '0°C',
+          1: '12°C',
+          2: '32°C',
+          3: {
+            style: {
+              color: '#ff0000',
+            },
+            label: this.$createElement('strong', '55°C'),
+          },
+        },
+        // marks: {
+        //   1: {
+        //     style: {
+        //       color: '#ff0000',
+        //     },
+        //     label: this.$createElement('strong', '未读'),
+        //   },
+        //   2: {
+        //     style: {
+        //       color: '#2db7f5',
+        //     },
+        //     label: this.$createElement('strong', '在读'),
+        //   },
+        //   3: {
+        //     style: {
+        //       color: '#19be6b',
+        //     },
+        //     label: this.$createElement('strong', '已读'),
+        //   },
+        // },
+      },
       styles: {
         height: 'calc(100% - 55px)',
         overflow: 'auto',
@@ -199,6 +237,15 @@ export default {
     },
     handleTransferChange(newTargetKeys) {
       this.drawerData.article_references = newTargetKeys;
+    },
+    sliderChange(value) {
+      if (value <= 1) {
+        this.drawerData.read_state = 'U';
+      } else if (value === 2) {
+        this.drawerData.read_state = 'I';
+      } else {
+        this.drawerData.read_state = 'F';
+      }
     },
   },
 };
