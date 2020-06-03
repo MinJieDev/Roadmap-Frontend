@@ -9,7 +9,8 @@
         <div class="markdown-body" >
           <VueMarkdown v-if="repaint" id="md">{{content}}</VueMarkdown>
         </div>
-          <Likes @on-share="handleClkShare"></Likes>
+        <Likes @on-share="handleClkShare" @on-like="handleClkLike" @on-unlike="handleClkUnlike"
+               :like="like" :me="user"></Likes>
           <Comment :comment="comment" @comment-committed="handleCommentCommitted"></Comment>
       </Col>
       <Col span="11" id="roadmap">
@@ -31,8 +32,9 @@ import { pushErr } from '../components/ErrPush';
 import Likes from '../components/Likes';
 import Comment from '../components/comment/Comment';
 import RoadmapWindow from '../components/RoadmapWindow';
-import { getEssay, getEssayShareLink, postEssayShareLink, putCommentId, putCommentSHA } from '../apis/EssayEditorApis';
+import { getEssay, getEssayShareLink, postEssayShareLink, putCommentId, putCommentSHA, putLikeSHA, putUnlikeSHA } from '../apis/EssayEditorApis';
 import { createComment } from '../apis/RoadmapEditorApis';
+import { getUser } from '../apis/UserProfileApis';
 
 
 export default {
@@ -41,6 +43,7 @@ export default {
   props: {},
   data() {
     return {
+      user: null,
       sharedId: -1,
       essayId: -1,
       text: null,
@@ -53,6 +56,7 @@ export default {
       refreshPreview: true,
       repaint: false,
       comment: [],
+      like: [],
       mountRoadmapWindow: false,
     };
   },
@@ -69,20 +73,23 @@ export default {
     getData() {
       window.console.log(`/api/essays/${this.$route.query.selected}/`);
       this.essayId = this.$route.query.selected;
-      getEssay(this.essayId)
-        .then((res) => {
-          this.comment = res.data.comment;
-          this.text = JSON.parse(res.data.text);
-          this.content = this.text.content;
-          this.refRoadmap = this.text.refRoadmap;
-          this.bindRoadmap = this.text.bindRoadmap;
-          this.title = res.data.title;
-          this.repaint = true;
-          this.mountRoadmapWindow = true;
-        })
-        .catch((err) => {
-          pushErr(this, err, true);
-        });
+      getUser().then((res1) => {
+        this.user = res1.data;
+        getEssay(this.essayId)
+          .then((res) => {
+            this.like = res.data.like;
+            this.comment = res.data.comment;
+            this.text = JSON.parse(res.data.text);
+            this.content = this.text.content;
+            this.refRoadmap = this.text.refRoadmap;
+            this.bindRoadmap = this.text.bindRoadmap;
+            this.title = res.data.title;
+            this.repaint = true;
+            this.mountRoadmapWindow = true;
+          });
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
     },
     handleClkShare() {
       if (this.sharedId !== -1) {
@@ -123,19 +130,48 @@ export default {
         pushErr(this, err, true);
       });
     },
+    handleClkLike() {
+      window.console.log('like');
+      if (String(this.sharedId) !== '-1') {
+        putLikeSHA(this.sharedId).then((res) => {
+          this.like = res.data.like;
+        }).catch((err) => {
+          pushErr(this, err, true);
+        });
+      } else {
+        this.$Notice.info({ title: '不能给自己点赞哦' });
+      }
+    },
+    handleClkUnlike() {
+      window.console.log('unlike');
+      if (String(this.sharedId) !== '-1') {
+        putUnlikeSHA(this.sharedId).then((res) => {
+          this.like = res.data.like;
+        }).catch((err) => {
+          pushErr(this, err, true);
+        });
+      } else {
+        this.$Notice.info({ title: '不能给自己点赞哦' });
+      }
+    },
   },
   mounted() {
     if (!this.$route.query.selected) {
       this.sharedId = this.$route.query.sharedId;
-      getEssayShareLink(this.sharedId).then((res) => {
-        this.comment = res.data.comment;
-        this.text = JSON.parse(res.data.text);
-        this.content = this.text.content;
-        this.roadmapSharedId = res.data.refRoadmapSHA;
-        this.bindRoadmap = this.text.bindRoadmap;
-        this.title = res.data.title;
-        this.repaint = true;
-        this.mountRoadmapWindow = true;
+      getUser().then((res1) => {
+        this.user = res1.data;
+        getEssayShareLink(this.sharedId)
+          .then((res) => {
+            this.like = res.data.like;
+            this.comment = res.data.comment;
+            this.text = JSON.parse(res.data.text);
+            this.content = this.text.content;
+            this.roadmapSharedId = res.data.refRoadmapSHA;
+            this.bindRoadmap = this.text.bindRoadmap;
+            this.title = res.data.title;
+            this.repaint = true;
+            this.mountRoadmapWindow = true;
+          });
       }).catch((err) => {
         pushErr(this, err, true);
       });

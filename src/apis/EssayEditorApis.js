@@ -16,3 +16,7 @@ export const getEssayShareLink = id => req(`/api/share/essay/${id}`, 'GET');
 export const putCommentSHA = (id, comment) => reqSingle(`/api/essays/${id}`, 'PUT', { comment });
 
 export const putCommentId = (id, comment) => reqSingle(`/api/essays/${id}.json`, 'PUT', { comment });
+
+export const putLikeSHA = id => reqSingle(`/api/essay_like/${id}`, 'PUT', { action: 'like' });
+
+export const putUnlikeSHA = id => reqSingle(`/api/essay_like/${id}`, 'PUT', { action: 'unlike' });

@@ -6,7 +6,8 @@
     </div>
     <div class="markdown-body">
       <VueMarkdown v-if="repaint" style="margin: 20px">{{content}}</VueMarkdown>
-      <Likes @on-share="handleClkShare"></Likes>
+      <Likes @on-share="handleClkShare" @on-like="handleClkLike" @on-unlike="handleClkUnlike"
+             :like="like" :me="user"></Likes>
       <Comment :comment="comment" @comment-committed="handleCommentCommitted"></Comment>
     </div>
   </div>
@@ -21,8 +22,9 @@ import VueMarkdown from 'vue-markdown';
 import { pushErr } from '../components/ErrPush';
 import Likes from '../components/Likes';
 import Comment from '../components/comment/Comment';
-import { postEssayShareLink, getEssayShareLink, putCommentId, putCommentSHA, getEssay } from '../apis/EssayEditorApis';
+import { postEssayShareLink, getEssayShareLink, putCommentId, putCommentSHA, getEssay, putLikeSHA, putUnlikeSHA } from '../apis/EssayEditorApis';
 import { createComment } from '../apis/RoadmapEditorApis';
+import { getUser } from '../apis/UserProfileApis';
 
 
 export default {
@@ -31,6 +33,7 @@ export default {
   props: {},
   data() {
     return {
+      user: null,
       sharedId: -1,
       essayId: -1,
       text: null,
@@ -42,6 +45,7 @@ export default {
       refreshPreview: true,
       repaint: false,
       comment: [],
+      like: [],
     };
   },
   computed: {
@@ -57,27 +61,30 @@ export default {
     getData() {
       window.console.log(`/api/essays/${this.$route.query.selected}/`);
       this.essayId = this.$route.query.selected;
-      getEssay(this.essayId)
-        .then((res) => {
-          this.comment = res.data.comment;
-          this.text = JSON.parse(res.data.text);
-          this.content = this.text.content;
-          this.refRoadmap = this.text.refRoadmap;
-          this.bindRoadmap = this.text.bindRoadmap;
-          this.title = res.data.title;
-          this.repaint = true;
-          if (this.refRoadmap !== -1) {
-            this.$router.push({
-              path: '/essayRoadmapReader/',
-              query: {
-                selected: this.essayId,
-              },
-            });
-          }
-        })
-        .catch((err) => {
-          pushErr(this, err, true);
-        });
+      getUser().then((res1) => {
+        this.user = res1.data;
+        getEssay(this.essayId)
+          .then((res) => {
+            this.like = res.data.like;
+            this.comment = res.data.comment;
+            this.text = JSON.parse(res.data.text);
+            this.content = this.text.content;
+            this.refRoadmap = this.text.refRoadmap;
+            this.bindRoadmap = this.text.bindRoadmap;
+            this.title = res.data.title;
+            this.repaint = true;
+            if (this.refRoadmap !== -1) {
+              this.$router.push({
+                path: '/essayRoadmapReader/',
+                query: {
+                  selected: this.essayId,
+                },
+              });
+            }
+          });
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
     },
     handleCommentCommitted(com) {
       window.console.log('com', com);
@@ -118,26 +125,54 @@ export default {
         });
       }
     },
+    handleClkLike() {
+      window.console.log('like');
+      if (String(this.sharedId) !== '-1') {
+        putLikeSHA(this.sharedId).then((res) => {
+          this.like = res.data.like;
+        }).catch((err) => {
+          pushErr(this, err, true);
+        });
+      } else {
+        this.$Notice.info({ title: '不能给自己点赞哦' });
+      }
+    },
+    handleClkUnlike() {
+      window.console.log('unlike');
+      if (String(this.sharedId) !== '-1') {
+        putUnlikeSHA(this.sharedId).then((res) => {
+          this.like = res.data.like;
+        }).catch((err) => {
+          pushErr(this, err, true);
+        });
+      } else {
+        this.$Notice.info({ title: '不能给自己点赞哦' });
+      }
+    },
   },
   mounted() {
     if (!this.$route.query.selected) {
       this.sharedId = this.$route.query.sharedId;
-      getEssayShareLink(this.sharedId).then((res) => {
-        this.comment = res.data.comment;
-        this.text = JSON.parse(res.data.text);
-        this.content = this.text.content;
-        this.refRoadmap = this.text.refRoadmap;
-        this.bindRoadmap = this.text.bindRoadmap;
-        this.title = res.data.title;
-        this.repaint = true;
-        if (this.refRoadmap !== -1) {
-          this.$router.push({
-            path: '/essayRoadmapReader/',
-            query: {
-              sharedId: this.sharedId,
-            },
-          });
-        }
+      getUser().then((res1) => {
+        this.user = res1.data;
+        getEssayShareLink(this.sharedId).then((res) => {
+          this.like = res.data.like;
+          this.comment = res.data.comment;
+          this.text = JSON.parse(res.data.text);
+          this.content = this.text.content;
+          this.refRoadmap = this.text.refRoadmap;
+          this.bindRoadmap = this.text.bindRoadmap;
+          this.title = res.data.title;
+          this.repaint = true;
+          if (this.refRoadmap !== -1) {
+            this.$router.push({
+              path: '/essayRoadmapReader/',
+              query: {
+                sharedId: this.sharedId,
+              },
+            });
+          }
+        });
       }).catch((err) => {
         pushErr(this, err, true);
       });
