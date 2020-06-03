@@ -21,7 +21,7 @@
           加入文献库
         </Button>
         <div slot="title" style="margin-right: 100px">
-          <h2>{{ item.title }}</h2>
+          <h2><a :href="item.url">{{ item.title }} </a></h2>
           <p style="color: #7f7f7f"> {{ item.title_zh }}</p>
           <p style="color: #880000"> {{ item.authors.join(', ') }}</p>
           <div style="color: #008800">{{ item.updatedTime.slice(0,10) }}
