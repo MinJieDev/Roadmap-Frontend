@@ -12,4 +12,6 @@ export const updateUserOrgan = (id, organ) => reqSingle(`/api/users/${id}.json`,
 
 export const updateUserBio = (id, bio) => reqSingle(`/api/users/${id}.json`, 'PUT', { bio });
 
-export const updateInterest = (id, interest) => reqSingle(`api/users/${id}.json`, 'PUT', { interest });
+export const updateInterest = (id, interest) => reqSingle(`/api/users/${id}.json`, 'PUT', { interest });
+
+export const getUser = () => reqSingle('/api/users/', 'GET');

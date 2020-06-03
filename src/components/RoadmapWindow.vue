@@ -58,8 +58,6 @@ export default {
     // share
     if (String(this.sharedId) !== '-1') {
       try {
-        // this.articles = (await req('/api/articles/', 'GET')).data;
-        window.console.log('window, ', this.sharedId);
         const roadmapData = (await getRoadmapShareLink(this.sharedId)).data;
         this.articles = roadmapData.articles_used;
         this.essays = roadmapData.essays_used;

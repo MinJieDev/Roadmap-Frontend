@@ -21,8 +21,9 @@
         @svg-click="handleSvgClick"
         @conn-click="handleConnClick"
       />
-      <Likes @on-share="handleClkShare"></Likes>
-      <Comment :comments="comments" @comment-committed="handleCommentCommitted"></Comment>
+      <Likes @on-share="handleClkShare" @on-like="handleClkLike" @on-unlike="handleClkUnlike"
+             :like="like" :me="user"></Likes>
+      <Comment :comment="comment" @comment-committed="handleCommentCommitted"></Comment>
     </Content>
     <Sider hide-trigger :style="{background: '#fff'}" v-if="sharedId===-1">
       <Button  @click="handleClkHelp"
@@ -61,13 +62,14 @@
 import _ from 'lodash';
 import Vue from 'vue';
 import { pushErr } from '../components/ErrPush';
-import { getRoadmap, getRoadmapShareLink, postRoadmapShareLink } from '../apis/RoadmapEditorApis';
+import { getRoadmap, getRoadmapShareLink, postRoadmapShareLink, createComment, putCommentId, putCommentSHA, putLikeSHA, putUnlikeSHA } from '../apis/RoadmapEditorApis';
 import { reqSingle } from '../apis/util';
 import Roadmap from '../components/roadmap/Roadmap';
 import NoteMarkdown from '../components/NoteMarkdown';
 import Likes from '../components/Likes';
 import Comment from '../components/comment/Comment';
 import { getEssay } from '../apis/EssayEditorApis';
+import { getUser } from '../apis/UserProfileApis';
 
 Vue.prototype._ = _;
 
@@ -81,6 +83,7 @@ export default {
   },
   data() {
     return {
+      user: null,
       text: null,
       roadMapId: -1,
       sharedId: -1,
@@ -96,7 +99,8 @@ export default {
       curNode: null,
       refCurves: [
       ],
-      comments: [],
+      comment: [],
+      like: [],
     };
   },
   async mounted() {
@@ -105,9 +109,12 @@ export default {
       this.sharedId = this.$route.query.sharedId;
       try {
         // this.articles = (await req('/api/articles/', 'GET')).data;
+        this.user = (await getUser()).data;
         const roadmapData = (await getRoadmapShareLink(this.sharedId)).data;
         this.articles = roadmapData.articles_used;
         this.essays = roadmapData.essays_used;
+        this.comment = roadmapData.comment;
+        this.like = roadmapData.like;
         this.nodes = this.toDisplayNodes(JSON.parse(roadmapData.text).nodes);
         this.connections = this.toDisplayConnections(JSON.parse(roadmapData.text).connections);
         this.refCurves = JSON.parse(roadmapData.text).refConnections;
@@ -121,9 +128,12 @@ export default {
     } else {
       this.roadMapId = this.$route.query.selected;
       try {
+        this.user = (await getUser()).data;
         this.articles = (await reqSingle('/api/articles/', 'GET')).data;
         this.essays = (await reqSingle('/api/essays/', 'GET')).data;
         const roadmapData = (await getRoadmap(this.roadMapId)).data;
+        this.comment = roadmapData.comment;
+        this.like = roadmapData.like;
         this.text = JSON.parse(roadmapData.text);
         this.nodes = this.toDisplayNodes(JSON.parse(roadmapData.text).nodes);
         this.connections = this.toDisplayConnections(JSON.parse(roadmapData.text).connections);
@@ -200,6 +210,13 @@ export default {
     },
     hasBindEssay() {
       return this.text && this.text.bindEssay && this.text.bindEssay !== -1;
+    },
+    commentId() {
+      let ret = [];
+      _(this.comment).forEach((comm) => {
+        ret = [...ret, comm.id];
+      });
+      return ret;
     },
   },
   methods: {
@@ -346,7 +363,47 @@ export default {
     },
     handleCommentCommitted(com) {
       window.console.log('com', com);
-      this.comments = [...this.comments, com];
+      createComment(com).then((res) => {
+        if (String(this.sharedId) !== '-1') {
+          putCommentSHA(this.sharedId, res.data.id).then(() => {
+            getRoadmapShareLink(this.sharedId).then((res3) => {
+              this.comment = res3.data.comment;
+            });
+          });
+        } else {
+          putCommentId(this.roadMapId, [...this.commentId, res.data.id]).then(() => {
+            getRoadmap(this.roadMapId).then((res3) => {
+              this.comment = res3.data.comment;
+            });
+          });
+        }
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
+    },
+    handleClkLike() {
+      window.console.log('like');
+      if (String(this.sharedId) !== '-1') {
+        putLikeSHA(this.sharedId).then((res) => {
+          this.like = res.data.like;
+        }).catch((err) => {
+          pushErr(this, err, true);
+        });
+      } else {
+        this.$Notice.info({ title: '不能给自己点赞哦' });
+      }
+    },
+    handleClkUnlike() {
+      window.console.log('unlike');
+      if (String(this.sharedId) !== '-1') {
+        putUnlikeSHA(this.sharedId).then((res) => {
+          this.like = res.data.like;
+        }).catch((err) => {
+          pushErr(this, err, true);
+        });
+      } else {
+        this.$Notice.info({ title: '不能给自己点赞哦' });
+      }
     },
     handleClkBindEssay() {
       getEssay(this.text.bindEssay).then(() => {
