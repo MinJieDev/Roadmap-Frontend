@@ -86,6 +86,8 @@ export default {
             this.title = res.data.title;
             this.repaint = true;
             this.mountRoadmapWindow = true;
+          }).catch((err) => {
+            pushErr(this, err, true);
           });
       }).catch((err) => {
         pushErr(this, err, true);
@@ -171,6 +173,8 @@ export default {
             this.title = res.data.title;
             this.repaint = true;
             this.mountRoadmapWindow = true;
+          }).catch((err) => {
+            pushErr(this, err, true);
           });
       }).catch((err) => {
         pushErr(this, err, true);

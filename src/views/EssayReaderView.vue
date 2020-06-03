@@ -81,6 +81,8 @@ export default {
                 },
               });
             }
+          }).catch((err) => {
+            pushErr(this, err, true);
           });
       }).catch((err) => {
         pushErr(this, err, true);
@@ -172,6 +174,8 @@ export default {
               },
             });
           }
+        }).catch((err) => {
+          pushErr(this, err, true);
         });
       }).catch((err) => {
         pushErr(this, err, true);
