@@ -13,7 +13,10 @@
       <Card :bordered="false">
         <Button
           slot="extra"
-          @click="addPaper(item.title, item.authors.join(', '), item.url)"
+          @click="addPaper(
+            item.title,
+            item.authors.join(' and '),
+            item.url)"
           type="info" ghost>
           加入文献库
         </Button>
@@ -54,7 +57,6 @@ export default {
         url,
         '',
         'arXiv e-print',
-        // year,
         [])
         .catch((err) => {
           window.console.error(err);
