@@ -1,6 +1,12 @@
 <template>
   <div>
+    <div v-if="newPapers.length === 0">
+      <h1><center>你似乎来到了没有知识存在的荒原...</center></h1>
+      <br>
+      <h2 style="color: #5393eb"><center>快去个人档案里面添加一些兴趣方向吧~~</center></h2>
+    </div>
     <div
+      v-if="newPapers.length !== 0"
       v-for="(item,i) in newPapers"
       v-bind:key="i"
          style="background:#eee;padding: 10px;margin-right: 200px; margin-left: 100px">
@@ -13,7 +19,7 @@
         </Button>
         <div slot="title" style="margin-right: 100px">
           <h2>{{ item.title }}</h2>
-          <p style="color: #7f7f7f">中文</p>
+          <p style="color: #7f7f7f"> {{ item.title_zh }}</p>
           <p style="color: #880000"> {{ item.authors.join(', ') }}</p>
           <div style="color: #008800">{{ item.updatedTime.slice(0,10) }}
             <a href='https://arxiv.org/' v-for="(tag, tagIndex) in item.tags"
@@ -28,7 +34,7 @@
 
 <script>
 import _ from 'lodash';
-import { createMTdata, getAllNewPapers } from '../apis/MindTableEditorApis';
+import { createMTdata, getPaperCertainInterest, getUserDetails } from '../apis/MindTableEditorApis';
 import { pushErr } from './ErrPush';
 
 export default {
@@ -36,6 +42,7 @@ export default {
   data() {
     return {
       newPapers: [],
+      userInterest: [],
     };
   },
   methods: {
@@ -46,7 +53,8 @@ export default {
         author,
         url,
         '',
-        '',
+        'arXiv e-print',
+        // year,
         [])
         .catch((err) => {
           window.console.error(err);
@@ -56,29 +64,40 @@ export default {
   },
   mounted() {
     this.newPapers = [];
-    getAllNewPapers().then((res) => {
-      // window.console.info(res);
-      _(res.data).forEach((item) => {
-        // http://fanyi.youdao.com/translate?&doctype=json&type=&i=
-        // window.console.info('debug', item);
-        const jsonParser = JSON.parse(item.text);
-        this.newPapers.push(
-          {
-            title: jsonParser.paper_title,
-            url: jsonParser.paper_url,
-            authors: jsonParser.paper_authors,
-            updatedTime: jsonParser.paper_updated_time,
-            summary: jsonParser.paper_summary,
-            tags: jsonParser.paper_tags,
-          },
-        );
-      });
+    getUserDetails().then((res) => {
+      this.userInterest = res.data[0].interest.split(',');
+      for (let i = 0; i < this.userInterest.length; i += 1) {
+        const interest = this.userInterest[i];
+        if (interest !== '' && interest !== undefined) {
+          window.console.info(interest);
+          getPaperCertainInterest(interest)
+            .then((paperRes) => {
+              _(paperRes.data)
+                .forEach((item) => {
+                  // http://fanyi.youdao.com/translate?&doctype=json&type=&i=
+                  const jsonParser = JSON.parse(item.text);
+                  // window.console.info(jsonParser);
+                  this.newPapers.push(
+                    {
+                      title: jsonParser.paper_title,
+                      url: jsonParser.paper_url,
+                      authors: jsonParser.paper_authors,
+                      updatedTime: jsonParser.paper_updated_time,
+                      summary: jsonParser.paper_summary,
+                      tags: jsonParser.paper_tags,
+                      title_zh: unescape(jsonParser.paper_title_zh),
+                    },
+                  );
+                });
+            }).catch((err) => {
+              pushErr(this, err, true);
+            });
+        }
+      }
     }).catch((err) => {
       pushErr(this, err, true);
     });
-    window.console.info('newpaepre, ', this.newPapers);
   },
-
 };
 </script>
 
