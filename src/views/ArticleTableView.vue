@@ -9,6 +9,7 @@
 </template>
 
 <script>
+
 import MindTable from '../components/MindTable';
 import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
@@ -19,21 +20,24 @@ export default {
   data() {
     return {
       articles: [],
-      articleTotal: 50,
+      articleTotal: 0,
     };
   },
   methods: {
     reloadData(page) {
-      if (page === undefined) {
-        // eslint-disable-next-line no-param-reassign
-        page = 1;
+      let newPage = page;
+      if (newPage === undefined || newPage < 1) {
+        const routePage = this.$route.query.pageCurrent;
+        if (routePage !== undefined && routePage > 1) {
+          newPage = routePage;
+        } else {
+          newPage = 1;
+        }
       }
-      // window.console.log('current page', page);
-      reqSingle('/api/articles/', 'GET', { page }).then((res) => {
-        // window.console.log('get page data', res);
+      // window.console.log('reload page', newPage);
+      reqSingle('/api/articles/', 'GET', { page: newPage }).then((res) => {
         this.articles = res.data.results;
         this.articleTotal = res.data.count;
-        // window.console.log('article total:', this.articleTotal);
       }).catch((err) => {
         pushErr(this, err, true);
       });

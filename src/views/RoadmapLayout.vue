@@ -140,7 +140,12 @@ export default {
       router.push({ name: 'Welcome' });
     },
     goToProfile() {
-      router.push({ name: 'UserProfile' });
+      router.push({
+        name: 'UserProfile',
+        params: {
+          content: 'profile',
+        },
+      });
     },
   },
   created() {

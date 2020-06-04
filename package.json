@@ -27,6 +27,7 @@
     "simplemde": "^1.11.2",
     "view-design": "^4.2.0",
     "vue": "^2.5.2",
+    "vue-clipboard2": "^0.3.1",
     "vue-cookies": "^1.7.0",
     "vue-markdown": "^2.2.4",
     "vue-mindmap": "^0.0.4",

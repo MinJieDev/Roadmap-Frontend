@@ -14,27 +14,24 @@
           <Icon type="md-aperture" />
           兴趣管理
         </MenuItem>
-        <Submenu name="3">
-          <template slot="title">
-            <Icon type="ios-stats" />
-            内容统计
-          </template>
-          <MenuItem
-            name="3-1"
-            @click.native="openArticleStatcs">
-            文献统计
-          </MenuItem>
-          <MenuItem
-            name="3-2"
-            @click.native="openRoadmapStatcs">
-            路书统计
-          </MenuItem>
-          <MenuItem
-            name="3-3"
-            @click.native="openEssayStatcs">
-            随笔统计
-          </MenuItem>
-        </Submenu>
+        <MenuItem
+          name="3"
+          @click.native="openArticleStatcs">
+          <Icon type="md-stats" />
+          文献统计
+        </MenuItem>
+        <MenuItem
+          name="4"
+          @click.native="openRoadmapStatcs">
+          <Icon type="ios-more" />
+          路书统计
+        </MenuItem>
+        <MenuItem
+          name="5"
+          @click.native="openEssayStatcs">
+          <Icon type="ios-more" />
+          随笔统计
+        </MenuItem>
       </Menu>
     </Sider>
     <Content
@@ -226,7 +223,8 @@
         <h1>文献统计</h1>
         <Divider />
         <br>
-        <ArticleStatistics></ArticleStatistics>
+        <ArticleStatistics>
+        </ArticleStatistics>
       </div>
       <div v-else-if="content==='roadmapSt'"
            style="margin-left: 60px">
@@ -349,12 +347,12 @@ export default {
     getUserProfileData() {
       reqSingle('api/users', 'GET').then((res) => {
         // window.console.log('user data', res);
-        this.userData.id = _.clone(res.data[0].id);
-        this.userData.name = _.clone(res.data[0].username);
-        this.userData.email = _.clone(res.data[0].email);
-        this.userData.city = _.clone(res.data[0].city);
-        this.userData.bio = _.clone(res.data[0].bio);
-        this.userData.organization = _.clone(res.data[0].organization);
+        this.userData.id = res.data[0].id;
+        this.userData.name = res.data[0].username;
+        this.userData.email = res.data[0].email;
+        this.userData.city = res.data[0].city;
+        this.userData.bio = res.data[0].bio;
+        this.userData.organization = res.data[0].organization;
       }).catch((err) => {
         pushErr(this, err, true);
       });
@@ -459,7 +457,6 @@ export default {
       });
     },
     deleteInterestItem(item) {
-      // TODO: debug: delete to zero
       this.userData.interest = _.pull(this.userData.interest, item);
       _.forEach(this.fieldList, (field) => {
         if (item === field.value) {
@@ -490,6 +487,7 @@ export default {
     },
   },
   mounted() {
+    this.content = this.$route.params.content;
     this.getUserProfileData();
     _.forEach(this.fieldList, (item) => {
       this.transfer.transData = _.concat(this.transfer.transData,

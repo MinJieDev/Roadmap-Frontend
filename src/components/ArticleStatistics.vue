@@ -69,7 +69,7 @@
       title="导出全部文献作者频次"
       :styles="{top: '20px'}"
       @on-cancel="cancelAuthorExportModal">
-      <p v-html="authExport.content"></p>
+      <p class="text-wrapper">{{authExport.content}}</p>
       <p slot="header" style="text-align:center">
         <Icon type="md-checkmark-circle-outline" />
         <span>导出成功</span>
@@ -180,13 +180,17 @@ export default {
       if (this.viewStyle === 'chart') {
         this.viewStyle = 'table';
       } else {
+        if (this.articleTotal === 0) {
+          this.options.labels = [''];
+          this.options.datasets[0].data = [0];
+        }
         this.viewStyle = 'chart';
       }
-      this.$Notice.success({ title: '图表转换成功' });
+      // this.$Notice.success({ title: '图表转换成功' });
     },
     exportAuthorStat() {
       _.forEach(this.authTimeDesc, (item) => {
-        this.authExport.content = `${this.authExport.content}${_.toString(item.name)} - ${_.toString(item.times)}<br>`;
+        this.authExport.content = `${this.authExport.content}${_.toString(item.name)} - ${_.toString(item.times)}\n`;
       });
       this.authExport.modal = true;
     },
@@ -199,11 +203,11 @@ export default {
       this.authExport.content = '';
       if (this.authExport.view === 'times') {
         _.forEach(this.authTimeDesc, (item) => {
-          this.authExport.content = `${this.authExport.content}${_.toString(item.name)} - ${_.toString(item.times)}<br>`;
+          this.authExport.content = `${this.authExport.content}${_.toString(item.name)} - ${_.toString(item.times)}\n`;
         });
       } else {
         _.forEach(this.authNameAsc, (item) => {
-          this.authExport.content = `${this.authExport.content}${_.toString(item.name)} - ${_.toString(item.times)}<br>`;
+          this.authExport.content = `${this.authExport.content}${_.toString(item.name)} - ${_.toString(item.times)}\n`;
         });
       }
     },
@@ -212,8 +216,14 @@ export default {
       this.authExport.content = '';
     },
     copyAuthorStat() {
+      this.$copyText(this.authExport.content).then(
+        () => {
+          this.$Notice.success({ title: '复制剪切板成功' });
+        }, () => {
+          this.$Notice.warning({ title: '复制剪切板失败' });
+        },
+      );
       this.authorStat.modal = false;
-      this.$Notice.success({ title: '复制剪切板成功' });
     },
   },
   mounted() {
@@ -221,18 +231,13 @@ export default {
       this.articles = res.data;
       this.articleTotal = this.articles.length;
       _.forEach(this.articles, (item) => {
-        if (item.read_state === 'read') {
+        if (item.read_state === 'F') {
           this.readState.read += 1;
-        } else if (item.read_state === 'reading') {
+        } else if (item.read_state === 'I') {
           this.readState.reading += 1;
         } else {
           this.readState.unread += 1;
         }
-        // if (item.read_state === true) {
-        //   this.readState.read += 1;
-        // } else {
-        //   this.readState.unread += 1;
-        // }
         const newAuthors = _.split(item.author, ' and ');
         _.remove(newAuthors, auth => auth === 'others');
         _.forEach(newAuthors, (newAuth) => {
@@ -253,8 +258,8 @@ export default {
       this.progress.tipContent = `${this.readState.read}已读 / ${this.readState.reading}在读
         / ${this.readState.unread}未读`;
       if (this.articleTotal === 0) {
-        this.progress.progressPercent = 100;
-        this.progress.successPercent = 100;
+        this.progress.progressPercent = 0;
+        this.progress.successPercent = 0;
       } else {
         const progressNum = this.readState.reading + this.readState.read;
         // eslint-disable-next-line max-len,no-mixed-operators
@@ -303,5 +308,8 @@ export default {
   .wrapper{
     width: 850px;
     height: 500px;
+  }
+  .text-wrapper {
+    white-space: pre-wrap;
   }
 </style>
