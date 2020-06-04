@@ -46,7 +46,7 @@
              :src="data[floatDataIndex].thumbnail"
              :style="floatImageSize"
         >
-        <img v-else src="../assets/RoadmapDefault.png" :style="floatImageSize">
+        <!--img v-else src="../assets/RoadmapDefault.png" :style="floatImageSize"-->
       </div>
     <Row v-for="r in rows" v-bind:key="r" type="flex" justify="center" :gutter="20">
       <i-col v-for="c in cols" v-bind:key="c" span="6" align="center" >
@@ -284,7 +284,7 @@ export default {
     };
   },
   mounted() {
-    this.viewStyle = store.state.roadMapTable === undefined ? 'card' : store.state.roadMapTable;
+    this.viewStyle = store.state.roadMapTable !== 'table' ? 'card' : store.state.roadMapTable;
     this.initialViewStyle = this.viewStyle;
     reqSingle('/api/road_maps/', 'GET')
       .then((res) => {
@@ -491,7 +491,7 @@ export default {
     },
     updateFloatXY(event) {
       this.floatPosition.left = `${(event.pageX - 250)}px`;
-      this.floatPosition.top = `${event.pageY}px`;
+      this.floatPosition.top = `${event.pageY + 20}px`;
     },
     getArticleById(id) {
       return _(this.articles).find(art => String(art.id) === String(id));
