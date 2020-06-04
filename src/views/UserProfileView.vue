@@ -223,7 +223,8 @@
         <h1>文献统计</h1>
         <Divider />
         <br>
-        <ArticleStatistics></ArticleStatistics>
+        <ArticleStatistics>
+        </ArticleStatistics>
       </div>
       <div v-else-if="content==='roadmapSt'"
            style="margin-left: 60px">

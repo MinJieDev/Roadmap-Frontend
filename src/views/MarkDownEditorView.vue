@@ -28,6 +28,7 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import Simplemde from 'simplemde';
 import 'simplemde/dist/simplemde.min.css';
 import 'github-markdown-css';
@@ -47,6 +48,7 @@ export default {
       title: '',
       author: '',
       refreshPreview: true,
+      pageCurrent: 1,
     };
   },
   methods: {
@@ -59,25 +61,33 @@ export default {
       changeMTdata(dataChange)
         .then(() => {
           this.$Message.info('修改成功!');
-          this.$emit('reloadData');
+          window.console.log('before reload, page:', this.pageCurrent);
+          this.$emit('reloadData', this.pageCurrent);
         })
         .catch((err) => {
           pushErr(this, err, true);
         });
       this.$router.push({
         path: '/articleTable',
+        query: {
+          pageCurrent: this.pageCurrent,
+        },
       });
     },
     cancel() {
+      this.$emit('reloadData', this.pageCurrent);
       this.$router.push({
         path: '/articleTable',
+        query: {
+          pageCurrent: this.pageCurrent,
+        },
       });
     },
     getData() {
       req(`/api/articles/${this.$route.query.selected}/`, 'GET')
         .then((res) => {
           this.articleData = res.data;
-          window.console.log(res.data);
+          // window.console.log(res.data);
           this.editor.value(res.data.note);
           this.title = res.data.title;
           this.author = res.data.author;
@@ -95,6 +105,8 @@ export default {
         'unordered-list', 'ordered-list', '|',
         'link', 'image', '|', 'preview'],
     });
+    this.pageCurrent = _.toInteger(this.$route.query.pageCurrent);
+    window.console.log('editor page', this.pageCurrent);
     this.getData();
   },
   computed: {

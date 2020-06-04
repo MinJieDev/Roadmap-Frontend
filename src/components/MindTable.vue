@@ -526,6 +526,14 @@ export default {
       });
     },
   },
+  mounted() {
+    if (this.$route.query !== undefined) {
+      this.page.current = _.toInteger(this.$route.query.pageCurrent);
+    }
+    if (this.page.current < 1 || this.page.current === undefined) {
+      this.page.current = 1;
+    }
+  },
 };
 </script>
 
