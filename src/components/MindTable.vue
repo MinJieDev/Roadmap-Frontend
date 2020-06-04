@@ -143,6 +143,7 @@ export default {
         read_state: 'U',
         volume: 0,
         years: 0,
+        article_references: [],
       },
       page: {
         current: 1,
@@ -164,16 +165,17 @@ export default {
           align: 'center',
         },
         {
-          title: 'Title',
+          title: '文献名',
           key: 'alias',
           // width: 400,
         },
         {
-          title: 'First Author',
+          title: '第一作者',
           key: 'firstAuthor',
+          width: 180,
         },
         {
-          title: 'Read State',
+          title: '阅读状态',
           key: 'status',
           align: 'center',
           width: 105,
@@ -198,7 +200,7 @@ export default {
           },
         },
         {
-          title: 'Note',
+          title: '笔记',
           key: 'note',
           align: 'center',
           render: (h, params) => h('div', [
@@ -220,7 +222,7 @@ export default {
           width: 120,
         },
         {
-          title: 'Action',
+          title: '选项',
           key: 'action',
           width: 140,
           align: 'center',
@@ -245,6 +247,7 @@ export default {
                   this.$Modal.info({
                     title: '引用列表',
                     content: `${_.join(refNames, '<br>') || '空'}`,
+                    width: 800,
                   });
                 },
               } }, [h('Button', {

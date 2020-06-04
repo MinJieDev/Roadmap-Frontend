@@ -180,9 +180,13 @@ export default {
       if (this.viewStyle === 'chart') {
         this.viewStyle = 'table';
       } else {
+        if (this.articleTotal === 0) {
+          this.options.labels = [''];
+          this.options.datasets[0].data = [0];
+        }
         this.viewStyle = 'chart';
       }
-      this.$Notice.success({ title: '图表转换成功' });
+      // this.$Notice.success({ title: '图表转换成功' });
     },
     exportAuthorStat() {
       _.forEach(this.authTimeDesc, (item) => {
@@ -199,11 +203,11 @@ export default {
       this.authExport.content = '';
       if (this.authExport.view === 'times') {
         _.forEach(this.authTimeDesc, (item) => {
-          this.authExport.content = `${this.authExport.content}${_.toString(item.name)} - ${_.toString(item.times)}<br>`;
+          this.authExport.content = `${this.authExport.content}${_.toString(item.name)} - ${_.toString(item.times)}\n`;
         });
       } else {
         _.forEach(this.authNameAsc, (item) => {
-          this.authExport.content = `${this.authExport.content}${_.toString(item.name)} - ${_.toString(item.times)}<br>`;
+          this.authExport.content = `${this.authExport.content}${_.toString(item.name)} - ${_.toString(item.times)}\n`;
         });
       }
     },
@@ -254,8 +258,8 @@ export default {
       this.progress.tipContent = `${this.readState.read}已读 / ${this.readState.reading}在读
         / ${this.readState.unread}未读`;
       if (this.articleTotal === 0) {
-        this.progress.progressPercent = 100;
-        this.progress.successPercent = 100;
+        this.progress.progressPercent = 0;
+        this.progress.successPercent = 0;
       } else {
         const progressNum = this.readState.reading + this.readState.read;
         // eslint-disable-next-line max-len,no-mixed-operators

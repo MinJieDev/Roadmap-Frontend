@@ -213,6 +213,8 @@ export default {
           },
         },
       },
+      drawerData: {},
+      targetKeys: [],
       styles: {
         height: 'calc(100% - 55px)',
         overflow: 'auto',
@@ -222,12 +224,6 @@ export default {
     };
   },
   computed: {
-    drawerData() {
-      return _.clone(this.drawerFormData);
-    },
-    targetKeys() {
-      return this.drawerData.article_references;
-    },
     transferData() {
       return _.map(this.articles, atc => ({ key: atc.id, label: atc.title }));
     },
@@ -237,9 +233,13 @@ export default {
       this.$emit('cancelDrawer');
     },
     submitDrawer() {
+      if (this.drawerData.alias === '') {
+        this.drawerData.alias = this.drawerData.title;
+      }
       this.$emit('submitDrawer', this.drawerData);
     },
     handleTransferChange(newTargetKeys) {
+      this.targetKeys = newTargetKeys;
       this.drawerData.article_references = newTargetKeys;
     },
     sliderChange(value) {
@@ -254,6 +254,10 @@ export default {
     hideTipFormat() {
       return null;
     },
+  },
+  mounted() {
+    this.drawerData = _.clone(this.drawerFormData);
+    this.targetKeys = this.drawerData.article_references;
   },
 };
 </script>
