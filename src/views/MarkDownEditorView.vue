@@ -61,7 +61,7 @@ export default {
       changeMTdata(dataChange)
         .then(() => {
           this.$Message.info('修改成功!');
-          window.console.log('before reload, page:', this.pageCurrent);
+          // window.console.log('before reload, page:', this.pageCurrent);
           this.$emit('reloadData', this.pageCurrent);
         })
         .catch((err) => {
@@ -106,7 +106,7 @@ export default {
         'link', 'image', '|', 'preview'],
     });
     this.pageCurrent = _.toInteger(this.$route.query.pageCurrent);
-    window.console.log('editor page', this.pageCurrent);
+    // window.console.log('editor page', this.pageCurrent);
     this.getData();
   },
   computed: {
