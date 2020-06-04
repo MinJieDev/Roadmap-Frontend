@@ -16,7 +16,8 @@
           @click="addPaper(
             item.title,
             item.authors.join(' and '),
-            item.url)"
+            item.url,
+            parseInt(item.updatedTime.slice(0,4)))"
           type="info" ghost>
           加入文献库
         </Button>
@@ -49,14 +50,17 @@ export default {
     };
   },
   methods: {
-    addPaper(title, author, url) {
-      // window.console.info('in addpaper');
+    addPaper(title, author, url, years) {
       createMTdata(
+        title,
         title,
         author,
         url,
-        '',
         'arXiv e-print',
+        years,
+        0,
+        0,
+        'U',
         [])
         .catch((err) => {
           window.console.error(err);
