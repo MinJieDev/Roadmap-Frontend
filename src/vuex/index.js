@@ -9,6 +9,7 @@ const state = {
   example: 'vuex is backing up',
   txtArr: ['hdlnb', 'hdlswlp'],
   authToken: cookie.get('authToken'),
+  roadMapTable: cookie.get('roadMapTable'),
 };
 
 const getters = {
@@ -31,6 +32,11 @@ const mutations = {
   pushAuthToken(state, authToken) {
     state.authToken = authToken;
     cookie.set('authToken', authToken);
+  },
+  // eslint-disable-next-line no-shadow
+  pushRoadMapTable(state, style) {
+    state.roadMapTable = style;
+    cookie.set('roadMapTable', style);
   },
 };
 

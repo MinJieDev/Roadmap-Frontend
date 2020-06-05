@@ -56,7 +56,7 @@ import 'github-markdown-css';
 import VueMarkdown from 'vue-markdown';
 import { pushErr } from '../components/ErrPush';
 import { req, reqSingle } from '../apis/util';
-// import { req } from '../apis/util';
+import { getEssay, updateEssay } from '../apis/EssayEditorApis';
 
 export default {
   name: 'EssayEditorView',
@@ -99,14 +99,12 @@ export default {
           pushErr(this, err, true);
         });
       } else { // update essay
-        reqSingle(`/api/essays/${this.$route.query.selected}/`, 'PATCH', {
-          title: this.title,
-          text: JSON.stringify(dataChange),
-        }).then((res) => {
-          this.$Message.info(`修改成功! id=${res.data.id}`);
-        }).catch((err) => {
-          pushErr(this, err, true);
-        });
+        updateEssay(this.$route.query.selected, this.title, JSON.stringify(dataChange))
+          .then((res) => {
+            this.$Message.info(`修改成功! id=${res.data.id}`);
+          }).catch((err) => {
+            pushErr(this, err, true);
+          });
       }
     },
     cancel() {
@@ -123,7 +121,7 @@ export default {
       this.titleEditable = false;
     },
     getData() {
-      req(`/api/essays/${this.$route.query.selected}/`, 'GET')
+      getEssay(this.$route.query.selected)
         .then((res) => {
           this.text = JSON.parse(res.data.text);
           window.console.log(this.text);

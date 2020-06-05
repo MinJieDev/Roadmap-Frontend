@@ -24,6 +24,10 @@
               <Icon type="ios-create" />
               随笔管理
             </MenuItem>
+            <MenuItem name="4" :to="{name: 'PaperRecommend'}">
+              <Icon type="md-thumbs-up" />
+              好文发现
+            </MenuItem>
             <div v-if="isLoginStatus() !== true">
               <MenuItem
                 name="4"
@@ -171,7 +175,7 @@ export default {
   }
 
   .layout-nav {
-    width: 530px;
+    width: 650px;
     margin: 0 auto;
     margin-right: 20px;
   }

@@ -16,7 +16,10 @@
       <i-input v-model="email" placeholder="注册邮箱"
                    style="width: 300px "/>
       <br>
-      <Select v-model="interest" multiple :max-tag-count="2" style="width: 300px">
+      <Select v-model="interest" multiple
+              :max-tag-count="2"
+              placeholder='请选择您感兴趣的方向'
+              style="width: 300px">
         <Option
           v-for="item in fieldList"
           :value="item.label"
@@ -74,8 +77,8 @@ export default {
           slot: 'cs.AI',
         },
         {
-          value: 'Computational Geometry 计算几何学',
-          label: 'cs.CG',
+          value: 'Hardware Architecture 硬件体系结构',
+          label: 'cs.AR',
         },
         {
           value: 'Computation and Language 计算语言学',
@@ -98,8 +101,20 @@ export default {
           label: 'cs.NE',
         },
         {
-          value: 'Robotics 机器人',
-          label: 'cs.RO',
+          value: 'Computational Engineering, Finance 计算工程、金融',
+          label: 'cs.CE',
+        },
+        {
+          value: 'Emerging Technologies 新兴技术',
+          label: 'cs.ET',
+        },
+        {
+          value: 'Learning cs.LG',
+          label: 'cs.LG',
+        },
+        {
+          value: 'Information Theory 信息论',
+          label: 'cs.IT',
         },
       ],
       interest: [],

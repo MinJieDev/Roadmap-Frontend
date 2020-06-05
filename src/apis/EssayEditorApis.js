@@ -17,6 +17,8 @@ export const getEssay = id => reqSingle(`/api/essays/${id}.json`, 'GET');
 
 export const changeEssay = data => reqSingle(`/api/essays/${data.id}.json`, 'PATCH', data);
 
+export const updateEssay = (id, title, text) => reqSingle(`/api/essays/${id}.json`, 'PATCH', { title, text });
+
 export const postEssayShareLink = id => req('/api/share/essay/', 'POST', {}, { id });
 
 export const getEssayShareLink = id => req(`/api/share/essay/${splashEnd(id)}`, 'GET');

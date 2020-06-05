@@ -275,10 +275,11 @@ export default {
         {
           value: 'Artificial Intelligence 人工智能',
           label: 'cs.AI',
+          slot: 'cs.AI',
         },
         {
-          value: 'Computational Geometry 计算几何学',
-          label: 'cs.CG',
+          value: 'Hardware Architecture 硬件体系结构',
+          label: 'cs.AR',
         },
         {
           value: 'Computation and Language 计算语言学',
@@ -301,8 +302,20 @@ export default {
           label: 'cs.NE',
         },
         {
-          value: 'Robotics 机器人',
-          label: 'cs.RO',
+          value: 'Computational Engineering, Finance 计算工程、金融',
+          label: 'cs.CE',
+        },
+        {
+          value: 'Emerging Technologies 新兴技术',
+          label: 'cs.ET',
+        },
+        {
+          value: 'Learning cs.LG',
+          label: 'cs.LG',
+        },
+        {
+          value: 'Information Theory 信息论',
+          label: 'cs.IT',
         },
       ],
       transfer: {
