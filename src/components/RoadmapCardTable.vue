@@ -41,13 +41,21 @@
         </ItemEditor>
     </div>
     <div v-else-if="this.viewStyle==='card'" style="margin-top: 20px;">
-      <div v-show="floatSeen" :style="floatPosition">
-        <img v-if="floatDataIndex>=0 && !data[floatDataIndex].isEmpty"
-             :src="data[floatDataIndex].thumbnail"
-             :style="floatImageSize"
+      <Modal
+        v-model = "floatSeen"
+        width="650px"
+        @on-ok="onEdit(roadmaps[floatDataIndex].id)"
+        ok-text="编辑路书"
+        cancel-text="返回"
         >
-        <!--img v-else src="../assets/RoadmapDefault.png" :style="floatImageSize"-->
-      </div>
+        <div v-if = "floatDataIndex>=0">
+          <h2 align="center">{{data[floatDataIndex].title}}</h2>
+          <img v-if="!data[floatDataIndex].isEmpty"
+               :src="data[floatDataIndex].thumbnail"
+               :style="floatImageSize">
+          <p v-else align="center">暂无需要预览的内容</p>
+        </div>
+      </Modal>
     <Row v-for="r in rows" v-bind:key="r" type="flex" justify="center" :gutter="20">
       <i-col v-for="c in cols" v-bind:key="c" span="6" align="center" >
         <!-- getIndex函数用于获取指定r和c后，路书在index中的索引。对于新建路书，getIndex会返回-1 -->
@@ -55,9 +63,8 @@
               style="margin-bottom: 20px">
           <!--右上角简易查看-->
           <p slot="extra" v-if="!(r === 1 && c === 1)"
-             @mouseenter="mouseOnThumbnail(r, c, cols)"
-             @mouseleave="mouseLeaveThumbnail"
-             @mousemove="updateFloatXY">
+             @click="handleClickPreview(r, c, cols)"
+             style="cursor: pointer">
             <Icon type="ios-search"></Icon>
             预览
           </p>
@@ -147,9 +154,8 @@ export default {
       viewStyle: 'card',
       // float window
       floatSeen: false,
-      floatPosition: { position: 'absolute', top: '20px', left: '20px', 'z-index': 2 },
       floatDataIndex: -1,
-      floatImageSize: { width: '500px', background: 'white' },
+      floatImageSize: { width: '630px', background: 'white' },
       initialViewStyle: undefined,
       filtArticle: -1,
       // data: [],
@@ -480,18 +486,10 @@ export default {
       }
       store.commit('pushRoadMapTable', this.viewStyle);
     },
-    mouseOnThumbnail(r, c, cols) {
+    handleClickPreview(r, c, cols) {
       this.floatDataIndex = this.getIndex(r, c, cols);
-      window.console.info(`Mouse moved to ${this.floatDataIndex}`);
+      window.console.info(`Click preview of ${this.floatDataIndex}`);
       this.floatSeen = true;
-    },
-    mouseLeaveThumbnail() {
-      window.console.info('Mouse left.');
-      this.floatSeen = false;
-    },
-    updateFloatXY(event) {
-      this.floatPosition.left = `${(event.pageX - 250)}px`;
-      this.floatPosition.top = `${event.pageY + 20}px`;
     },
     getArticleById(id) {
       return _(this.articles).find(art => String(art.id) === String(id));
