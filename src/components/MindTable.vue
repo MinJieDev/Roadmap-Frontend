@@ -3,7 +3,7 @@
     <ItemEditor
       :drawer="drawer"
       :index="index"
-      :drawerFormData="formData"
+      :drawerData="formData"
       :articles="tableData"
       @cancelDrawer="cancelDrawer"
       @submitDrawer="submitDrawer"

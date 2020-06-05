@@ -181,7 +181,7 @@ export default {
       type: Number,
       default: -1,
     },
-    drawerFormData: {
+    drawerData: {
       type: Object,
       required: true,
     },
@@ -213,8 +213,6 @@ export default {
           },
         },
       },
-      drawerData: {},
-      targetKeys: [],
       styles: {
         height: 'calc(100% - 55px)',
         overflow: 'auto',
@@ -224,6 +222,9 @@ export default {
     };
   },
   computed: {
+    targetKeys() {
+      return this.drawerData.article_references;
+    },
     transferData() {
       return _.map(this.articles, atc => ({ key: atc.id, label: atc.title }));
     },
@@ -239,7 +240,6 @@ export default {
       this.$emit('submitDrawer', this.drawerData);
     },
     handleTransferChange(newTargetKeys) {
-      this.targetKeys = newTargetKeys;
       this.drawerData.article_references = newTargetKeys;
     },
     sliderChange(value) {
@@ -254,10 +254,6 @@ export default {
     hideTipFormat() {
       return null;
     },
-  },
-  mounted() {
-    this.drawerData = _.clone(this.drawerFormData);
-    this.targetKeys = this.drawerData.article_references;
   },
 };
 </script>
