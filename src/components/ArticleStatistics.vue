@@ -240,6 +240,7 @@ export default {
         }
         const newAuthors = _.split(item.author, ' and ');
         _.remove(newAuthors, auth => auth === 'others');
+        _.remove(newAuthors, auth => auth === '');
         _.forEach(newAuthors, (newAuth) => {
           const findRes = _.find(this.authorStat.data, stAuth => stAuth.name === newAuth);
           if (findRes === undefined) {

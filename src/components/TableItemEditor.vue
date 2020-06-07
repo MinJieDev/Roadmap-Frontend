@@ -31,7 +31,7 @@
           <br>
           <Row :gutter="50" style="margin-left: 20px">
             <Input
-              v-model="drawerData.alias"
+              v-model="drawerData.abbrtitle"
               clearable
               placeholder="请输入文献显示名">
             </Input>
@@ -73,7 +73,7 @@
           <Row :gutter="30" style="margin-left: 10px; margin-top: 2px;">
             <Col>
               <Slider
-                v-model="slider.value"
+                v-model="sliderValue"
                 :step="slider.step"
                 :max="slider.max"
                 :marks="slider.marks"
@@ -114,8 +114,6 @@
           </Input>
           </Row>
         </Col>
-
-
       </Row>
 
       <Row :gutter="32">
@@ -181,7 +179,7 @@ export default {
       type: Number,
       default: -1,
     },
-    drawerFormData: {
+    drawerData: {
       type: Object,
       required: true,
     },
@@ -189,7 +187,6 @@ export default {
   data() {
     return {
       slider: {
-        value: 1,
         max: 4,
         step: 1,
         marks: {
@@ -213,8 +210,6 @@ export default {
           },
         },
       },
-      drawerData: {},
-      targetKeys: [],
       styles: {
         height: 'calc(100% - 55px)',
         overflow: 'auto',
@@ -224,8 +219,19 @@ export default {
     };
   },
   computed: {
+    targetKeys() {
+      return this.drawerData.article_references;
+    },
     transferData() {
       return _.map(this.articles, atc => ({ key: atc.id, label: atc.title }));
+    },
+    sliderValue() {
+      if (this.drawerData.read_state === 'U') {
+        return 1;
+      } else if (this.drawerData.read_state === 'I') {
+        return 2;
+      }
+      return 3;
     },
   },
   methods: {
@@ -233,13 +239,12 @@ export default {
       this.$emit('cancelDrawer');
     },
     submitDrawer() {
-      if (this.drawerData.alias === '') {
-        this.drawerData.alias = this.drawerData.title;
+      if (this.drawerData.abbrtitle === '') {
+        this.drawerData.abbrtitle = this.drawerData.title;
       }
       this.$emit('submitDrawer', this.drawerData);
     },
     handleTransferChange(newTargetKeys) {
-      this.targetKeys = newTargetKeys;
       this.drawerData.article_references = newTargetKeys;
     },
     sliderChange(value) {
@@ -254,10 +259,6 @@ export default {
     hideTipFormat() {
       return null;
     },
-  },
-  mounted() {
-    this.drawerData = _.clone(this.drawerFormData);
-    this.targetKeys = this.drawerData.article_references;
   },
 };
 </script>
