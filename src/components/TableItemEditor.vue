@@ -73,7 +73,7 @@
           <Row :gutter="30" style="margin-left: 10px; margin-top: 2px;">
             <Col>
               <Slider
-                v-model="slider.value"
+                v-model="sliderValue"
                 :step="slider.step"
                 :max="slider.max"
                 :marks="slider.marks"
@@ -114,8 +114,6 @@
           </Input>
           </Row>
         </Col>
-
-
       </Row>
 
       <Row :gutter="32">
@@ -189,7 +187,6 @@ export default {
   data() {
     return {
       slider: {
-        value: 1,
         max: 4,
         step: 1,
         marks: {
@@ -227,6 +224,14 @@ export default {
     },
     transferData() {
       return _.map(this.articles, atc => ({ key: atc.id, label: atc.title }));
+    },
+    sliderValue() {
+      if (this.drawerData.read_state === 'U') {
+        return 1;
+      } else if (this.drawerData.read_state === 'I') {
+        return 2;
+      }
+      return 3;
     },
   },
   methods: {
