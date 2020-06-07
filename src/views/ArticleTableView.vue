@@ -37,6 +37,7 @@ export default {
       // window.console.log('reload page', newPage);
       reqSingle('/api/articles/', 'GET', { page: newPage }).then((res) => {
         this.articles = res.data.results;
+        // window.console.log('articles', this.articles);
         this.articleTotal = res.data.count;
       }).catch((err) => {
         pushErr(this, err, true);

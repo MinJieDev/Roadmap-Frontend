@@ -31,7 +31,7 @@
           <br>
           <Row :gutter="50" style="margin-left: 20px">
             <Input
-              v-model="drawerData.alias"
+              v-model="drawerData.abbrtitle"
               clearable
               placeholder="请输入文献显示名">
             </Input>
@@ -239,8 +239,8 @@ export default {
       this.$emit('cancelDrawer');
     },
     submitDrawer() {
-      if (this.drawerData.alias === '') {
-        this.drawerData.alias = this.drawerData.title;
+      if (this.drawerData.abbrtitle === '') {
+        this.drawerData.abbrtitle = this.drawerData.title;
       }
       this.$emit('submitDrawer', this.drawerData);
     },

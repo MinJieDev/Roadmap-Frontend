@@ -135,7 +135,7 @@ export default {
       BibValue: '',
       formData: {
         title: '',
-        alias: '',
+        abbrtitle: '',
         url: '',
         author: '',
         journal: '',
@@ -166,7 +166,7 @@ export default {
         },
         {
           title: '文献名',
-          key: 'alias',
+          key: 'abbrtitle',
           // width: 400,
         },
         {
@@ -344,7 +344,7 @@ export default {
       if (this.index === -1) {
         createMTdata(
           drawerFormData.title,
-          drawerFormData.alias,
+          drawerFormData.abbrtitle,
           drawerFormData.author,
           drawerFormData.url,
           drawerFormData.journal,
@@ -428,7 +428,7 @@ export default {
         // eslint-disable-next-line no-underscore-dangle
         if (article._isChecked === true) {
           count += 1;
-          window.console.log('delete article content: ', article);
+          // window.console.log('delete article content: ', article);
           deleteMTdata(article.id).then(() => {
             this.$Message.info(`${article.title} Deleted`);
             let pageNum;
