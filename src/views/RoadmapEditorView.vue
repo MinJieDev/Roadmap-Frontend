@@ -933,10 +933,11 @@ export default {
     handleOpenUrl() {
       if (this.curNode.URI) {
         if (!_(this.curNode.URI)
-          .startsWith('http://')) {
+          .startsWith('http')) {
           window.open(`http://${this.curNode.URI}`, '_blank');
+        } else {
+          window.open(this.curNode.URI, '_blank');
         }
-        window.open(this.curNode.URI, '_blank');
       }
     },
     handleNodeClick(node) {
