@@ -6,6 +6,20 @@
 
 Please visit Knowledge-RoadMap: http://47.94.141.56
 
+Google Chrome Browser is recommended.
+
+## Help Doc
+
+Please **sign up / login** and **read** [help document](http://47.94.141.56/essayReader?sharedId=a1cfabe9f960cc061868020f210575455fb87abaa710cabbdad1379870d11e70/) in our Live Demo Website
+
+Or read [this blog](https://www.cnblogs.com/minjiekaifa/p/13080164.html)
+
+## Backend Repository
+
+Backend is built with django.
+
+https://github.com/MinJieDev/Roadmap-Backend
+
 ## Build Setup
 
 ``` bash
