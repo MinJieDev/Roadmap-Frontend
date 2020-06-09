@@ -314,10 +314,11 @@ export default {
       window.console.log('dbclick', node);
       window.console.log('url', node.URI);
       if (node.URI) {
-        if (!_(node.URI).startsWith('http://')) {
+        if (!_(node.URI).startsWith('http')) {
           window.open(`http://${node.URI}`, '_blank');
+        } else {
+          window.open(node.URI, '_blank');
         }
-        window.open(node.URI, '_blank');
       } else if (node.category === 'essay') {
         this.handleOpenEssay();
       } else {
