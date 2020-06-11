@@ -4,7 +4,8 @@
       title="Edit Description"
       @on-ok="ok"
       @on-cancel="cancel"
-      @on-trig="handleTrig">
+      @on-trig="handleTrig"
+      @keydown.native.stop>
       <p>Description</p>
       <Input v-model="newDescription" type="textarea" placeholder="Enter Description..."/>
     </Modal>

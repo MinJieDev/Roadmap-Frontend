@@ -20,7 +20,7 @@
 <script>
 import _ from 'lodash';
 import ItemEditor from './RoadItemEditor';
-import { req } from '../apis/util';
+import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
 import { delRoadmap, postRoadmapShareLink } from '../apis/RoadmapEditorApis';
 
@@ -43,31 +43,35 @@ export default {
           align: 'center',
         },
         // {
-        //   title: '标签',
-        //   key: 'tag',
-        //   width: 300,
-        //   align: 'center',
-        //   render: (h, params) => {
-        //     const tags = this.data[params.index].tags;
-        //     return h('div', (tags || []).map(item => h('Tag', {
-        //       props: {
-        //         // type: 'border',
-        //         key: item.name,
-        //         name: item.name,
-        //         color: item.color,
-        //         closable: true,
-        //         style: 'margin-left: 3px',
-        //       },
-        //     },
-        //     item.name,
-        //     )));
-        //   },
+
         // },
         {
           title: '描述',
           key: 'description',
           width: 300,
           align: 'center',
+        },
+        {
+          title: '标签',
+          key: 'tag',
+          width: 300,
+          align: 'center',
+          render: (h, params) => {
+            const tags = this.data[params.index].tags;
+            return h('div', (tags || []).map(item => h('Tag', {
+              props: {
+                // type: 'border',
+                key: item.name,
+                name: item.name,
+                color: item.color,
+                closable: true,
+                style: 'margin-left: 3px',
+              },
+            },
+            item.name,
+            )));
+          },
+
         },
         {
           title: '操作',
@@ -136,12 +140,14 @@ export default {
     };
   },
   mounted() {
-    req('/api/road_maps/', 'GET').then((res) => {
-      this.roadmaps = res.data;
-      this.data = this.getData();
-    }).catch((err) => {
-      pushErr(this, err, true);
-    });
+    reqSingle('/api/road_maps/', 'GET')
+      .then((res) => {
+        // window.console.log('roadmap card', res);
+        this.roadmaps = res.data;
+        this.data = this.getData();
+      }).catch((err) => {
+        pushErr(this, err, true);
+      });
   },
   methods: {
     getData() {
@@ -156,6 +162,13 @@ export default {
           description: roadmap.description,
         });
         window.console.log(roadmap);
+      });
+      // test
+      req('/api/tags/1', 'GET').then((res) => {
+        window.console.info('[DEBUG]', res);
+        // this.articles = res.data;
+      }).catch((err) => {
+        pushErr(this, err, true);
       });
       return data;
     },

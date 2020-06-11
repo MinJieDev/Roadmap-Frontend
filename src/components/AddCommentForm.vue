@@ -1,31 +1,27 @@
 <template>
   <div>
     <MenuItem name="add-comment" @click.native="handleClkAddComment" ref="MenuItem">
-      Add Comment
+      添加注释
+      <Icon type="md-clipboard" />
     </MenuItem>
     <Modal
       v-model="commentFormModal"
-      title="Add Comment"
+      title="添加注释"
       @on-ok="ok"
-      @on-cancel="cancel">
-      <p>Node</p>
-      <Select v-model="commentInfo.node" filterable>
-        <Option v-for="item in nodeNameList" :value="item" :key="item">{{ item }}</Option>
-      </Select>
-      <p>Comment Content</p>
-      <Input v-model="commentInfo.comment" type="textarea" placeholder="Enter comment..."/>
+      @on-cancel="cancel"
+      @keydown.native.stop>
+      <p>注释内容</p>
+      <Input v-model="commentInfo.comment" type="textarea" placeholder="请输入注释内容..."/>
     </Modal>
   </div>
 </template>
 <script>
 export default {
   name: 'AddCommentForm',
-  props: ['nodeNameList'],
   data() {
     return {
       commentFormModal: false,
       commentInfo: {
-        node: '',
         comment: '',
       },
     };

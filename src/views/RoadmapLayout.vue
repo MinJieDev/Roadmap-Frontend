@@ -9,7 +9,7 @@
               alt="MinJieDev · 知识路书"
               width=120px
               style="cursor:pointer"
-              @click="goToLogin">
+              @click="goToWelcome">
           </div>
           <div class="layout-nav">
             <MenuItem name="1" :to="{name: 'ArticleTable'}">
@@ -20,33 +20,58 @@
               <Icon type="md-map"></Icon>
               路书管理
             </MenuItem>
-                <div v-if="isLoginStatus() !== true">
-                  <MenuItem
-                    name="3"
-                    @click.native="goToLogin()">
-                    <Icon type="md-person"></Icon>
-                    登录
-                  </MenuItem>
-                </div>
-                <div v-if="isLoginStatus() === true">
-                  <MenuItem
-                    name="3"
-                    @click.native="logOut()">
-                    <Icon type="md-person"></Icon>
-                    退出账号
-                  </MenuItem>
-                </div>
+            <MenuItem name="3" :to="{name: 'EssayTable'}">
+              <Icon type="ios-create" />
+              随笔管理
+            </MenuItem>
+            <MenuItem name="4" :to="{name: 'PaperRecommend'}">
+              <Icon type="md-thumbs-up" />
+              好文发现
+            </MenuItem>
+            <div v-if="isLoginStatus() !== true">
+              <MenuItem
+                name="4"
+                @click.native="goToLogin()">
+                <Icon type="md-person-add"></Icon>
+                登录账户
+              </MenuItem>
+            </div>
+            <div v-if="isLoginStatus() === true">
+              <Submenu name="4" theme="dark">
+                <template slot="title">
+                  <Icon type="md-person" />
+                  个人中心
+                </template>
+                <MenuItem
+                  name="4-1"
+                  @click.native="goToDash()">
+                  <Icon type="md-apps" />
+                  活动中心
+                </MenuItem>
+                <MenuItem
+                  name="4-2"
+                  @click.native="goToProfile()">
+                  <Icon type="md-list" />
+                  个人档案
+                </MenuItem>
+                <MenuItem
+                  name="4-3"
+                  @click.native="logOut()">
+                  <Icon type="md-log-out" />
+                  登出账户
+                </MenuItem>
+              </Submenu>
+            </div>
           </div>
         </Menu>
       </Header>
       <Layout :style="{padding: '0 50px'}">
         <Breadcrumb :style="{margin: '16px 0px'}">
-          <BreadcrumbItem>HomePage</BreadcrumbItem>
           <BreadcrumbItem
-            :to="path(index)"
-            v-for="(item, index) in $route.meta.name"
+            :to="item.fullPath"
+            v-for="(item, index) in getRouterStack()"
             :key="index">
-            {{ item }}
+            {{ item.nickName }}
           </BreadcrumbItem>
         </Breadcrumb>
         <Content :style="{padding: '24px 0', minHeight: '500px', background: '#fff'}">
@@ -65,10 +90,10 @@
   </div>
 </template>
 <script>
-
 import UserReportButton from '../components/UserReportButton';
 import router from '../router';
 import { isLogin, logout } from '../apis/User';
+import pushRouter from '../components/Breadcrumb';
 
 export default {
   name: 'RoadmapLayout',
@@ -86,9 +111,22 @@ export default {
     },
   },
   methods: {
+    getRouterStack() {
+      pushRouter(
+        this.$router.history.current.name,
+        this.$router.history.current.meta.nickName,
+        this.$router.history.current.fullPath,
+        this.$router.history.current.meta.level);
+      return window.routerStack;
+    },
     goToLogin() {
-      if (this.$route.path !== '/') {
-        router.push('/');
+      if (this.$route.name !== 'Login') {
+        router.push({ name: 'Login' });
+      }
+    },
+    goToWelcome() {
+      if (this.$route.name !== 'Welcome') {
+        router.push({ name: 'Welcome' });
       }
     },
     isLoginStatus() {
@@ -96,9 +134,18 @@ export default {
     },
     logOut() {
       logout();
-      if (this.$route.path !== '/') {
-        router.push('/');
-      }
+      this.goToLogin();
+    },
+    goToDash() {
+      router.push({ name: 'Welcome' });
+    },
+    goToProfile() {
+      router.push({
+        name: 'UserProfile',
+        params: {
+          content: 'profile',
+        },
+      });
     },
   },
   created() {
@@ -128,7 +175,7 @@ export default {
   }
 
   .layout-nav {
-    width: 420px;
+    width: 650px;
     margin: 0 auto;
     margin-right: 20px;
   }

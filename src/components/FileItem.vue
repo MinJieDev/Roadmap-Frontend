@@ -12,8 +12,7 @@
             <Icon type="md-more"></Icon>
           </a>
           <DropdownMenu slot="list">
-            <DropdownItem @click.native="handleAddFileNode">添加文献节点</DropdownItem>
-            <DropdownItem @click.native="handleDelFileNode">删除文献节点</DropdownItem>
+            <DropdownItem @click.native="handleAddFileNode">添加节点</DropdownItem>
           </DropdownMenu>
         </Dropdown>
       </Col>
@@ -23,7 +22,7 @@
 <script>
 export default {
   name: 'FileItem',
-  props: ['fileName', 'display', 'articleId'],
+  props: ['fileName', 'display', 'articleId', 'articleUrl'],
   data() {
     return {
     };
@@ -43,13 +42,7 @@ export default {
       this.$emit('node-added', {
         nodeName: this.fileName,
         articleId: this.articleId,
-        nodeUrl: '',
-      });
-    },
-    handleDelFileNode() {
-      this.$Message.info('Node deleted');
-      this.$emit('node-deleted', {
-        nodeName: this.fileName,
+        nodeUrl: this.articleUrl,
       });
     },
   },

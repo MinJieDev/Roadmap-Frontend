@@ -1,15 +1,21 @@
 <template>
   <div>
-    <MenuItem name="add-node" @click.native="handleClkAddNode" ref="MenuItem">Add Node</MenuItem>
+    <MenuItem name="add-node" @click.native="handleClkAddNode" ref="MenuItem">
+      &ensp;新建节点
+      <Icon type="md-git-commit" />
+    </MenuItem>
     <Modal
       v-model="nodeFormModal"
       title="Add Node"
       @on-ok="ok"
-      @on-cancel="cancel">
+      @on-cancel="cancel"
+      @keydown.native.stop>
       <p>Node Name</p>
       <Input v-model="nodeInfo.nodeName" placeholder="Enter something..." style="width: 300px" />
       <p>Url</p>
       <Input v-model="nodeInfo.nodeUrl" placeholder="Enter something..." style="width: 300px" />
+      <p>Color</p>
+      <ColorPicker v-model="nodeInfo.color" recommend :hue="false"/>
     </Modal>
   </div>
 </template>
@@ -22,6 +28,7 @@ export default {
       nodeInfo: {
         nodeName: '',
         nodeUrl: '',
+        color: '#f5f5f5',
       },
     };
   },

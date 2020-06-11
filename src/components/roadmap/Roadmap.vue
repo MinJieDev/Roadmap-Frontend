@@ -7,7 +7,7 @@
                 markerWidth="10"
                 markerHeight="10"
                 viewBox="0 0 12 12"
-                refX="50"
+                refX="25"
                 refY="6"
                 orient="auto">
           <path d="M2,2 L10,6 L2,10 L6,6 L2,2" style="fill: #000000;" />
@@ -19,12 +19,14 @@
 <script>
 /* eslint-disable no-param-reassign */
 // TODO solve param reassign
+import _ from 'lodash';
 import {
   forceCollide,
   forceLink,
   forceManyBody,
   forceSimulation,
   select,
+  event,
   // zoom,
   // zoomIdentity,
 } from 'd3';
@@ -32,6 +34,7 @@ import {
 import {
   d3Nodes,
   d3Drag,
+  d3DragConn,
   d3PanZoom,
   onTick, d3CustomConnections,
 } from './utils/d3';
@@ -56,10 +59,16 @@ export default {
       type: Boolean,
       default: false,
     },
+    liveNode: {
+      default: null,
+    },
   },
   data() {
     return {
       simulation: null,
+      clickTimeId: 0,
+      curNode: this.liveNode,
+      allConn: [],
     };
   },
   methods: {
@@ -84,20 +93,115 @@ export default {
      * and start simulation.
      */
     prepareEditor(svg, conns, nodes, subnodes) {
+      svg.on('click', () => {
+        window.console.log('svg1');
+        this.curNode = null;
+        nodes.attr('class', n => `${n.category}-node article-node--editable`);
+        conns.attr('class', (c) => {
+          if (c.type === 'ref') { return 'mindmap-connection-reference'; }
+          return 'mindmap-connection';
+        });
+        this.$emit('svg-click');
+      });
       nodes
         .attr('class', (node) => {
-          if (node.category === 'article') {
-            return 'article-node article-node--editable';
+          if (node.category === 'article' || node.category === 'essay') {
+            return `${node.category}-node ${node.category}-node--editable`;
           }
           return 'mindmap-node mindmap-node--editable';
         })
-        .on('dbclick', (node) => {
-          node.fx = null;
-          node.fy = null;
+        .on('dblclick', (node) => {
+          this.curNode = node;
+          clearTimeout(this.clickTimeId);
+          event.stopPropagation();
+          this.$emit('node-dblclick', node);
+        })
+        .on('click', (node) => {
+          window.console.log('clk node', node);
+          this.curNode = node;
+          nodes.attr('class', (n) => {
+            if (n === node) {
+              return `${n.category}-node-chosen article-node--editable`;
+            }
+            return `${n.category}-node article-node--editable`;
+          });
+          conns.attr('class', (c) => {
+            if (c.type === 'ref') { return 'mindmap-connection-reference'; }
+            return 'mindmap-connection';
+          });
+          event.stopPropagation();
+          clearTimeout(this.clickTimeId);
+          this.clickTimeId = setTimeout(() => {
+            this.$emit('node-click', node);
+          }, 250);
+          window.console.log('nodeclk', this.curNode);
         });
-
       nodes.call(d3Drag(this.simulation, svg, nodes));
-
+      // eslint-disable-next-line
+      let groups = nodes._groups[0];
+      let k = 0;
+      nodes.selectAll('a').attr('style', () =>
+        // eslint-disable-next-line
+         `background: ${groups[k++].__data__.color}`
+      );
+      subnodes
+        .on('click', (node) => {
+          window.console.log('clk sub', node);
+          this.curNode = node;
+          nodes.attr('class', (n) => {
+            if (n === node) {
+              return `${n.category}-node-chosen article-node--editable`;
+            }
+            return `${n.category}-node article-node--editable`;
+          });
+          conns.attr('class', (c) => {
+            if (c.type === 'ref') { return 'mindmap-connection-reference'; }
+            return 'mindmap-connection';
+          });
+          event.stopPropagation();
+          clearTimeout(this.clickTimeId);
+          this.clickTimeId = setTimeout(() => {
+            this.$emit('node-click', node);
+          }, 250);
+          window.console.log('nodeclk', this.curNode);
+        })
+        .on('dblclick', (node) => {
+          this.curNode = node;
+          clearTimeout(this.clickTimeId);
+          event.stopPropagation();
+          this.$emit('subnode-dblclick', node);
+        });
+      conns
+        .on('click', (conn) => {
+          window.console.log('conn', conn);
+          nodes.attr('class', n => `${n.category}-node article-node--editable`);
+          conns.attr('class', (c) => {
+            if (c === conn) {
+              if (c.type === 'ref') { return 'mindmap-connection-reference'; }
+              return 'mindmap-connection-chosen';
+            }
+            if (c.type === 'ref') { return 'mindmap-connection-reference'; }
+            return 'mindmap-connection';
+          });
+          this.$emit('conn-click', conn);
+          event.stopPropagation();
+        });
+      conns.call(d3DragConn(this.simulation, svg, conns));
+      let ret = [];
+      // eslint-disable-next-line
+      _.forEach(conns._groups[0], (conn) => {
+        ret = [...ret, {
+          // eslint-disable-next-line
+          source: conn.__data__.source.text,
+          // eslint-disable-next-line
+          target: conn.__data__.target.text,
+          // eslint-disable-next-line
+          curve: conn.__data__.curve,
+          // eslint-disable-next-line
+          type: conn.__data__.type,
+        }];
+      });
+      this.allConn = ret;
       // Tick the simulation 100 times
       for (let i = 0; i < 100; i += 1) {
         this.simulation.tick();
@@ -109,6 +213,15 @@ export default {
             onTick(conns, nodes, subnodes)
           ));
       }, 200);
+      window.console.log('roadmap curNode', this.curNode);
+      if (this.curNode) {
+        nodes.attr('class', (n) => {
+          if (n === this.curNode) {
+            return `${n.category}-node-chosen article-node--editable`;
+          }
+          return `${n.category}-node article-node--editable`;
+        });
+      }
     },
     /**
      * Render mind map unsing D3
@@ -122,7 +235,6 @@ export default {
       svg.append('g').attr('id', 'mindmap-subnodes');
 
       this.prepareNodes();
-
       // Bind data to SVG elements and set all the properties to render them
       const connections = d3CustomConnections(svg, this.connections);
       const { nodes, subnodes } = d3Nodes(svg, this.nodes);
@@ -146,7 +258,10 @@ export default {
 
       svg.attr('viewBox', getViewBox(nodes.data()))
         .call(d3PanZoom(svg))
-        .on('dbClick.zoom', null);
+        .on('dblclick.zoom', null);
+    },
+    getConn() {
+      return this.allConn;
     },
   },
   mounted() {

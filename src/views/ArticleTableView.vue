@@ -2,14 +2,16 @@
   <div>
     <MindTable
       :tableData="articles"
+      :articleTotal="articleTotal"
       @reloadData="reloadData"
     />
   </div>
 </template>
 
 <script>
+
 import MindTable from '../components/MindTable';
-import { req } from '../apis/util';
+import { reqSingle } from '../apis/util';
 import { pushErr } from '../components/ErrPush';
 
 export default {
@@ -18,12 +20,25 @@ export default {
   data() {
     return {
       articles: [],
+      articleTotal: 0,
     };
   },
   methods: {
-    reloadData() {
-      req('/api/articles/', 'GET').then((res) => {
-        this.articles = res.data;
+    reloadData(page) {
+      let newPage = page;
+      if (newPage === undefined || newPage < 1) {
+        const routePage = this.$route.query.pageCurrent;
+        if (routePage !== undefined && routePage > 1) {
+          newPage = routePage;
+        } else {
+          newPage = 1;
+        }
+      }
+      // window.console.log('reload page', newPage);
+      reqSingle('/api/articles/', 'GET', { page: newPage }).then((res) => {
+        this.articles = res.data.results;
+        // window.console.log('articles', this.articles);
+        this.articleTotal = res.data.count;
       }).catch((err) => {
         pushErr(this, err, true);
       });

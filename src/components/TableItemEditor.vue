@@ -4,47 +4,95 @@
       title="查看"
       v-model="drawer"
       width="720"
+      :closable="false"
       :mask-closable="false"
       :styles="styles"
       @on-close="cancelDrawer"
     >
-      <h3>题目</h3>
-      <br>
       <Row :gutter="32">
-        <Col span="24">
-          <Row :gutter="50" style="margin-left: 0px">
+        <Col span="22">
+          <br>
+          <h3>题名</h3>
+          <br>
+          <Row :gutter="50" style="margin-left: 20px">
+            <Input
+              v-model="drawerData.title"
+              clearable
+              placeholder="请输入题目">
+            </Input>
+          </Row>
+        </Col>
+      </Row>
+
+      <Row :gutter="32">
+        <Col span="22">
+          <br>
+          <h3>显示名</h3>
+          <br>
+          <Row :gutter="50" style="margin-left: 20px">
+            <Input
+              v-model="drawerData.abbrtitle"
+              clearable
+              placeholder="请输入文献显示名">
+            </Input>
+          </Row>
+        </Col>
+      </Row>
+
+      <Row :gutter="32">
+        <Col span="22">
+          <br>
+          <h3>作者</h3>
+          <br>
+          <Row :gutter="50" style="margin-left: 20px">
+            <Input
+              v-model="drawerData.author"
+              clearable
+              placeholder="请输入作者">
+            </Input>
+          </Row>
+        </Col>
+      </Row>
+      <Row :gutter="32">
+        <Col span="7">
+          <br>
+          <h3>年份</h3>
+          <br>
+          <Row :gutter="50" style="margin-left: 20px">
+            <Input
+              v-model="drawerData.years"
+              clearable
+              placeholder="请输入文章所属年份">
+            </Input>
+          </Row>
+        </Col>
+        <Col span="14">
+          <br>
+          <h3>阅读状态</h3>
+          <br>
+          <Row :gutter="30" style="margin-left: 10px; margin-top: 2px;">
             <Col>
-              <Input
-                v-model="drawerFormData.title"
-                clearable
-                placeholder="请输入文章标题">
-              </Input>
+              <Slider
+                v-model="sliderValue"
+                :step="slider.step"
+                :max="slider.max"
+                :marks="slider.marks"
+                :tip-format="hideTipFormat"
+                @on-change="sliderChange"
+              ></Slider>
             </Col>
           </Row>
         </Col>
       </Row>
 
       <Row :gutter="32">
-        <Col span="10">
-          <br>
-          <h3>作者</h3>
-          <br>
-          <Row :gutter="50" style="margin-left: 20px">
-            <Input
-              v-model="drawerFormData.author"
-              clearable
-              placeholder="请输入作者">
-            </Input>
-          </Row>
-        </Col>
-
-        <Col span="12">
+        <Col span="22">
           <br>
           <h3>链接(URL)</h3>
           <br>
           <Row :gutter="50" style="margin-left: 20px">
             <Input
-              v-model="drawerFormData.url"
+              v-model="drawerData.url"
               clearable
               placeholder="请输入网址(URL)">
               <span slot="prepend">http://</span>
@@ -52,27 +100,48 @@
           </Row>
         </Col>
       </Row>
-      <br>
-      <h3>期刊/会议</h3>
-      <br>
-      <Row :gutter="50" style="margin-left: 20px; margin-right: 20px">
-        <Input
-          v-model="drawerFormData.journal"
-          clearable
-          placeholder="请输入文章所属的期刊/会议">
-        </Input>
+
+      <Row :gutter="32">
+        <Col span="16">
+          <br>
+          <h3>期刊/会议</h3>
+          <br>
+          <Row :gutter="50" style="margin-left: 20px">
+          <Input
+            v-model="drawerData.journal"
+            clearable
+            placeholder="请输入文章所属的期刊/会议">
+          </Input>
+          </Row>
+        </Col>
       </Row>
-      <br>
-      <h3>笔记</h3>
-      <br>
-      <Row :gutter="50" style="margin-left: 20px; margin-right: 20px">
-        <Input
-          type="textarea"
-          v-model="drawerFormData.note"
-          :rows="4"
-          clearable
-          placeholder="请输入描述或笔记">
-        </Input>
+
+      <Row :gutter="32">
+        <Col span="8">
+          <br>
+          <h3>卷号</h3>
+          <br>
+          <Row :gutter="50" style="margin-left: 20px">
+          <Input
+            v-model="drawerData.volume"
+            clearable
+            placeholder="请输入文章所属的卷号">
+          </Input>
+          </Row>
+        </Col>
+
+        <Col span="8">
+          <br>
+          <h3>页面</h3>
+          <br>
+          <Row :gutter="50" style="margin-left: 20px">
+          <Input
+            v-model="drawerData.pages"
+            clearable
+            placeholder="请输入文章所属的页面">
+          </Input>
+          </Row>
+        </Col>
       </Row>
       <br>
       <br>
@@ -110,12 +179,37 @@ export default {
       type: Number,
       default: -1,
     },
-    drawerFormData: {
+    drawerData: {
       type: Object,
+      required: true,
     },
   },
   data() {
     return {
+      slider: {
+        max: 4,
+        step: 1,
+        marks: {
+          1: {
+            style: {
+              color: '#ff0000',
+            },
+            label: this.$createElement('strong', '未读'),
+          },
+          2: {
+            style: {
+              color: '#2db7f5',
+            },
+            label: this.$createElement('strong', '在读'),
+          },
+          3: {
+            style: {
+              color: '#19be6b',
+            },
+            label: this.$createElement('strong', '已读'),
+          },
+        },
+      },
       styles: {
         height: 'calc(100% - 55px)',
         overflow: 'auto',
@@ -126,10 +220,18 @@ export default {
   },
   computed: {
     targetKeys() {
-      return this.drawerFormData.article_references;
+      return this.drawerData.article_references;
     },
     transferData() {
       return _.map(this.articles, atc => ({ key: atc.id, label: atc.title }));
+    },
+    sliderValue() {
+      if (this.drawerData.read_state === 'U') {
+        return 1;
+      } else if (this.drawerData.read_state === 'I') {
+        return 2;
+      }
+      return 3;
     },
   },
   methods: {
@@ -137,10 +239,25 @@ export default {
       this.$emit('cancelDrawer');
     },
     submitDrawer() {
-      this.$emit('submitDrawer', this.drawerFormData);
+      if (this.drawerData.abbrtitle === '') {
+        this.drawerData.abbrtitle = this.drawerData.title;
+      }
+      this.$emit('submitDrawer', this.drawerData);
     },
     handleTransferChange(newTargetKeys) {
-      this.drawerFormData.article_references = newTargetKeys;
+      this.drawerData.article_references = newTargetKeys;
+    },
+    sliderChange(value) {
+      if (value <= 1) {
+        this.drawerData.read_state = 'U';
+      } else if (value === 2) {
+        this.drawerData.read_state = 'I';
+      } else {
+        this.drawerData.read_state = 'F';
+      }
+    },
+    hideTipFormat() {
+      return null;
     },
   },
 };

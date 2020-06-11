@@ -14,7 +14,20 @@
                style="width: 300px "/>
       <br>
       <i-input v-model="email" placeholder="注册邮箱"
-               style="width: 300px "/>
+                   style="width: 300px "/>
+      <br>
+      <Select v-model="interest" multiple
+              :max-tag-count="2"
+              placeholder='请选择您感兴趣的方向'
+              style="width: 300px">
+        <Option
+          v-for="item in fieldList"
+          :value="item.label"
+          :tag ="item.label"
+          :key="item.label">
+          {{ item.value }}
+        </Option>
+      </Select>
       <br>
       <i-input disabled v-model="check_mes" style="width: 200px "/>
       <i-input v-model="check_code" style="width: 100px "/>
@@ -33,7 +46,7 @@
       <i-button
         type="success"
         @click.native="jump_login">
-        返回登陆
+        返回登录
       </i-button>
     </div>
   </div>
@@ -57,18 +70,67 @@ export default {
       check_code: '',
       add_a: '',
       add_b: '',
+      fieldList: [
+        {
+          value: 'Artificial Intelligence 人工智能',
+          label: 'cs.AI',
+          slot: 'cs.AI',
+        },
+        {
+          value: 'Hardware Architecture 硬件体系结构',
+          label: 'cs.AR',
+        },
+        {
+          value: 'Computation and Language 计算语言学',
+          label: 'cs.CL',
+        },
+        {
+          value: 'Computer Vision 计算视觉与模式识别',
+          label: 'cs.CV',
+        },
+        {
+          value: 'Databases 数据库',
+          label: 'cs.DB',
+        },
+        {
+          value: 'Multimedia 多媒体',
+          label: 'cs.MM',
+        },
+        {
+          value: 'Neural and Evolutionary Computing 神经与进化计算',
+          label: 'cs.NE',
+        },
+        {
+          value: 'Computational Engineering, Finance 计算工程、金融',
+          label: 'cs.CE',
+        },
+        {
+          value: 'Emerging Technologies 新兴技术',
+          label: 'cs.ET',
+        },
+        {
+          value: 'Learning cs.LG',
+          label: 'cs.LG',
+        },
+        {
+          value: 'Information Theory 信息论',
+          label: 'cs.IT',
+        },
+      ],
+      interest: [],
     };
   },
   mounted() {
-    this.add_a = Math.round(Math.random() * 100);
-    this.add_b = Math.round(Math.random() * 100);
+    this.add_a = Math.round(Math.random() * 30);
+    this.add_b = Math.round(Math.random() * 30);
     this.check_mes = `验证码：计算 ${this.add_a} + ${this.add_b} = `;
   },
   methods: {
     jump_login() {
-      router.push('/');
+      router.push({ name: 'Login' });
     },
     register() {
+      // window.console.info(this.interest);
       // eslint-disable-next-line max-len
       if (!this.userName.trim() || !this.password.trim() || !this.email.trim() || !this.password_twice.trim()) {
         pushErr(this, '5010');
@@ -84,13 +146,14 @@ export default {
           username: this.userName.trim(),
           password: this.password.trim(),
           email: this.email.trim(),
+          interest: this.interest.join(','),
         };
         reqNoAuth('/api/users/', 'post', tempData)
           .then(() => {
             this.$Notice.success({
               title: '注册成功',
             });
-            router.push('/');
+            router.push({ name: 'Login' });
           })
           .catch((err) => {
             pushErr(this, err, true);
