@@ -280,7 +280,7 @@ export default {
               },
               on: {
                 click: () => {
-                  this.onDelete(this.roadmaps[params.index].id, params.index);
+                  this.onDelete(this.roadmaps[params.index].id);
                 },
               },
             }, '删除'),
@@ -454,12 +454,13 @@ export default {
       window.console.log(index);
       this.drawer = true;
     },
-    onDelete(index, posInTable) {
+    onDelete(index) {
       delRoadmap(index)
-        .then((res) => {
-          this.data.splice(posInTable, 1);
+        .then(() => {
+          this.rawroadmaps = _.filter(this.rawroadmaps, value =>
+            String(value.id) !== String(index));
           window.console.log('onDelete', index);
-          this.$Message.info(`${res.data.id} Deleted`);
+          this.$Message.info(`${index} Deleted`);
         })
         .catch((err) => {
           pushErr(this, err, true);
