@@ -79,9 +79,20 @@
           <slot></slot>
         </Content>
       </Layout>
-      <Footer class="layout-footer-center"> &copy; MinJieDev · 知识路书 <br>
-        <Icon type="logo-github" />
-        <a  href="https://github.com/MinJieDev/Roadmap-Frontend"> Star Us</a> </Footer>
+      <Footer class="layout-footer-center">
+        <div>
+          <Icon type="logo-github" />
+          <a  href="https://github.com/MinJieDev/Roadmap-Frontend"> Star Us</a>
+        </div>
+        <div>
+          &copy;
+          <a  href="https://www.cnblogs.com/minjiekaifa/">MinJieDev</a>
+           ·
+          <a  href="http://roadmap.imcoming.top/">知识路书</a>
+          备案/许可证编号:
+          <a  href="http://www.beian.miit.gov.cn/">京ICP备20021695号</a>
+        </div>
+      </Footer>
       <div class="report">
         <UserReportButton>
         </UserReportButton>
