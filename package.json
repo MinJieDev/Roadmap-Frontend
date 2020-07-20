@@ -21,7 +21,7 @@
     "global": "^4.4.0",
     "json-loader": "^0.5.7",
     "less-loader": "4.1.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "prism": "^4.1.2",
     "schart.js": "^3.0.0",
     "simplemde": "^1.11.2",
